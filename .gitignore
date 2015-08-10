@@ -41,3 +41,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+.Rproj.user
+
+# Matthew's ignore files
+C5_R_Codes.Rproj
