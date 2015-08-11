@@ -55,5 +55,6 @@ rm(x1, x1_2)
 # Calculate number of days each unique household is active
 x2$daysActive <- as.numeric(x2$Date.of.withdrawl.or.move - x2$Date.of.phone.distribution)
 
+mean(x2$daysActive)
 
 hist(x2$daysActive, breaks = 15)
