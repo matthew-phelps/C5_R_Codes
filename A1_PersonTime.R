@@ -29,7 +29,7 @@ endDate <- as.Date('31-12-14', "%d-%m-%y")
 # RESTRICT TO DESIRED TIME-FRAME
 
 a1 <- x1[x1$Date.of.phone.distribution <= endDate, ]
-
+rm(x1)
 
 # Calculate number of days each unique household is active
 for (i in 1:nrow(a1)) {
