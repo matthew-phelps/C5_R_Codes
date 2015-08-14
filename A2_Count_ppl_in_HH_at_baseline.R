@@ -5,7 +5,7 @@
 
 rm(list = ls())
 graphics.off()
-mac <- "/Users/Matthew/Google Drive/Copenhagen\\Bangladesh - Cholera\\Map Stuff"
+mac <- ""
 pc <- "C:/Users/wrz741/Dropbox/C5 Baseline data/Pre-double entry"
 setwd(pc)
 rm(mac, pc)
@@ -19,6 +19,7 @@ HH_member_info<-as.data.set(spss.system.file('Q11.sav'), stringsAsFactors=FALSE)
 # make it easier to work with in R. 
 # Please change "x" to a variable name that makes sense for you!
 x1 <-as.data.frame(HH_member_info) 
+x1$hhid <-formatC(x1$hhid, width = 3, format = 'd', flag = 0)
 
 # make dummy variable for each age range so counting will be easier
 x1$child_U5 <- ifelse(x1$q11_4 < 5, 1, 0)
@@ -27,7 +28,7 @@ x1$adult <- ifelse(x1$q11_4 >= 18, 1, 0)
 
 # For each unique "slno" in df "x", sum the number of adults, children U5 and children 5-17.
 # Change "slno" to "hhid" if you wish to count based on HHID. This gives 1 record for each house
-x2 <- ddply(x1, .(slno),
+x2 <- ddply(x1, .(hhid),
       summarize,
       adults = sum(adult),
       children_U5 = sum(child_U5),
@@ -35,7 +36,7 @@ x2 <- ddply(x1, .(slno),
       all_ppl = adults + children_U5 + children_5_17)
 
 # Add HHID variable to make our final dataset. This gives one record for each person.
-x3 <- merge(x[,c(1,10)], x2, by = "slno")
+# x3 <- merge(x[,c(1,10)], x2, by = "slno")
 
 
 
