@@ -28,7 +28,7 @@ x1$adult <- ifelse(x1$q11_4 >= 18, 1, 0)
 
 # For each unique "slno" in df "x", sum the number of adults, children U5 and children 5-17.
 # Change "slno" to "hhid" if you wish to count based on HHID. This gives 1 record for each house
-x2 <- ddply(x1, .(hhid),
+baseline_ppl <- ddply(x1, .(hhid),
       summarize,
       adults = sum(adult),
       children_U5 = sum(child_U5),
@@ -36,17 +36,17 @@ x2 <- ddply(x1, .(hhid),
       all_ppl = adults + children_U5 + children_5_17)
 
 # Add HHID variable to make our final dataset. This gives one record for each person.
-# x3 <- merge(x[,c(1,10)], x2, by = "slno")
+# x3 <- merge(x[,c(1,10)], baseline_ppl, by = "slno")
 
 
 
 # DATA CHECKING!! ---------------------------------------------------------
 
 # check to make sure summation works as expected. Returns "TRUE" if it works
-sum(x2$children_U5) == sum(x1$child_U5)
-sum(x2$children_5_17)== sum(x1$child_5_17)
-sum(x2$adult)== sum(x1$adult)
-sum(x2$all_ppl) == sum(table(x1$hhid))
+sum(baseline_ppl$children_U5) == sum(x1$child_U5)
+sum(baseline_ppl$children_5_17)== sum(x1$child_5_17)
+sum(baseline_ppl$adult)== sum(x1$adult)
+sum(baseline_ppl$all_ppl) == sum(table(x1$hhid))
 sum(table(x1$hhid)) == sum(x1$child_U5) + sum(x1$child_5_17) + sum(x1$adult)
 
 
@@ -61,4 +61,10 @@ check[i,] <- 1
 
 # Sums to 0 if everyone was counted
 sum(check)
+
+
+
+# SAVE DATA ---------------------------------------------------------------
+
+save(baseline_ppl, file = "C:/Users/wrz741/Dropbox/C5_R_Codes/Rdata/baseline_ppl.Rdata")
 
