@@ -10,8 +10,6 @@ setwd(pc)
 rm(pc)
 
 
-library(xlsx)
-
 x2 <- read.csv("X-2 monthly visits 31Jul15.csv", sep=",")
 
 # remove rows without a HHID

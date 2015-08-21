@@ -11,6 +11,8 @@ rm(pc)
 
 library(dplyr)
 library(xlsx)
+library(data.table)
+#detach("package:plyr", unload=TRUE) # disrupts the dplyr package
 CustomEndDate <- function(x) {
   # Returns the specified end date if the withdrawl field is null
   if (x < endDate & !is.na(x)){
@@ -23,7 +25,7 @@ CustomEndDate <- function(x) {
 personTime <- function(x) {
   # Calculates person time for each specified date range
   complete.x <- x[complete.cases(x),]
-  factor = complete.x$unique_ID
+  factor = complete.x$hh_listing_id
   x1 <- split(complete.x, factor)
   for (j in 1:length(x1)) {
     x1[[j]]$pt <-0
@@ -49,6 +51,7 @@ personTime <- function(x) {
   } 
   return(x1)
 }
+
 
 
 load("X-1 Choleraphone distribution 31Jul15.Rdata")
@@ -81,23 +84,41 @@ max(a1$Date.withdrawl.move)
 
 
 # MERGE - Keep all records at first to find missing data
-a3 <- merge(a2, a1, by ="unique_ID", all=T, suffixes = c("", ".y"))
+ 
+
+a3 <- merge(a2, a1, by ="hh_listing_id", all=T, suffixes = c("", ".y"))
 a3$HHID.y <- a3$Listing.number.y <- NULL
 
-
-# Records for which we have no monthly visit data
-missing.df <- a3[!complete.cases(a3),] 
-
+# CLEAN where house moved but kept same HHID and listing number
+x<-a3
+x2<-0
+hhCleanup <- function(x) {
+  x2 <- data.frame(1,2,3,4,5,6,7,8,9)
+  setnames(x2, old = c(1,2,3,4,5,6,7,8,9), new = c(colnames(x)))
+  for(i in 1:nrow(x))  
+    if (x$date.monthly.visit[i] >= x$Date.baseline[i] |
+        x$date.monthly.visit[i] <= x$Date.withdrawl.move[i] ) {
+      x2[i,] <- x[i,]
+    } else {
+      x2[i,] <- 0
+    }
+  return (x2)
+}
+x <-colnames(a3)
+x <- hhCleanup(a3[complete.cases(a3), ])
+0# Records for which we have no monthly visit data
+missing.df <- a3[!complete.cases(a3), ] 
+x <- hhCleanup(a3.t)
 
 # PERSONE TIME for each household during each time-frame
-a4 <- personTime(a3)
+a4 <- personTime(x)
 
 # Return to Data Frame for easier reading.
 a5 <- do.call(rbind.data.frame, a4)
 row.names(a5) <- NULL
 rm(a3)
 
-
+x= c(1,2,3)
 
 
 # ERROR CHECKING ----------------------------------------------------------
@@ -109,16 +130,16 @@ max(a5$pt, na.rm=T)
 # Maybe same phone given to someone else in compound, or same family move
 # within compound
 error.df <- a5[a5$pt=='ERROR',]
-error.df <- error.df[complete.cases(error.df),]
+error.df <- error.df[complete.cases(error.df), ]
 
 lateVisits <- a5[a5$delay > 60, ] %>%
   group_by(unique_ID) %>%
   summarize( delay = mean(delay))
 
-a5[a5$delay > 60,]
+a5[a5$delay > 60, ]
 # PERSON-TIME CALCULATIONS ------------------------------------------------
 
-a6 <- a5[complete.cases(a5) & a5$pt != "ERROR",]
+a6 <- a5[complete.cases(a5) & a5$pt != "ERROR", ]
 a6$pt <- as.numeric(a6$pt)
 sum(a6$pt)
 sum(a6$pt) /365
