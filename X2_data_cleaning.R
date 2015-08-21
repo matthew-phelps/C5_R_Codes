@@ -9,7 +9,7 @@ pc <- "C:/Users/wrz741/Dropbox/C5 Field Operations data/Folder Amal"
 setwd(pc)
 rm(pc)
 
-library(plyr)
+
 library(xlsx)
 
 x2 <- read.csv("X-2 monthly visits 31Jul15.csv", sep=",")
@@ -23,7 +23,7 @@ x2$HHID <-formatC(x2$HHID, width = 3, format = 'd', flag = 0)
 x2$Listing.number <- formatC(x2$Listing.number, width = 4, format = 'd', flag = 0)
 
 # create unique ID called "unique_HHID_list_no"
-x2$unique_ID <- paste(x2$HHID, x2$Listing.number, sep="-")
+x2$hh_listing_id <- paste(x2$HHID, x2$Listing.number, sep="-")
 
 
 # turn date characters into date format

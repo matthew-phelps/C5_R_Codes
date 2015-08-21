@@ -24,7 +24,8 @@ x1$HHID <-formatC(x1$HHID, width = 3, format = 'd', flag = 0)
 x1$Listing.number <- formatC(x1$Listing.number, width = 4, format = 'd', flag = 0)
 
 # create unique ID called "unique_HHID_list_no"
-x1$unique_ID <- paste(x1$HHID, x1$Listing.number, sep="-")
+x1$hh_listing_id <- paste(x1$HHID, x1$Listing.number, sep="-")
+x1$HH_baseline
 
 
 # turn date characters into date format
