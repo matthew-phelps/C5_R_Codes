@@ -23,14 +23,15 @@ CustomEndDate <- function(x) {
   }
 }
 hhCleanup <- function(x) {
+  # separates HHs that moved within the same compound so had two baselines but same HHID and same listing No.
   x2 <- data.frame(1,2,3,4,5,6,7,8,9)
   setnames(x2, old = c(1,2,3,4,5,6,7,8,9), new = c(colnames(x)))
   for(i in 1:nrow(x))  
-    if (x$date.monthly.visit[i] >= x$Date.baseline[i] |
+    if (x$date.monthly.visit[i] >= x$Date.baseline[i] &
         x$date.monthly.visit[i] <= x$Date.withdrawl.move[i] ) {
       x2[i,] <- x[i,]
     } else {
-      x2[i,] <- 0
+      x2[i,] <- NA
     }
   x2$date.monthly.visit <- as.Date(x2$date.monthly.visit, origin = "1970-01-01")
   x2$Date.baseline <- as.Date(x2$Date.baseline, origin = "1970-01-01")
@@ -41,11 +42,12 @@ hhCleanup <- function(x) {
 personTime <- function(x) {
   # Calculates person time for each specified date range. Returns data frame in same dimensions as input
   complete.x <- x[complete.cases(x),]
-  factor = complete.x$hh_listing_id
+  factor = complete.x$HH_baseline
   x1 <- split(complete.x, factor)
   for (j in 1:length(x1)) {
     x1[[j]]$pt <-0
     x1[[j]]$delay <-0
+    #if (x1[[j]]$HH_baseline == "") {browser()} #For debugging
     for (i in 1:nrow(x1[[j]])) {
       
       if(i == 1 & nrow(x1[[j]]) != 1 & x1[[j]]$date.monthly.visit[i] > x1[[j]]$Date.phone.distribution[i] ) {
@@ -56,7 +58,7 @@ personTime <- function(x) {
         x1[[j]]$pt[i] <- as.numeric(x1[[j]]$Date.withdrawl.move[i] - x1[[j]]$Date.phone.distribution[i]) * x1[[j]]$Num_ppl[i]
       } else if(i > 1 & i < nrow(x1[[j]]) & x1[[j]]$date.monthly.visit[i] > x1[[j]]$date.monthly.visit[i-1]) {
         x1[[j]]$pt[i] <- as.numeric(x1[[j]]$date.monthly.visit[i] - x1[[j]]$date.monthly.visit[i-1]) * x1[[j]]$Num_ppl[i]
-      } else if (x1[[j]]$Date.withdrawl.move[i] > x1[[j]]$date.monthly.visit[i]) {
+      } else if (x1[[j]]$Date.withdrawl.move[i] >= x1[[j]]$date.monthly.visit[i]) {
         x1[[j]]$pt[i] <- as.numeric((x1[[j]]$Date.withdrawl.move[i] - x1[[j]]$date.monthly.visit[i]) +
                                       (x1[[j]]$date.monthly.visit[i] - x1[[j]]$date.monthly.visit[i-1])) * x1[[j]]$Num_ppl[i]
       } else {
@@ -69,8 +71,6 @@ personTime <- function(x) {
   row.names(x1) <- NULL
   return(x1)
 }
-
-
 
 load("X-1 Choleraphone distribution 31Jul15.Rdata")
 load("X-2 monthly visits 31Jul15.Rdata")
@@ -115,47 +115,42 @@ a4 <- hhCleanup(a3[complete.cases(a3), ])
 # PERSONE TIME for each household during each time-frame
 a5 <- personTime(a4)
 
-# Return to Data Frame for easier reading.
-a5 <- do.call(rbind.data.frame, a4)
-
-er <- a5[74:77,]
+er <- a5[a5$delay <0,]
 rm(a3)
 
-x= c(1,2,3)
 
 
 # ERROR CHECKING ----------------------------------------------------------
-
+# 
 min(a5$pt, na.rm=T)
-max(a5$pt, na.rm=T)
-
-# Records for which the HHID and Listing number appear twice.
-# Maybe same phone given to someone else in compound, or same family move
-# within compound
+which.max(a5$pt)
+# 
+# # Records for which the HHID and Listing number appear twice.
+# # Maybe same phone given to someone else in compound, or same family move
+# # within compound
 error.df <- a5[a5$pt=='ERROR',]
 error.df <- error.df[complete.cases(error.df), ]
-
-lateVisits <- a5[a5$delay > 60, ] %>%
-  group_by(unique_ID) %>%
-  summarize( delay = mean(delay))
-
-a5[a5$delay > 60, ]
-# PERSON-TIME CALCULATIONS ------------------------------------------------
-
-a6 <- a5[complete.cases(a5) & a5$pt != "ERROR", ]
-a6$pt <- as.numeric(a6$pt)
-sum(a6$pt)
-sum(a6$pt) /365
-
-
-# Checking data
-min(a6$pt)
-max(a6$pt)
-which.max(a6$pt)
-
-hist(a6$pt)
-boxplot(a6$pt)
-
+# 
+ lateVisits <- a5[a5$delay > 60, ] %>%
+   group_by(HH_baseline) %>%
+   summarize( delay = mean(delay))
+# 
+# a5[a5$delay > 60, ]
+# # PERSON-TIME CALCULATIONS ------------------------------------------------
+# 
+# a6 <- a5[complete.cases(a5) & a5$pt != "ERROR", ]
+# a6$pt <- as.numeric(a6$pt)
+# sum(a6$pt)
+# sum(a6$pt) /365
+# 
+# 
+# # Checking data
+# min(a6$pt)
+# max(a6$pt)
+# which.max(a6$pt)
+# 
+# hist(a6$pt)
+# boxplot(a6$pt)
 
 
 # WRITE TO FILE -----------------------------------------------------------
