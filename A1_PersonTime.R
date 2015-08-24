@@ -22,8 +22,24 @@ CustomEndDate <- function(x) {
     return(x)
   }
 }
+hhCleanup <- function(x) {
+  x2 <- data.frame(1,2,3,4,5,6,7,8,9)
+  setnames(x2, old = c(1,2,3,4,5,6,7,8,9), new = c(colnames(x)))
+  for(i in 1:nrow(x))  
+    if (x$date.monthly.visit[i] >= x$Date.baseline[i] |
+        x$date.monthly.visit[i] <= x$Date.withdrawl.move[i] ) {
+      x2[i,] <- x[i,]
+    } else {
+      x2[i,] <- 0
+    }
+  x2$date.monthly.visit <- as.Date(x2$date.monthly.visit, origin = "1970-01-01")
+  x2$Date.baseline <- as.Date(x2$Date.baseline, origin = "1970-01-01")
+  x2$Date.phone.distribution <- as.Date(x2$Date.phone.distribution, origin = "1970-01-01")
+  x2$Date.withdrawl.move <- as.Date(x2$Date.withdrawl.move, origin = "1970-01-01")
+  return (x2)
+}
 personTime <- function(x) {
-  # Calculates person time for each specified date range
+  # Calculates person time for each specified date range. Returns data frame in same dimensions as input
   complete.x <- x[complete.cases(x),]
   factor = complete.x$hh_listing_id
   x1 <- split(complete.x, factor)
@@ -49,6 +65,8 @@ personTime <- function(x) {
       x1[[j]]$delay <- min(x1[[j]]$date.monthly.visit - x1[[j]]$Date.phone.distribution )
     }
   } 
+  x1 <-  do.call(rbind.data.frame, x1)
+  row.names(x1) <- NULL
   return(x1)
 }
 
@@ -84,38 +102,23 @@ max(a1$Date.withdrawl.move)
 
 
 # MERGE - Keep all records at first to find missing data
- 
-
 a3 <- merge(a2, a1, by ="hh_listing_id", all=T, suffixes = c("", ".y"))
 a3$HHID.y <- a3$Listing.number.y <- NULL
 
-# CLEAN where house moved but kept same HHID and listing number
-x<-a3
-x2<-0
-hhCleanup <- function(x) {
-  x2 <- data.frame(1,2,3,4,5,6,7,8,9)
-  setnames(x2, old = c(1,2,3,4,5,6,7,8,9), new = c(colnames(x)))
-  for(i in 1:nrow(x))  
-    if (x$date.monthly.visit[i] >= x$Date.baseline[i] |
-        x$date.monthly.visit[i] <= x$Date.withdrawl.move[i] ) {
-      x2[i,] <- x[i,]
-    } else {
-      x2[i,] <- 0
-    }
-  return (x2)
-}
-x <-colnames(a3)
-x <- hhCleanup(a3[complete.cases(a3), ])
-0# Records for which we have no monthly visit data
+# Records for which we have no monthly visit data
 missing.df <- a3[!complete.cases(a3), ] 
-x <- hhCleanup(a3.t)
+
+
+# CLEAN where house moved but kept same HHID and listing number
+a4 <- hhCleanup(a3[complete.cases(a3), ])
 
 # PERSONE TIME for each household during each time-frame
-a4 <- personTime(x)
+a5 <- personTime(a4)
 
 # Return to Data Frame for easier reading.
 a5 <- do.call(rbind.data.frame, a4)
-row.names(a5) <- NULL
+
+er <- a5[74:77,]
 rm(a3)
 
 x= c(1,2,3)
