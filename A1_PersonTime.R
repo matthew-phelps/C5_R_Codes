@@ -74,6 +74,7 @@ personTime <- function(x) {
 
 load("X-1 Choleraphone distribution 31Jul15.Rdata")
 load("X-2 monthly visits 31Jul15.Rdata")
+load("month_all.Rdata")
 endDate <- as.Date('31-12-14', "%d-%m-%y")
 endDate <- Sys.Date()
 
@@ -82,6 +83,7 @@ x2 <- rename(x2, Num_ppl = Numer.of.ppl.in.household.at.monthly.visit,
              date.monthly.visit = Date.of.monthly.visit)
 x1 <- rename(x1, Date.baseline = Date.of.baseline, Date.phone.distribution = Date.of.phone.distribution,
              Date.withdrawl.move = Date.of.withdrawl.or.move)
+x3 <- MonthlyAll.2[, c('visitdate')]
 
 
 # RESTRICT TO DESIRED TIME-FRAME
