@@ -13,8 +13,8 @@ data.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata"
 setwd(mp)
 rm(mp, ct)
 
-source("PATH TO M1 HERE")
-source("PATH TO M2 HERE")
+source("C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\M1_monthly_joins.R") # PATH TO M1 HERE
+source("C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\M2_monthly_cleaning.R") # PATH TO M2 HERE
 
 #data cleaning by summary
 

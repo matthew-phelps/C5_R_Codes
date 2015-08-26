@@ -82,7 +82,7 @@ MonthlyAll$visitdate[MonthlyAll$visitdate == "2016-05-11"] <- as.Date("2015-05-1
 MonthlyAll$visitdate[MonthlyAll$visitdate == "2016-07-13"] <- as.Date("2015-07-13")
 MonthlyAll$visitdate[MonthlyAll$visitdate == "2016-07-09"] <- as.Date("2015-07-09")
 
-
+hist(MonthlyAll$visitdateauto , breaks = 20)
 
 # POST-CLEANING CHECK -----------------------------------------------------
 
