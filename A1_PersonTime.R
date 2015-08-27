@@ -136,7 +136,9 @@ error.df <- error.df[complete.cases(error.df), ]
  lateVisits <- a5[a5$delay > 60, ] %>%
    group_by(HH_baseline) %>%
    summarize( delay = mean(delay))
-# 
+
+ 
+ 
 # a5[a5$delay > 60, ]
 # # PERSON-TIME CALCULATIONS ------------------------------------------------
 # 
@@ -157,7 +159,7 @@ error.df <- error.df[complete.cases(error.df), ]
 
 # WRITE TO FILE -----------------------------------------------------------
 # 
-# 
+save(a5, file = "X2_cleaned.Rdata")
 # write.csv(missing.data.df[,c(1,6,7,8)], file = "missing_data.csv")
 # write.csv(a6, file = "A-1 Person-Time per HH.csv")
 # write.csv(error.df, file = "A-3 Data Checking.csv")
