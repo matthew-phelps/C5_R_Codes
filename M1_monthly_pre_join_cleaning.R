@@ -11,7 +11,7 @@ graphics.off()
 mp <- "C:/Users/wrz741/Dropbox/C5 Monthly Visits Data/Raw data direct from ODK"
 ct <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data/Raw data direct from ODK"
 data.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata"
-data.path.ct <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data"
+data.path.ct <- "PATH TO WHERE YOU WANT OUTPUT DATA STORED"
 setwd(mp) ### CHANGE TO "ct"
 rm(mp, ct)
 
