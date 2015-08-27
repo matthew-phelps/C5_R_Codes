@@ -10,6 +10,7 @@ graphics.off()
 mp <- "C:/Users/wrz741/Dropbox/C5 Monthly Visits Data/Raw data direct from ODK"
 ct <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data/Raw data direct from ODK"
 data.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata"
+M1.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\M1_monthly_joins.R"
 setwd(mp)
 rm(mp, ct)
 
@@ -17,7 +18,7 @@ rm(mp, ct)
 # 1.) SOURCE DATE JOIN CODE -----------------------------------------------
 
 # Go to this code to add or remove variables of interest
-source("C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\M1_monthly_joins.R")
+source(M1.path) # SET M1 PATH HERE
 
 
 # 2.) REMOVE COLUMNS ------------------------------------------------------
