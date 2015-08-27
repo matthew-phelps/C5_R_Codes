@@ -15,8 +15,6 @@ data.path.ct <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data"
 setwd(mp) ### CHANGE TO "ct"
 rm(mp, ct)
 
-start.date <- as.Date('2014-09-09') # Monthly visits started on sept 9,2014
-end.date <- Sys.Date()
 
 # 1.) LOAD FILES --------------------------------------------------------------
 
@@ -43,14 +41,17 @@ fileNames.df <- file.info(list.files(path = "C:/Users/wrz741/Dropbox/C5 Monthly 
 # extract the rowname of the most recently modified file:
 fileNames.df <- fileNames.df[with(fileNames.df, order(as.POSIXct(mtime))), ]
 monthly7.name <- fileNames.df[nrow(fileNames.df), ] # Subset the most recently modified file
-monthly7.name <- rownames(monthly7.name) # Get file path
-monthly7 <- read.csv(file = monthly7.name, stringsAsFactors = F) # turn into df
+monthly7.path <- rownames(monthly7.name) # Get file path
+monthly7 <- read.csv(file = monthly7.path, stringsAsFactors = F) # turn into df
+
+# Store end.date for data validation (make sure no records are after the file creation date)
+end.date <- as.Date(monthly7.name$mtime)
 rm(monthly7.name, fileNames.df)
 
 
 # Load Field operations monthly visit records
 load("C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\X2_cleaned.Rdata") # MATTHEW
-load(".../X2_cleaned.Rdata") # CHAR
+#load(".../X2_cleaned.Rdata") # CHAR
 x2 <- a5
 rm(a5)
 
@@ -216,7 +217,7 @@ sort(mon5_5$visitdate) #range 2014-10-13 to 2015-01-03, anomalies:  2015-01-14
 mon5_5$hh_id[mon5_5$visitdate=="2015-01-14"] #hhid 400
 
 MonthlyAll$visitdate[MonthlyAll$hh_id==400] #"2015-01-14" "2014-11-13" "2014-09-29" "2015-02-13" "2015-01-14" "2015-03-20" "2015-05-08"
-X2$date[X2$HHID==400] #"2014-09-29" "2014-11-14" "2015-02-13" "2015-03-20" "2015-05-08" "2015-06-19"
+x2$date[x2$HHID==400] #"2014-09-29" "2014-11-14" "2015-02-13" "2015-03-20" "2015-05-08" "2015-06-19"
 #no changes, a duplicate will be deleted later
 
 
@@ -256,26 +257,65 @@ mon6$visitdate[mon6$visitdate=="2015-02-01"]<-"2015-04-01"
 mon6$hh_id[mon6$visitdate=="2015-07-08"] #hhid 85
 MonthlyAll$visitdate[MonthlyAll$hh_id==85] #  "2014-09-20" "2014-11-11" "2015-02-16" "2015-03-24" "2015-07-08"
 x2$date[x2$HHID==085] # "2014-09-20" "2014-11-11" "2015-02-16" "2015-03-24" "2015-03-04" "2015-04-22" "2015-05-08" "2015-06-23"
-mon6$hh_id[mon6$visitdate=="2015-07-08"]<-"2015-05-08"
+mon6$visitdate[mon6$visitdate=="2015-07-08"]<-"2015-05-08"
 
 mon6$hh_id[mon6$visitdate=="2015-08-12"] #hhid347
 MonthlyAll$visitdate[MonthlyAll$hh_id==347] #"2014-12-11" "2015-02-07" "2014-12-11" "2015-03-16" "2015-08-12"
 x2$date[x2$HHID==347] # "2014-12-11" "2015-02-07" "2015-03-16" "2015-05-12"
-mon6$hh_id[mon6$visitdate=="2015-08-12"]<-"2015-05-12"
+mon6$visitdate[mon6$visitdate=="2015-08-12"]<-"2015-05-12"
 
 
-# Monthly 7: Check & Change date anomolies.
+#  Monthly 7: Check & Change date anomolies.------------------------------------------------------------------------
+ 
 boxplot(mon7$visitdate)
 head(sort(mon7$visitdate))
 tail(sort(mon7$visitdate))
-# range 2015-06-12 to 2015-06-15, anomaly: "2015-04-04"
+# range 2015-06-12 to 2015-06-15, anomaly: "2014-07-06" "2015-04-04" "2016-07-09" "2016-07-13"
 
-mon7$hh_id[mon7$visitdate=="2015-04-04"] #hhid269
-MonthlyAll$visitdate[MonthlyAll$hh_id==123] #"2014-10-16" "2014-11-26" "2015-03-15" "2015-04-07" "2015-05-12" "2015-04-04"
-X2$date[X2$HHID==123] #"2014-10-16" "2014-11-26" "2015-04-07" "2015-05-12" "2015-06-26"
-#### doesn't work: mon7[which(mon7$visitdate=="2015-04-04"& mon7$hh_id==123),]<-NULL # simply doesn't make sense in this date range for monthly 7, no in line with previous monthly visit dates, and doesn't match and X2 date
+start.date <- as.Date("2015-06-07")
+end.date # created in Step 1.)
+early <- mon7$visitdate[mon7$visitdate < start.date]
+late <- mon7[mon7$visitdate > end.date, ]
+
+y <- mon7$hh_id[mon7$visitdate=="2014-07-06"]
+MonthlyAll$visitdate[MonthlyAll$hh_id==y]
+x2$date[x2$HHID==y]
+mon7$visitdate[mon7$visitdate == '2014-07-06'] <- '2015-07-06'
+
+y <- mon7$hh_id[mon7$visitdate=="2015-04-04"] #hhid269
+MonthlyAll[MonthlyAll$hh_id==y,] 
+x2$date[x2$HHID==y]
+#### doesn't work: mon7[which(mon7$visitdate=="2015-04-04"& mon7$hh_id==123),]<-NULL 
+#### # simply doesn't make sense in this date range for monthly 7, no in line with previous monthly visit dates, and doesn't match and  date
+## Matt's guess: the hhid was recorded incorrectly- this belongs to another house
+
+y <- mon7$hh_id[mon7$visitdate=="2016-07-09"]
+MonthlyAll$visitdate[MonthlyAll$hh_id==y]
+x2$date[x2$HHID==y]
+mon7$visitdate[mon7$visitdate == '2016-07-09'] <- '2015-07-09'
+
+y <- mon7$hh_id[mon7$visitdate=="2016-07-13"]
+MonthlyAll$visitdate[MonthlyAll$hh_id==y]
+x2$date[x2$HHID==y]
+mon7$visitdate[mon7$visitdate == '2016-07-13'] <- '2015-07-13'
 
 
 
-# Clean workspace.
-# rm(list = ls()[!(ls() %in% c('MonthlyAll', "start.date", 'end.date', 'data.path'))])
+# 6.) MAKE CLEAN JOIN ----------------------------------------------------------
+
+MonthlyAll<-rbind(mon2, mon3,mon4,mon5,
+                  mon6,mon7)
+
+# Check data
+boxplot(MonthlyAll$visitdate)
+
+
+# 7.) SAVE DATA TO DISK ---------------------------------------------------
+
+save(MonthlyAll, file = data.path)
+
+# 8.) CLEAN WORKSPACE -----------------------------------------------------
+rm(list = ls()[!(ls() %in% c('MonthlyAll'))])
+
+
+
