@@ -31,17 +31,17 @@ baselineAll$shared_facilities<- with(baselineAll, ifelse(q17==1& q31 >=1 & q35==
 baselineAll$income_quintile<-as.integer(cut(baselineAll$Monthly_income, quantile(baselineAll$Monthly_income, 
                                                                            probs=0:5/5, include.lowest=TRUE)))
   
-#asset calculation
-#in q9_20_oth1, q9_20_oth2, q9_20_oth3 meatshelf (cupboard), dressing table (dresser), and sofa should earn 1 point, rickshaw should earn 2, 
-# names(baselineAll$q9_20_oth1)
-# baselineAll$q9_20_oth1<-as.character(baselineAll$q9_20_oth1)
-# 
-# x<-grep("^M",baselineAll$q9_20_oth1)
-# baselineAll$q9_20_oth1[baselineAll$q9_20_oth1==x,]<-"MEAT SHELF"
-# 
-# baselineAll$q9_20_oth1[baselineAll$q9_20_oth1==grep("^M",baselineAll$q9_20_oth1)]<-"MEAT SHELF"
-# 
-# baselineAll$q9_20_oth1p <- with(baselineAll, ifelse(q9_20_oth1=="COMPUTER",3,
+# asset calculation
+# in q9_20_oth1, q9_20_oth2, q9_20_oth3 meatshelf (cupboard), dressing table (dresser), and sofa should earn 1 point, rickshaw should earn 2, 
+names(baselineAll)
+baselineAll$q9_20_oth1<-as.character(baselineAll$q9_20_oth1)
+
+x<-grep("^M",baselineAll$q9_20_oth1)
+baselineAll$q9_20_oth1[baselineAll$q9_20_oth1==x]<-"MEAT SHELF"
+
+baselineAll$q9_20_oth1[baselineAll$q9_20_oth1==grep("^M",baselineAll$q9_20_oth1)]<-"MEAT SHELF"
+
+baselineAll$q9_20_oth1p <- with(baselineAll, ifelse(q9_20_oth1=="COMPUTER",3,
 #                                                     ifelse(q9_20_oth1=="VEDEO CAMERA",2,0)))
 #                                                     ifelse(q9_20_oth1=="DRESIN TABLE",1,
 #                                                     ifelse(q9_20_oth1=="DRESING TABLE  (1)",1,

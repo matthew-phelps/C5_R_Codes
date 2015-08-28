@@ -14,16 +14,19 @@ setwd(paste(wdmain,wd1,sep=""))
 main<-as.data.set(spss.system.file('main_2ndentry with dates.sav'),stringsAsFactors=FALSE)#correct file name
 HH_member<-as.data.set(spss.system.file('Q11_2ndEntry.sav'), stringsAsFactors=FALSE)#correct file name
 water_use1<-as.data.set(spss.system.file('q13_18_2ndEntry.sav'), stringsAsFactors=FALSE)#correct file name
+distance<-as.data.set(spss.system.file('Q45_46_2ndentry.sav'), stringsAsFactors=FALSE)#correct file name
 
 setwd(paste(wdmain,wd69,sep=""))
 main69<-as.data.set(spss.system.file('main_FinalEntry_69q.sav'),stringsAsFactors=FALSE) 
 HH_member69<-as.data.set(spss.system.file('q11_FinalEntry_69q.sav'), stringsAsFactors=FALSE) 
 water_use69<-as.data.set(spss.system.file('q13_18_FinalEntry_69q.sav'), stringsAsFactors=FALSE)
+distance69<-as.data.set(spss.system.file('q45_46_FinalEntry_69q.sav'), stringsAsFactors=FALSE)#correct file name
 
 setwd(paste(wdmain,wd47,sep=""))
 main47<-as.data.set(spss.system.file('Final47_main.sav'),stringsAsFactors=FALSE)   
 HH_member47<-as.data.set(spss.system.file('Final47_Q11.sav'), stringsAsFactors=FALSE) 
 water_use47<-as.data.set(spss.system.file('Final47_Q13_18.sav'), stringsAsFactors=FALSE)
+distance47<-as.data.set(spss.system.file('Final47_Q45_46.sav'), stringsAsFactors=FALSE)#correct file name
 
 # make it easier to work with in R, convert to data frame
 Q11 <-as.data.frame(HH_member) 
@@ -37,6 +40,11 @@ main69<-as.data.frame(main69)
 water_use1<-data.frame(water_use1)
 water_use47<-data.frame(water_use47)
 water_use69<-data.frame(water_use69)
+
+distance<-data.frame(distance)
+distance69<-data.frame(distance69)
+distance47<-data.frame(distance47)
+
 #combine main baseline data sets
 #first add missing columns
 names1<-names(main)
@@ -181,6 +189,17 @@ watersources<-cbind(source1,source2,source3,by="slno", incomparables=NA)
 watersources$slno[!(watersources$slno %in% baselineAll$slno)]
 
 baselineAll <- cbind(baselineAll, watersources, by="slno") 
+
+#####Distance to primary water source#######
+distance47$slno<-as.numeric(paste(distance47$hhid,".",47, sep=""))
+distance69$slno<-as.numeric(paste(distance69$hhid,".",69, sep=""))
+dall<-rbind(distance,distance47,distance69)
+
+dall$q45<-as.numeric(dall$q45)
+distance_to_source1<-dall$q46_1[dall$q45==1]
+
+baselineAll<-cbind(baselineAll,distance_to_source1)
+baselineAll$distance_to_source1[is.na(baselineAll$distance_to_source1)]<-21 #all NAs were GPS locations, taken because distance was more than 20 meters
 
 #----------------------------------------------------------------------------
 
