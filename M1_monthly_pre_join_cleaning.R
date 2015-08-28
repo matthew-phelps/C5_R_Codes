@@ -1,7 +1,7 @@
 # Author: Char Tamason & Matthew Phelps
 # Desc:    Join most recent ODK data table and merge with older versions of survey
 # output: Joined ODK table?
-# Dependencies: none
+# Dependencies: X2_, X_1 A1_
 
 # PATH CHANGES in lines:
 # 18, 39, 57, 318 
@@ -313,7 +313,18 @@ MonthlyAll<-rbind(mon2, mon3,mon4,mon5,
 boxplot(MonthlyAll$visitdate)
 
 
-# 7.) SAVE DATA TO DISK ---------------------------------------------------
+# 7.) MAKE DATA FOR HUMAN READIBLE ---------------------------------------------------
+dropVar <- c('x', 'month_auto', 'day_auto', 'y', 'z', 'year_auto', 'auto_date',
+             'day', 'month', 'year')
+MonthlyAll <- MonthlyAll[, !names(MonthlyAll) %in% dropVar]
+
+y <- match(c('visitdate'), names(MonthlyAll))
+x <- 1:(ncol(MonthlyAll) - length(y))
+MonthlyAll <- MonthlyAll[, c(y, x)]
+rm(x, y)
+
+
+# SAVE DATA TO DISK -------------------------------------------------------
 
 save(MonthlyAll, file = data.path)
 

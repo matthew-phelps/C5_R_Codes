@@ -39,6 +39,26 @@ hhCleanup <- function(x) {
   x2$Date.withdrawl.move <- as.Date(x2$Date.withdrawl.move, origin = "1970-01-01")
   return (x2)
 }
+hhCleanup.monthlyAll <- function(x) {
+  # separates HHs that moved within the same compound so had two baselines but same HHID and same listing No.
+  x2 <- data.frame(1,2,3,4,5,6,7,8,9)
+  setnames(x2, old = c(1,2,3,4,5,6,7,8,9), new = c(colnames(x)))
+  for(i in 1:nrow(x))  
+    if (x$visitdate[i] >= x$Date.baseline[i] &
+        x$visitdate[i] <= x$Date.withdrawl.move[i] ) {
+      x2[i,] <- x[i,]
+    } else {
+      x2[i,] <- NA
+    }
+  
+  
+  
+  x2$visitdate <- as.Date(x2$visitdate, origin = "1970-01-01")
+  x2$Date.baseline <- as.Date(x2$Date.baseline, origin = "1970-01-01")
+  x2$Date.phone.distribution <- as.Date(x2$Date.phone.distribution, origin = "1970-01-01")
+  x2$Date.withdrawl.move <- as.Date(x2$Date.withdrawl.move, origin = "1970-01-01")
+  return (x2)
+}
 personTime <- function(x) {
   # Calculates person time for each specified date range. Returns data frame in same dimensions as input
   complete.x <- x[complete.cases(x),]
@@ -83,8 +103,14 @@ x2 <- rename(x2, Num_ppl = Numer.of.ppl.in.household.at.monthly.visit,
              date.monthly.visit = Date.of.monthly.visit)
 x1 <- rename(x1, Date.baseline = Date.of.baseline, Date.phone.distribution = Date.of.phone.distribution,
              Date.withdrawl.move = Date.of.withdrawl.or.move)
-x3 <- MonthlyAll.2[, c('visitdate')]
+x3 <- MonthlyAll[, c('visitdate', 'hh_id')]
 
+x3[x3$hh_id==331,]
+
+
+# Change HHID to integer
+x1$HHID <- as.integer(x1$HHID)
+x2$HHID <- as.integer(x2$HHID)
 
 # RESTRICT TO DESIRED TIME-FRAME
 
@@ -94,7 +120,7 @@ rm(x1)
 a2 <- x2[x2$date.monthly.visit <= endDate,]
 rm(x2)
 
-# SET END DATE
+# SET WITHDRAWL DATE AS END DATE FOR HOUSEHOLDS CURRENTLY STILL ENROLLED
 for (i in 1:nrow(a1)) {
 a1$Date.withdrawl.move[i] <- CustomEndDate(a1$Date.withdrawl.move[i])
 }
@@ -103,8 +129,9 @@ max(a1$Date.withdrawl.move)
 # a1$daysActive <- as.numeric(a1$Date.of.withdrawl.or.move - a1$Date.of.phone.distribution)
 
 
-# MERGE - Keep all records at first to find missing data
+# MERGE x1, x2 - Keep all records at first to find missing data
 a3 <- merge(a2, a1, by ="hh_listing_id", all=T, suffixes = c("", ".y"))
+
 a3$HHID.y <- a3$Listing.number.y <- NULL
 
 # Records for which we have no monthly visit data
@@ -163,3 +190,28 @@ save(a5, file = "X2_cleaned.Rdata")
 # write.csv(missing.data.df[,c(1,6,7,8)], file = "missing_data.csv")
 # write.csv(a6, file = "A-1 Person-Time per HH.csv")
 # write.csv(error.df, file = "A-3 Data Checking.csv")
+
+ 
+ 
+ 
+ 
+# MERGE X1, MONTHLYALL ----------------------------------------------------
+
+ 
+ 
+month_baseline <- merge(a1, MonthlyAll, by.x = "HHID", by.y = "hh_id", all = T)
+month_baseline <- month_baseline[, 1:9]
+ 
+ 
+# Remove HHID where the HHID and listing number were used for multiple baselines
+y <- hhCleanup.monthlyAll(month_baseline)
+y <- y[complete.cases(y),]
+
+
+# Df of baselines that were NOT match with a monthly visit record
+z0 <- anti_join(y, MonthlyAll, by = c("HHID" = "hh_id", "visitdate" = "visitdate"))
+# Df of monthly visit records that were NOT matched with a baseline 
+z <- anti_join(MonthlyAll, y, by = c("hh_id" = "HHID", "visitdate" = "visitdate"))
+
+
+## hhid 302: Incorrect recording of phone distribution for listing number 1318

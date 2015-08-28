@@ -1,6 +1,7 @@
 # Author: Char Tamason & Matthew Phelps
-# Desc:    Join most recent ODK data table and merge with older versions of survey
-# output: Joined ODK table?
+# Desc:    Cleaning of entire dataset using X-2 file 
+# output: Cleaned monthly visits
+# DEPENDENCIES: Requires M1, X2_data_cleaning and A1 to have been run
 
 
 # Intro -------------------------------------------------------------------
@@ -11,35 +12,42 @@ mp <- "C:/Users/wrz741/Dropbox/C5 Monthly Visits Data/Raw data direct from ODK"
 ct <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data/Raw data direct from ODK"
 data.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata"
 data.path.ct <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data"
-
+x2 <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\X2_cleaned.Rdata"
+x2.ct <- "PATH HERE"
 setwd(mp)
 rm(mp, ct)
+
+library(dplyr)
+
 
 
 # GLOBAL VARIABLES --------------------------------------------------------
 
 # Go to this code to add or remove variables of interest
+
+
+# 1.) LOAD DATA -----------------------------------------------------------
+
 load(data.path)
+load(x2)
+x2 <- a5
+rm(a5)
 
 
 # 2.) REMOVE COLUMNS ------------------------------------------------------
 
 # Re-order columns so Date visit fields are first.
-y <- match(c('visitdate'), names(MonthlyAll))
-x <- 1:(ncol(MonthlyAll) - length(y))
-MonthlyAll <- MonthlyAll[, c(y, x)]
-
-
-# Remove duplicate columns.
-dropVar <- c('x', 'month_auto', 'day_auto', 'y', 'z', 'year_auto', 'auto_date',
-             'day', 'month', 'year')
-MonthlyAll <- MonthlyAll[, !names(MonthlyAll) %in% dropVar]
-rm(y,x, dropVar)
-MonthlyAll$visitdate[1]
 
 
 
-# 1.) CHECK DUPLICATE RECORDS ---------------------------------------------
+# Subset monthlyAll to make it easier to work with
+m <- MonthlyAll[, c('visitdate', 'hh_id', "FRA")]
+
+# make x-2 an integet so ani_join can work later on
+x2$HHID <- as.integer(x2$HHID)
+
+
+# 3.) CHECK DUPLICATE RECORDS ---------------------------------------------
 
 # Find observations where HH was recorded as being visited twice on same date:
 x <- (duplicated(MonthlyAll[, c('visitdate', 'hh_id')]))
@@ -55,3 +63,28 @@ MonthlyAll = MonthlyAll[-41,]
 
 
 
+# 4.) COMBINE TO X-2 ------------------------------------------------------
+
+hhCleanup <- function(x) {
+  # separates HHs that moved within the same compound so had two baselines but same HHID and same listing No.
+  m2 <- data.frame(1,2,3)
+  setnames(x2, old = c(1,2,3), new = c(colnames(x)))
+  for(i in 1:nrow(x))  
+    if (x$date.monthly.visit[i] >= x$Date.baseline[i] &
+        x$date.monthly.visit[i] <= x$Date.withdrawl.move[i] ) {
+      x2[i,] <- x[i,]
+    } else {
+      x2[i,] <- NA
+    }
+  x2$date.monthly.visit <- as.Date(x2$date.monthly.visit, origin = "1970-01-01")
+  x2$Date.baseline <- as.Date(x2$Date.baseline, origin = "1970-01-01")
+  x2$Date.phone.distribution <- as.Date(x2$Date.phone.distribution, origin = "1970-01-01")
+  x2$Date.withdrawl.move <- as.Date(x2$Date.withdrawl.move, origin = "1970-01-01")
+  return (x2)
+}
+
+
+x3 <- merge(m, x2, by.x = c("hh_id", 'visitdate'), by.y = c('HHID', 'date.monthly.visit'), all = T)
+
+not.in.monthlyAll <- anti_join(x2, m, by = c('HHID' = "hh_id", "date.monthly.visit" = "visitdate"))
+not.in.x2 <- anti_join(m, x2, by = c('hh_id' = "HHID", "visitdate" = "date.monthly.visit"))
