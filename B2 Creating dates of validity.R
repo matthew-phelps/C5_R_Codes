@@ -55,14 +55,6 @@ x1_data$interval_check <- NA
 
 x1.not.in.baseline <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
 
-# Don't think this code is needed. Please uncomment if is needed 
-# missing20_08_2015<-c("100_2014-11-25", "109_2015-05-27", "118_2015-05-31", "126_2015-06-21", "129_2015-06-24", "144_2014-10-20", "16_2014-06-03", 
-#                     "168_2015-05-08", "171_2014-10-24", "186_2015-05-24", "199_2015-06-01", "214_2015-06-05", "217_2014-10-31", "220_2014-06-11",
-#                     "223_2015-04-17", "225_2015-06-28", "230_2014-08-15", "235_2014-09-16", "248_2014-08-07", "251_2014-08-19", "252_2014-06-01",
-#                     "253_2014-08-26", "254_2014-09-25", "257_2015-05-23", "270_2015-06-12", "28_2014-09-12",  "280_2015-06-26", "295_2014-08-18",
-#                     "300_2014-11-14", "322_2014-10-27", "330_2015-06-26", "332_2014-11-14", "333_2014-07-20", "35_2015-07-24",  "388_2015-07-11",
-#                     "391_2014-11-14", "50_2015-05-29",  "60_2014-10-21",  "67_2014-06-05",  "78_2015-07-04",  "83_2014-09-12",  "85_2014-06-01", 
-#                     "90_2015-07-04") 
 
 # Create list comparing x1 and baseline:
 hhid <- sort(x1.not.in.baseline$HHID)
@@ -193,10 +185,6 @@ baselineAll$hhid <- as.numeric(baselineAll$hhid)
 x1_data$HHID <- formatC(x1_data$HHID, width = 3, format = 'd', flag = 0)
 x1_data$uniqueID<-paste(x1_data$HHID,"_",x1_data$base_date,sep="")
 x1_data$HHID <- as.numeric(x1_data$HHID)
-
-
-#change dates in baseline that are incorrect, in order to match with X-1
-
 
 
 
