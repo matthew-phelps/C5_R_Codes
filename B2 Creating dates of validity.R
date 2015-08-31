@@ -195,16 +195,6 @@ x1_data$uniqueID<-paste(x1_data$HHID,"_",x1_data$base_date,sep="")
 x1_data$HHID <- as.numeric(x1_data$HHID)
 
 
-mon5_5$hh_id[mon5_5$visitdate=="2015-01-14"]
-x1_data$uniqueID<-ifelse(x1_data$uniqueID=="083_2014-09-12","083_2014-09-11",x1_data$uniqueID)
-x1_data$uniqueID<-ifelse(x1_data$uniqueID=="100_2014-11-25","",x1_data$uniqueID)
-x1_data$uniqueID<-ifelse(x1_data$uniqueID=="171_2014-10-14","",x1_data$uniqueID)
-x1_data$uniqueID<-ifelse(x1_data$uniqueID=="230_2014-08-15","",x1_data$uniqueID)
-x1_data$uniqueID<-ifelse(x1_data$uniqueID=="235_2014-09-16","",x1_data$uniqueID)
-x1_data$uniqueID<-ifelse(x1_data$uniqueID=="248_2014-08-07","",x1_data$uniqueID)
-x1_data$uniqueID<-ifelse(x1_data$uniqueID=="028_2014-09-12","",x1_data$uniqueID)
-x1_data$uniqueID<-ifelse(x1_data$uniqueID=="295_2014-08-18","",x1_data$uniqueID)
-
 #change dates in baseline that are incorrect, in order to match with X-1
 
 
