@@ -1,7 +1,33 @@
-#Creating dates of validity for each uniqueID, using X-1 Choleraphone distribution sheet from field station
-####must run creating a joint baseline file and Creating joint monthly visit file2 first
+# Authors: Char Tamason and Matthew Phelps
+# Creating dates of validity for each uniqueID, using X-1 Choleraphone distribution sheet from field station
+# DEPENDENCIES: must run creating a joint baseline file and Creating joint monthly visit file2 first
+
+# If user == Char, do nothing. If else, prepare Matthew's workingspace
+ifelse(grepl("zrc340", getwd()), NA, rm(list = ls()) + load("C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata"))
+ifelse(grepl("zrc340", getwd()), NA,wdmain <- "C:\\Users\\wrz741\\Dropbox")
+
 wdx1<-"\\C5 Field Operations data\\X-1 Cholera phone distribution"
 setwd(paste(wdmain,wdx1,sep=""))
+
+
+library(xlsx)
+
+# Load most recent X-1 version:
+fileNames.df <- file.info(list.files(path = getwd(),
+                                     pattern = "X-1 Choleraphone distribution.*\\.xlsx$", 
+                                     full.names = T))
+
+# Sort files that match pattern by most modification time and 
+# extract the rowname of the most recently modified file:
+fileNames.df <- fileNames.df[with(fileNames.df, order(as.POSIXct(mtime))), ]
+x1.name <- fileNames.df[nrow(fileNames.df), ] # Subset the most recently modified file
+x1.path <- rownames(x1.name) # Get file path
+x1 <- read.xlsx2(file = x1.path, sheetIndex = 1, stringsAsFactors = F) # turn into df
+
+# Store end.date for data validation (make sure no records are after the file creation date)
+end.date <- as.Date(x1.name$mtime)
+rm(x1.name, x1.path, fileNames.df)
+
 
 x1_data <- read.csv2("X-1 Choleraphone distribution 31Jul15.csv")
 x1_data <- x1_data[which(!(is.na(x1_data$HHID))),]

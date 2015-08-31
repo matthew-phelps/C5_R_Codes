@@ -1,10 +1,15 @@
-#cleaning baseline
+# Cleaning baseline
+# Output: Baseline file ready for comparing with X-1
+# Matthew's pathnames:
+wdmain <- "C:\\Users\\wrz741\\Dropbox"
 
 #set working directory short cuts so they can be pasted together
 wdmain<-"C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data"
 wd1<-"\\C5 Baseline data\\Pre-double entry\\Set 1, 403 households\\2ndEntry" #correct folder name
 wd47<-"\\C5 Baseline data\\Double-entered data\\Set 3 of 47 households"
 wd69<-"\\C5 Baseline data\\Double-entered data\\Set 2 of 69 households"
+
+
 
 library(memisc)
 library(plyr)
@@ -201,6 +206,7 @@ distance_to_source1<-dall$q46_1[dall$q45==1]
 baselineAll<-cbind(baselineAll,distance_to_source1)
 baselineAll$distance_to_source1[is.na(baselineAll$distance_to_source1)]<-21 #all NAs were GPS locations, taken because distance was more than 20 meters
 
+save(baselineAll, file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
 #----------------------------------------------------------------------------
 
 # if desired storage capacity need to do for baseline data sets 1 and 2
