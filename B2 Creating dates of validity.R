@@ -53,11 +53,11 @@ x1_data$interval_check <- NA
 
 # 2.) Check data: which unique IDs in x1 are not in baseline. Create df of x1 not in baseline --------------------------------------------------------------------
 
-x1.not.in.baseline <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
+not.in.baseline <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
 
 
 # Create list comparing x1 and baseline:
-hhid <- sort(x1.not.in.baseline$HHID)
+hhid <- sort(not.in.baseline$HHID)
 missing.ls <- vector("list", length(hhid))
 for (i in 1:length(hhid)) {
   missing.ls[[i]]$baseUniqueID <-  (baselineAll[baselineAll$hhid == hhid[i],c("uniqueID")])
@@ -189,12 +189,26 @@ x1_data$HHID <- as.numeric(x1_data$HHID)
 
 
 # 3.) Repeat data check after cleaning -------------------------------
- x1.not.in.baseline <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
+x1.not.in.baseline.2 <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
+rm(x1.not.in.baseline)
 
 
 
 
-baseline_hhid_not_in_X1<-(sort(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid")]))
+
+# 4.) Check Data: Baseline records that are not in x-1 ------------------------
+
+not_in_X1<-(sort(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid")]))
+
+hhid <- sort(not_in_X1$hhid)
+missing.ls <- vector("list", length(hhid))
+for (i in 1:length(hhid)) {
+  missing.ls[[i]]$baseUniqueID <-  (baselineAll[baselineAll$hhid == hhid[i],c("uniqueID")])
+  missing.ls[[i]]$x1UniqueID <- (x1_data[x1_data$HHID == hhid[i],c("uniqueID")])
+}
+
+missing.ls[[1]]
+print(missing.ls)
 
 
 
@@ -206,6 +220,10 @@ sort(baseline_hhid_not_in_X1[!(baseline_hhid_not_in_X1%in% MonthlyAll$hhid)])
 baseline_in_X1<-c(sort(baselineAll$uniqueID[(baselineAll$uniqueID %in% x1_data$uniqueID)]))
 
 # View(baselineAll[,c("hhid","uniqueID")])
+
+
+
+# 5.) Clean based on data checking ----------------------------------------
 
 
 
