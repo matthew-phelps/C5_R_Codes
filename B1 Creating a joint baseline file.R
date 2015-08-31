@@ -206,7 +206,16 @@ distance_to_source1<-dall$q46_1[dall$q45==1]
 baselineAll<-cbind(baselineAll,distance_to_source1)
 baselineAll$distance_to_source1[is.na(baselineAll$distance_to_source1)]<-21 #all NAs were GPS locations, taken because distance was more than 20 meters
 
+
+
+# Move Unique ID to front column and save dataset -------------------------
+baselineAll$
+y <- match(c('uniqueID'), names(baselineAll))
+x <- 1:(ncol(baselineAll) - length(y))
+baselineAll <- baselineAll[, c(y, x)]
+rm(x, y)
 save(baselineAll, file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
+
 #----------------------------------------------------------------------------
 
 # if desired storage capacity need to do for baseline data sets 1 and 2
