@@ -1,10 +1,16 @@
 # Cleaning baseline
 # Output: Baseline file ready for comparing with X-1
 # Matthew's pathnames:
-wdmain <- "C:\\Users\\wrz741\\Dropbox"
+
 
 #set working directory short cuts so they can be pasted together
 wdmain<-"C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data"
+
+# If Matthew, prepare Matthew's workingspace; else do nothing
+ifelse(grepl("wrz741", getwd()), rm(list = ls()), NA)
+ifelse(grepl("wrz741", getwd()), wdmain <- "C:\\Users\\wrz741\\Dropbox", NA)
+
+
 wd1<-"\\C5 Baseline data\\Pre-double entry\\Set 1, 403 households\\2ndEntry" #correct folder name
 wd47<-"\\C5 Baseline data\\Double-entered data\\Set 3 of 47 households"
 wd69<-"\\C5 Baseline data\\Double-entered data\\Set 2 of 69 households"
@@ -74,10 +80,21 @@ main$intdate <- spss2date(main$intdate)
 main47$intdate <- spss2date(main47$intdate)
 main69$intdate <- spss2date(main69$intdate)#no dates entered yet, waiting for data entry
 
-#create unique id in main baseline files
+# Format HHID with leading 0s in order to make unique ID
+main$hhid <- formatC(main$hhid, width = 3, format = 'd', flag = 0)
+main47$hhid <- formatC(main47$hhid, width = 3, format = 'd', flag = 0)
+main69$hhid <- formatC(main69$hhid, width = 3, format = 'd', flag = 0)
+
+# Create unique id in main baseline files
 main$uniqueID<-paste(main$hhid,"_",main$intdate,sep="")
 main47$uniqueID<-paste(main47$hhid,"_",main47$intdate,sep="")
 main69$uniqueID<-paste(main69$hhid,"_",main69$intdate,sep="")
+
+# Return HHID to original formatting:
+main$hhid <- as.numeric(main$hhid)
+main47$hhid <- as.numeric(main47$hhid)
+main69$hhid <- as.numeric(main69$hhid)
+
 
 #create slno for main47 and main69, will come in helpful when merging datasets later
 main47$slno<-as.numeric(paste(main47$hhid,".",47,sep=""))
@@ -209,7 +226,6 @@ baselineAll$distance_to_source1[is.na(baselineAll$distance_to_source1)]<-21 #all
 
 
 # Move Unique ID to front column and save dataset -------------------------
-baselineAll$
 y <- match(c('uniqueID'), names(baselineAll))
 x <- 1:(ncol(baselineAll) - length(y))
 baselineAll <- baselineAll[, c(y, x)]
