@@ -193,7 +193,8 @@ x1.not.in.baseline.2 <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), 
 rm(x1.not.in.baseline)
 
 
-
+x1_data[x1_data$HHID == 117,]
+x1_data <- x1_data[order(x1_data$HHID), ]
 
 
 # 4.) Check Data: Baseline records that are not in x-1 ------------------------
@@ -223,30 +224,78 @@ baseline_in_X1<-c(sort(baselineAll$uniqueID[(baselineAll$uniqueID %in% x1_data$u
 
 
 
-# 5.) Clean based on data checking ----------------------------------------
+# 5.) Clean based on checking baseline not in x1 ----------------------------------------
 
 
+
+
+# 6.) Check date ranges -------------------------------------------------------
+
+summary(x1_data$base_date)
+summary(baselineAll$intdate)
 
 baselineAll$uniqueID
+
+
+
+# 7.) Check for x1 dates for logic ----------------------------------------
+
+# First, sort data set interval_check to be T for all records:
+x1_data$interval_check <- T
+# Group items together by hhid. List contains df with a record for each hhid + baseline
+# combination.
+x1_split <- split(x1_data, x1_data$HHID)
+x1_split[[345]]
+
+x1_split[[346]]$base_date
+# Loop through list, if more than one baseline given to a hh, check to make sure
+# the dates are logical. i.e. baseline of j + 1 is after the withdrawl of j.
+for (i in 1:length(x1_split)){
+  if(nrow(x1_split[[i]]) > 1) {
+    for (j in 1:(nrow(x1_split[[i]]) - 1)){ # If wthdrwl date > base of next hh, give it a F
+      ifelse(x1_split[[i]]$with_date[j] >  x1_split[[i]]$base_date[j + 1],
+             x1_split[[i]]$interval_check[j] <- F, x1_split[[i]]$interval_check[j] <- T )
+    }
+  } 
+
+}
+
+# Turn back to df
+x1 <- do.call(rbind.data.frame, x1_split)
+row.names(x1) <- NULL
+
+# There are no interval errors when this statement is TRUE: 
+nrow(x1) == sum(x1$interval_check)
+
+# Df of problem records:
+y <- which(x1$interval_check %in% F) #Gives index of duplicates
+e1 <- x1[c(y, y+1), ] # gives df of duplicates. y-1 makes sure we get the
+
+
+######## This section is replaced by code above
+######## 
 # for (i in 1:10) { do something that involves i}
 # i <- j <- 1 
 
-final_x1_data <- data.frame()  
 
-for (i in 1:length(unique(x1_data$HHID))){
-  
-  subset <- x1_data[which(x1_data$HHID==unique(x1_data$HHID)[i]),]
-  subset <- subset[order(subset$base_date),]  
-  
-  for (j in 1:(nrow(subset)-1)) {
-    subset$interval_check[j] <- subset$with_date[j] < subset$base_date[j+1]
-  }
-  
-  subset$interval_check[j+1] <- TRUE
-  final_x1_data <- rbind(final_x1_data, subset)
-  
-}
-
+# final_x1_data <- data.frame()  
+# 
+# for (i in 1:length(unique(x1_data$HHID))){
+#   
+#   subset <- x1_data[which(x1_data$HHID==unique(x1_data$HHID)[i]),]
+#   subset <- subset[order(subset$base_date),]  
+#   
+#   for (j in 1:(nrow(subset)-1)) {
+#     subset$interval_check[j] <- subset$with_date[j] < subset$base_date[j+1]
+#   }
+#   
+#   subset$interval_check[j+1] <- TRUE
+#   final_x1_data <- rbind(final_x1_data, subset)
+#   
+# }
+# sum(final_x1_data$interval_check)
+# y <- which(final_x1_data$interval_check %in% F) #Gives index of duplicates
+# e2 <- final_x1_data[c(y, y+1), ]
 # final_x1_data[which(final_x1_data$interval_check==F),]
 
 
