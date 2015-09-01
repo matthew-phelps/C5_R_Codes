@@ -185,12 +185,29 @@ baselineAll$intdate[baselineAll$uniqueID == "333_2014-04-20"] <- "2014-07-20"
 
 # # Changes to baseline based on email from Bimal:
 baselineAll$hhid[baselineAll$uniqueID == "172_2014-10-21"] <- 60
+
 baselineAll$hhid[baselineAll$uniqueID == "114_2014-10-20"] <- 144
+baselineAll$hhid[baselineAll$uniqueID == "168_2014-08-22"] <- 184
+
 baselineAll$hhid[baselineAll$uniqueID == "151_2014-08-19"] <- 251
 baselineAll$hhid[baselineAll$uniqueID == "124_2014-11-14"] <- 300
 baselineAll$hhid[baselineAll$uniqueID == "191_2014-10-27"] <- 322
 baselineAll$hhid[baselineAll$uniqueID == "182_2014-11-14"] <- 332
 baselineAll$hhid[baselineAll$uniqueID == "236_2014-11-14"] <- 391
+
+# # Changes to baseline dates on email from Bimal:
+baselineAll$intdate [baselineAll$uniqueID == "067_2014-12-09"] <- "2014-06-05"
+baselineAll$intdate [baselineAll$uniqueID == "252_2014-12-12"] <- "2014-06-01"
+
+
+# DELETE FROM BASELINE ----------------------------------------------------
+
+# People to record as dropouts between baseline and monthly
+# "300_2014-08-22" to dropout file
+# "322_2014-07-12"
+# "332_2014-08-14"
+# "391_2014-07-11"
+
 
 
 # Re-create unique IDs with new dates
@@ -215,23 +232,33 @@ x1_data <- x1_data[order(x1_data$HHID), ]
 
 # 4.) Check Data: Baseline records that are not in x-1 ------------------------
 
-not_in_X1<-(sort(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid")]))
+not_in_X1<-as.data.frame(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid", "intdate")])
 
-hhid <- sort(not_in_X1$hhid)
-missing.ls <- vector("list", length(hhid))
-for (i in 1:length(hhid)) {
-  missing.ls[[i]]$baseUniqueID <-  (baselineAll[baselineAll$hhid == hhid[i],c("uniqueID")])
-  missing.ls[[i]]$x1UniqueID <- (x1_data[x1_data$HHID == hhid[i],c("uniqueID")])
+# make list object of 
+missing.ls <- vector("list", length(not_in_X1$hhid))
+for (i in 1:length(not_in_X1$hhid)) {
+  missing.ls[[i]]$baseUniqueID <-  (baselineAll[baselineAll$hhid == not_in_X1$hhid[i], c("uniqueID")])
+  missing.ls[[i]]$x1UniqueID <- (x1_data[x1_data$HHID == not_in_X1$hhid[i] ,c("uniqueID")])
 }
 
 missing.ls[[1]]
 print(missing.ls)
 
 
+# Checked for typos. None found.
+# Remove HHIDs that Bimal already addressed:
+not_in_X1 <- not_in_X1[!(not_in_X1$hhid == 67 | 
+                           not_in_X1$hhid == 168 |
+                           not_in_X1$hhid == 252), ]
 
-sort(baseline_hhid_not_in_X1[!(baseline_hhid_not_in_X1%in% MonthlyAll$hhid)])
-#baseline_in_X1<-c(sort(baselineAll$hhid[(baselineAll$uniqueID %in% x1_data$uniqueID)]))
-# sort(baseline_in_X1[!(baseline_in_X1%in% MonthlyAll$hhid)])
+# Send remaing records to Bangladesh for checking
+write.csv2(not_in_X1, file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_X1.csv")
+
+
+ 
+# sort(baseline_hhid_not_in_X1[!(baseline_hhid_not_in_X1%in% MonthlyAll$hhid)])
+# #baseline_in_X1<-c(sort(baselineAll$hhid[(baselineAll$uniqueID %in% x1_data$uniqueID)]))
+# # sort(baseline_in_X1[!(baseline_in_X1%in% MonthlyAll$hhid)])
 
 #check which baseline entries are in x1, can be used for analysis
 baseline_in_X1<-c(sort(baselineAll$uniqueID[(baselineAll$uniqueID %in% x1_data$uniqueID)]))
@@ -246,36 +273,17 @@ baseline_in_X1<-c(sort(baselineAll$uniqueID[(baselineAll$uniqueID %in% x1_data$u
 
 
 # 6.) Check date ranges -------------------------------------------------------
-
+# (& make sure same HHIDs do not overlap in time) 
 summary(x1_data$base_date)
 summary(baselineAll$intdate)
 
 baselineAll$uniqueID
 
-
-
-# 7.) Check for x1 dates for logical sequencing ----------------------------------------
-# (make sure same HHIDs do not overlap in time) 
-
-intervalCheck <- function(x, factor) {
-  x_split <- split(x, factor)
-  for (i in 1:length(x_split)){
-    if(nrow(x_split[[i]]) > 1) {
-      for (j in 1:(nrow(x_split[[i]]) - 1)){ # If wthdrwl date > base of next hh, give it a F
-        ifelse(x_split[[i]]$with_date[j] >  x_split[[i]]$base_date[j + 1],
-               x_split[[i]]$interval_check[j] <- F, x_split[[i]]$interval_check[j] <- T )
-      }
-    } 
-  }
-}
-
-
-# First, sort data set interval_check to be T for all records:
+# Interval Check: Frist, sort data set interval_check to be T for all records:
 x1_data$interval_check <- T
 
-intervalCheck(x1_data, factor = x1_data$HHID)
-# Group items together by hhid. List contains df with a record for each hhid + baseline
-# combination.
+# Group items together by hhid. List contains df with a record for each 
+# hhid + baseline combination.
 x1_split <- split(x1_data, x1_data$HHID)
 x1_split[[345]]
 
@@ -302,6 +310,9 @@ nrow(x1) == sum(x1$interval_check)
 # Df of problem records:
 y <- which(x1$interval_check %in% F) #Gives index of duplicates
 e1 <- x1[c(y, y+1), ] # gives df of duplicates. y-1 makes sure we get the
+
+
+
 
 
 ######## This section is replaced by code above
