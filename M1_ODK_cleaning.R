@@ -332,6 +332,8 @@ x <- 1:(ncol(MonthlyAll) - length(y))
 MonthlyAll <- MonthlyAll[, c(y, x)]
 rm(x, y)
 
+MonthlyAll <- MonthlyAll[order(MonthlyAll$hh_id, MonthlyAll$visitdate), ]
+row.names(MonthlyAll) <- NULL
 
 # SAVE DATA TO DISK -------------------------------------------------------
 
