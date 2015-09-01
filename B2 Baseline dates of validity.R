@@ -365,11 +365,14 @@ write.csv2(e1[, c(8, 1:5)],
 
 
 
-# 8.) Check baseline for logical date sequencing --------------------------
-# (i.e. make sure same HHID does not overlap in time)
+# 8.) MERGE x1 and baseline --------------------------
 
+base_merge <- merge(x1, baselineAll, by.x = "uniqueID", by.y = "uniqueID",
+                    all = F)
 
-
+dropvars <- c("hhid", "slno", "hhid.1")
+base_merge <- base_merge[, !names(base_merge) %in% dropvars]
+save(base_merge, file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata")
 
 
 # First need to fix monthlyall date typos-----------------------------------------------------------------
