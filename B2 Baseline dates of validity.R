@@ -199,17 +199,6 @@ baselineAll$hhid[baselineAll$uniqueID == "236_2014-11-14"] <- 391
 baselineAll$intdate [baselineAll$uniqueID == "067_2014-12-09"] <- "2014-06-05"
 baselineAll$intdate [baselineAll$uniqueID == "252_2014-12-12"] <- "2014-06-01"
 
-
-# DELETE FROM BASELINE ----------------------------------------------------
-
-# People to record as dropouts between baseline and monthly
-# "300_2014-08-22" to dropout file
-# "322_2014-07-12"
-# "332_2014-08-14"
-# "391_2014-07-11"
-
-
-
 # Re-create unique IDs with new dates
 baselineAll$hhid <- formatC(baselineAll$hhid, width = 3, format = 'd', flag = 0)
 baselineAll$uniqueID<-paste(baselineAll$hhid,"_",baselineAll$intdate,sep="")
@@ -220,21 +209,36 @@ x1_data$uniqueID<-paste(x1_data$HHID,"_",x1_data$base_date,sep="")
 x1_data$HHID <- as.numeric(x1_data$HHID)
 
 
+# DROPOUTS FROM BASELINE ----------------------------------------------------
+
+# People to record as dropouts between baseline and monthly
+dropouts <-data.frame(uniqueID = c("300_2014-08-22", "322_2014-07-12", "332_2014-08-14", 
+              "391_2014-07-11"))
+
+# Remove records from baseline:
+baselineAll <- baselineAll[!(baselineAll$uniqueID %in% dropouts$uniqueID),]
+
+
+
+
+
 
 # 3.) Repeat data check after cleaning -------------------------------
 not.in.baseline.2 <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
 rm(x1.not.in.baseline)
 
-
-x1_data[x1_data$HHID == 117,]
-x1_data <- x1_data[order(x1_data$HHID), ]
+write.csv2(not.in.baseline.2[, c(8, 1:5)], 
+           file ="C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_baseline.csv",
+           row.names = F)
 
 
 # 4.) Check Data: Baseline records that are not in x-1 ------------------------
 
+x1_data <- x1_data[order(x1_data$HHID), ]
+
 not_in_X1<-as.data.frame(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid", "intdate")])
 
-# make list object of 
+# make list object of missing X1 records to make manual cleaning easier:
 missing.ls <- vector("list", length(not_in_X1$hhid))
 for (i in 1:length(not_in_X1$hhid)) {
   missing.ls[[i]]$baseUniqueID <-  (baselineAll[baselineAll$hhid == not_in_X1$hhid[i], c("uniqueID")])
@@ -246,13 +250,27 @@ print(missing.ls)
 
 
 # Checked for typos. None found.
+
 # Remove HHIDs that Bimal already addressed:
 not_in_X1 <- not_in_X1[!(not_in_X1$hhid == 67 | 
                            not_in_X1$hhid == 168 |
                            not_in_X1$hhid == 252), ]
+ 
+
+# 5.) CLEANING  ---------------------------------------------------------
+
+## To-be-done after getting info back from BD
+
+
+# 6.) RE-RUN DATA CHECK AFTER CLEANING X1 -------------------------------------
+
+not_in_X1<-as.data.frame(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid", "listing", "intdate")])
+names(not_in_X1)[4] <- "baseline_date"
 
 # Send remaing records to Bangladesh for checking
-write.csv2(not_in_X1, file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_X1.csv")
+write.csv2(not_in_X1, 
+           file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_X1.csv",
+           row.names = F)
 
 
  
@@ -300,7 +318,7 @@ for (i in 1:length(x1_split)){
 
 }
 
-# Turn back to df
+# Turn list back to df
 x1 <- do.call(rbind.data.frame, x1_split)
 row.names(x1) <- NULL
 
