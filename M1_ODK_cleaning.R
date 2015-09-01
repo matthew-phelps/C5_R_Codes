@@ -8,14 +8,23 @@
 # 
 
 # Intro -------------------------------------------------------------------
-getwd()
-rm(list = ls())
-graphics.off()
-mp <- "C:/Users/wrz741/Dropbox/C5 Monthly Visits Data/Raw data direct from ODK"
-ct <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data/Raw data direct from ODK"
-data.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata"
-data.path.ct <- "PATH TO WHERE YOU WANT OUTPUT DATA STORED"
-setwd(mp) ### CHANGE TO "ct"
+
+
+ 
+# Prepare Matthew's workspace if user == MATTHEW. If else, setwd to Chars dir
+ifelse(grepl("zrc340", getwd()),
+       NA,
+       rm(list = ls()))
+ifelse(grepl("zrc340", getwd()),
+       data.path <- "CHAR: PATH TO WHERE YOU WANT OUTPUT DATA STORED",
+       data.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata")
+ifelse(grepl("zrc340", getwd()),
+       ODK.path <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data/Raw data direct from ODK",
+       ODK.path <- "C:/Users/wrz741/Dropbox/C5 Monthly Visits Data/Raw data direct from ODK")
+
+
+setwd(ODK.path)
+
 
 
 
@@ -36,7 +45,7 @@ monthly6<-read.csv("C5_monthly_survey_v6_results.csv", stringsAsFactors=FALSE)
 ## Monthly 7 needs to be dynamic:
 # Create df with the  full file names and the date of modification.
 # See http://stackoverflow.com/questions/13762224/how-to-sort-files-list-by-date/13762544
-fileNames.df <- file.info(list.files(path = mp,
+fileNames.df <- file.info(list.files(path = ODK.path,
                                      pattern = "C5_monthly_survey_v7_results.*\\.csv$", full.names = T))
 # .*\\.csv$ is the pattern matching secton
 
