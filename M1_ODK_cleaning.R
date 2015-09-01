@@ -61,11 +61,7 @@ end.date <- as.Date(monthly7.name$mtime)
 rm(monthly7.name, fileNames.df)
 
 
-# Load Field operations monthly visit records
-load("C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\X2_cleaned.Rdata") # MATTHEW
-#load(".../X2_cleaned.Rdata") # CHAR
-x2 <- a5
-rm(a5)
+
 
 # 2.) VARIABLE SELECTION --------------------------------------------------
 
