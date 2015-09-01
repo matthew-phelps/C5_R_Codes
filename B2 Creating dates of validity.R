@@ -12,7 +12,11 @@ setwd(paste(wdmain,wdx1,sep=""))
 
 library(xlsx)
 
-# Load most recent X-1 version:
+# GLOBAL VARIABLES --------------------------------------------------------
+cut.date <- as.Date("2015-05-20")
+
+
+# 1.) Load most recent X-1 version:
 fileNames.df <- file.info(list.files(path = getwd(),
                                      pattern = "X-1 Choleraphone distribution.*\\.xlsx$", 
                                      full.names = T))
@@ -28,12 +32,15 @@ x1_data <- read.xlsx2(file = x1.path, sheetIndex = 1, stringsAsFactors = F) # tu
 end.date <- as.Date(x1.name$mtime)
 rm(x1.name, x1.path, fileNames.df)
 
-# Only keep records with a HHID
-x1_data <- x1_data[x1_data$HHID > 0, ]
-
 # Formate dates of x1
 x1_data$base_date <- as.Date(x1_data$Date.of.baseline, "%d.%m.%y")
 x1_data$with_date <- as.Date(x1_data$Date.of.withdrawl.or.move, "%d.%m.%y")
+
+# Only keep records with a HHID from range of dates for which baseline has been entered
+x1_data <- x1_data[x1_data$HHID > 0, ]
+x1_data <- x1_data[x1_data$base_date <= cut.date, ]
+
+
 
 # Create unique IDs for x1
 x1_data$uniqueID <- paste(x1_data$HHID, "_", x1_data$base_date, sep="")
@@ -176,6 +183,15 @@ x1_data$base_date[x1_data$uniqueID== "295_2014-08-18"] <- "2014-08-08"
 # Change dates in baseline that are incorrect, in order to match with X-1
 baselineAll$intdate[baselineAll$uniqueID == "333_2014-04-20"] <- "2014-07-20"
 
+# # Changes to baseline based on email from Bimal:
+baselineAll$hhid[baselineAll$uniqueID == "172_2014-10-21"] <- 60
+baselineAll$hhid[baselineAll$uniqueID == "114_2014-10-20"] <- 144
+baselineAll$hhid[baselineAll$uniqueID == "151_2014-08-19"] <- 251
+baselineAll$hhid[baselineAll$uniqueID == "124_2014-11-14"] <- 300
+baselineAll$hhid[baselineAll$uniqueID == "191_2014-10-27"] <- 322
+baselineAll$hhid[baselineAll$uniqueID == "182_2014-11-14"] <- 332
+baselineAll$hhid[baselineAll$uniqueID == "236_2014-11-14"] <- 391
+
 
 # Re-create unique IDs with new dates
 baselineAll$hhid <- formatC(baselineAll$hhid, width = 3, format = 'd', flag = 0)
@@ -189,7 +205,7 @@ x1_data$HHID <- as.numeric(x1_data$HHID)
 
 
 # 3.) Repeat data check after cleaning -------------------------------
-x1.not.in.baseline.2 <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
+not.in.baseline.2 <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
 rm(x1.not.in.baseline)
 
 

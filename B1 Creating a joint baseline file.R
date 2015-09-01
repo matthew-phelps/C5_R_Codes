@@ -226,7 +226,7 @@ baselineAll$distance_to_source1[is.na(baselineAll$distance_to_source1)]<-21 #all
 
 
 # Move Unique ID to front column and save dataset -------------------------
-y <- match(c('uniqueID'), names(baselineAll))
+y <- match(c('uniqueID', 'hhid'), names(baselineAll))
 x <- 1:(ncol(baselineAll) - length(y))
 baselineAll <- baselineAll[, c(y, x)]
 rm(x, y)
