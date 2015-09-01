@@ -240,7 +240,7 @@ baseline_in_X1<-c(sort(baselineAll$uniqueID[(baselineAll$uniqueID %in% x1_data$u
 
 
 
-# 5.) Clean based on checking baseline not in x1 ----------------------------------------
+# 5.) Clean data based on checking baseline not in x1 ----------------------------------------
 
 
 
@@ -254,10 +254,26 @@ baselineAll$uniqueID
 
 
 
-# 7.) Check for x1 dates for logic ----------------------------------------
+# 7.) Check for x1 dates for logical sequencing ----------------------------------------
+# (make sure same HHIDs do not overlap in time) 
+
+intervalCheck <- function(x, factor) {
+  x_split <- split(x, factor)
+  for (i in 1:length(x_split)){
+    if(nrow(x_split[[i]]) > 1) {
+      for (j in 1:(nrow(x_split[[i]]) - 1)){ # If wthdrwl date > base of next hh, give it a F
+        ifelse(x_split[[i]]$with_date[j] >  x_split[[i]]$base_date[j + 1],
+               x_split[[i]]$interval_check[j] <- F, x_split[[i]]$interval_check[j] <- T )
+      }
+    } 
+  }
+}
+
 
 # First, sort data set interval_check to be T for all records:
 x1_data$interval_check <- T
+
+intervalCheck(x1_data, factor = x1_data$HHID)
 # Group items together by hhid. List contains df with a record for each hhid + baseline
 # combination.
 x1_split <- split(x1_data, x1_data$HHID)
@@ -313,6 +329,14 @@ e1 <- x1[c(y, y+1), ] # gives df of duplicates. y-1 makes sure we get the
 # y <- which(final_x1_data$interval_check %in% F) #Gives index of duplicates
 # e2 <- final_x1_data[c(y, y+1), ]
 # final_x1_data[which(final_x1_data$interval_check==F),]
+
+
+
+# 8.) Check baseline for logical date sequencing --------------------------
+# (i.e. make sure same HHID does not overlap in time)
+
+
+
 
 
 # First need to fix monthlyall date typos-----------------------------------------------------------------
