@@ -65,7 +65,6 @@ x2$HHID <- as.integer(x2$HHID)
 # Remove empyt records
 x2 <- x2[!is.na(x2$HHID), ]
 
-
 # x2 dates
 x2$date_visit <- as.Date(x2$Date.of.monthly.visit, format = "%d.%m.%y")
 
@@ -77,12 +76,13 @@ x2$Numer.of.ppl.in.household.at.monthly.visit <- NULL
 x2 <- x2[order(x2$HHID, x2$date_visit), ]
 row.names(x2) <- NULL
 
-
-
 # Check X2 for date range -------------------------------------------------
 
 date_wrong <- x2[x2$date_visit > end.date | x2$date_visit < start.date, ]
 rm(date_wrong)
+
+
+
 
 # 3.) CHECK DUPLICATE RECORDS ---------------------------------------------
 
@@ -92,14 +92,12 @@ y <- which(x %in% T) #Gives index of duplicates
 duplicates.odk <- m[c(y, y-1), ] # gives df of duplicates. y-1 makes sure we get the
 # 'original' and the 'duplicate'
 
-# Remove duplicates as needed based on info from BD -----------------------
+# Remove duplicates as needed based on info from BD:
 # Drop HHID 185 duplicate
 # Need to delete row 237 (?) or 109 (?) depending on word from Bangladesh
 droprows <- y[2]
 MonthlyAll <- MonthlyAll[-c(droprows), ]
 rm(x, y, duplicates.odk)
-
-
 
 # Check X2 for where HH was recorded as being visited twice on same date:
 x <- (duplicated(x2[, c('date_visit', 'HHID')]))
@@ -111,7 +109,22 @@ rm(x, y, duplicates.x2)
 
 
 
+# Check for typos in entry ------------------------------------------------
+# We assume that if there is a 1 - 2 day differene between ODK and X2, we use
+# X2 dates
 
+temp.merge <- merge(m, x2, by.x = c('hh_id', 'visitdate'), by.y = c('HHID', 'date_visit'),  all = T)
+
+
+
+# Check missing records ---------------------------------------------------
+not.in.x2 <- anti_join(m, x2, by = c("visitdate" = 'date_visit', "hh_id" = 'HHID'))
+not.in.x2 <- not.in.x2[order(not.in.x2$hh_id, not.in.x2$visitdate), ]
+row.names(not.in.x2) <- NULL
+
+not.in.odk <- anti_join(x2, m, by = c("date_visit" = 'visitdate', "HHID" = 'hh_id'))
+not.in.odk <- not.in.odk[order(not.in.odk$HHID, not.in.odk$date_visit), ]
+row.names(not.in.odk) <- NULL
 
 # 4.) COMBINE TO X-2 ------------------------------------------------------
 
