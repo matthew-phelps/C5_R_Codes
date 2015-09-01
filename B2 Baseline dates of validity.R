@@ -328,8 +328,12 @@ nrow(x1) == sum(x1$interval_check)
 # Df of problem records:
 y <- which(x1$interval_check %in% F) #Gives index of duplicates
 e1 <- x1[c(y, y+1), ] # gives df of duplicates. y-1 makes sure we get the
+e1 <- e1[order(e1$HHID), ]
 
-
+# Write csv to send to BD of problems
+write.csv2(e1[, c(8, 1:5)],
+           file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Overlap.csv",
+           row.names = F)
 
 
 
