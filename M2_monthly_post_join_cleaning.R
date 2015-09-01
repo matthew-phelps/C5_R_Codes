@@ -6,12 +6,24 @@
 
 # Intro -------------------------------------------------------------------
 
-rm(list = ls())
-graphics.off()
-mp <- "C:/Users/wrz741/Dropbox/C5 Monthly Visits Data/Raw data direct from ODK"
-ct <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data/Raw data direct from ODK"
-data.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata"
+baseline.path <- "CHAR - PUT PATH TO BASELINE MERGE DATA HERE"
+ODK.path <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data/Raw data direct from ODK"
+
+# Prepare Matthew's workspace if user == MATTHEW. If else, do nothing
+ifelse(grepl("zrc340", getwd()),
+       NA,
+       rm(list = ls()))
+ifelse(grepl("zrc340", getwd()),
+       NA,
+       baseline.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata")
+ifelse(grepl("zrc340", getwd()),
+       NA,
+       ODK.path <-"C:/Users/wrz741/Dropbox/C5 Monthly Visits Data/Raw data direct from ODK")
+
+
 data.path.ct <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data"
+
+## What is this from? Can we stop using A1??
 x2 <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\X2_cleaned.Rdata"
 x2.ct <- "PATH HERE"
 setwd(mp)
@@ -28,7 +40,7 @@ library(dplyr)
 
 # 1.) LOAD DATA -----------------------------------------------------------
 
-load(data.path)
+load(baseline.path)
 load(x2)
 x2 <- a5
 rm(a5)
