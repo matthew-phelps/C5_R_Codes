@@ -57,7 +57,7 @@ start.date <- as.Date("2014-09-09")
 # 2.) Format data to make easy to work with ------------------------------------------------------
 
 # Subset monthlyAll to make it easier to work with
-m <- MonthlyAll[, c('visitdate', 'hh_id', "FRA")]
+mz <- MonthlyAll[, c('visitdate', 'hh_id', "FRA")]
 
 # make HHID inteter
 x2$HHID <- as.integer(x2$HHID)
@@ -87,9 +87,9 @@ rm(date_wrong)
 # 3.) CHECK DUPLICATE RECORDS ---------------------------------------------
 
 # Check ODK for where HH was recorded as being visited twice on same date:
-x <- (duplicated(m[, c('visitdate', 'hh_id')]))
+x <- (duplicated(mz[, c('visitdate', 'hh_id')]))
 y <- which(x %in% T) #Gives index of duplicates
-duplicates.odk <- m[c(y, y-1), ] # gives df of duplicates. y-1 makes sure we get the
+duplicates.odk <- mz[c(y, y-1), ] # gives df of duplicates. y-1 makes sure we get the
 # 'original' and the 'duplicate'
 
 # Remove duplicates as needed based on info from BD:
@@ -97,6 +97,7 @@ duplicates.odk <- m[c(y, y-1), ] # gives df of duplicates. y-1 makes sure we get
 # Need to delete row 237 (?) or 109 (?) depending on word from Bangladesh
 droprows <- y[2]
 MonthlyAll <- MonthlyAll[-c(droprows), ]
+mz <- MonthlyAll[, c('visitdate', 'hh_id', "FRA")]
 rm(x, y, duplicates.odk)
 
 # Check X2 for where HH was recorded as being visited twice on same date:
@@ -110,10 +111,53 @@ rm(x, y, duplicates.x2)
 
 
 # Check for typos in entry ------------------------------------------------
+
 # We assume that if there is a 1 - 2 day differene between ODK and X2, we use
 # X2 dates
+temp.merge <- merge(x2, MonthlyAll, by.x = c('HHID', 'date_visit'),  by.y = c('hh_id', 'visitdate') ,  all = T)
 
-temp.merge <- merge(m, x2, by.x = c('hh_id', 'visitdate'), by.y = c('HHID', 'date_visit'),  all = T)
+x <- split(temp.merge, temp.merge$HHID)
+
+for (j in 1:length(x)) {
+  for (i in 1:nrow(x[[j]])){
+    if(i > 1 & i < (nrow(x[[j]]) - 1)){
+      if(is.na(x[[j]][i, ]$FRA) & (is.na(x[[j]][i-1, ]$Listing.number) | is.na(x[[j]][i+1, ]$Listing.number))) {
+        if(x[[j]][i, ]$date_visit <= (x[[j]][i-1, ]$date_visit + 2)) {
+          x[[j]][i-1, ]$date_visit <- x[[j]][i, ]$date_visit
+        } else if (x[[j]][i, ]$date_visit >= (x[[j]][i+1, ]$date_visit - 2)) {
+          x[[j]][i+1, ]$date_visit <- x[[j]][i, ]$date_visit
+        }
+      }
+    }
+  }
+}
+
+# Combine all data from duplicate rows into one row, then delete superfluous rows
+j=1
+i=1
+for (j in 1:length(x)) {
+  for (i in 1:nrow(x[[j]])){
+    if(i < (nrow(x[[j]]) - 1) &
+       !is.na(x[[j]][i, ]$FRA) &
+       (x[[j]][i, ]$HHID == x[[j]][i + 1, ]$HHID)) {
+      x[[j]][i, ]$ppl <- x[[j]][i + 1, ]$ppl
+      x[[j]][i, ]$Listing.number <- x[[j]][i + 1, ]$Listing.number
+    } else if (i > 1 & 
+               !is.na(x[[j]][i, ]$FRA)) {
+      if(x[[j]][i, ]$HHID == x[[j]][i - 1, ]$HHID) {
+        x[[j]][i, ]$ppl <- x[[j]][i - 1, ]$ppl
+        x[[j]][i, ]$Listing.number <- x[[j]][i - 1, ]$Listing.number
+      }
+    }
+  }
+}
+
+# Convert back to df
+temp2 <- do.call(rbind.data.frame, x)
+
+# Delete duplicates
+z <- duplicated(temp2[, 1:3])
+temp2 <- temp2[z == F,  ]
 
 
 

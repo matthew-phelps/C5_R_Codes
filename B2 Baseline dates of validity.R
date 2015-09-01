@@ -326,8 +326,8 @@ row.names(x1) <- NULL
 nrow(x1) == sum(x1$interval_check)
 
 # Df of problem records:
-y <- which(x1$interval_check %in% F) #Gives index of duplicates
-e1 <- x1[c(y, y+1), ] # gives df of duplicates. y-1 makes sure we get the
+y <- which(x1$interval_check %in% F) #Gives index of problem cells
+e1 <- x1[c(y, y+1), ] # gives df of problem cells y-1 makes sure we get the
 e1 <- e1[order(e1$HHID), ]
 
 # Write csv to send to BD of problems
