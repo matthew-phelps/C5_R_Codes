@@ -7,9 +7,7 @@
 # Intro -------------------------------------------------------------------
 
 
-
-
-# Prepare Matthew's workspace if user == MATTHEW. If else, do nothing
+# Prepare Matthew's workspace if user == CHAR prepare Char's path, else: MAtthew's path
 ifelse(grepl("zrc340", getwd()),
        NA,
        rm(list = ls()))
