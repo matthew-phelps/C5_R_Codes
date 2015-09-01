@@ -133,8 +133,7 @@ for (j in 1:length(x)) {
 }
 
 # Combine all data from duplicate rows into one row, then delete superfluous rows
-j=1
-i=1
+
 for (j in 1:length(x)) {
   for (i in 1:nrow(x[[j]])){
     if(i < (nrow(x[[j]]) - 1) &
@@ -157,19 +156,28 @@ temp2 <- do.call(rbind.data.frame, x)
 
 # Delete duplicates
 z <- duplicated(temp2[, 1:3])
+sum(z)
 temp2 <- temp2[z == F,  ]
-
+rm(mz, temp.merge, z, x)
 
 
 # Check missing records ---------------------------------------------------
-not.in.x2 <- anti_join(m, x2, by = c("visitdate" = 'date_visit', "hh_id" = 'HHID'))
-not.in.x2 <- not.in.x2[order(not.in.x2$hh_id, not.in.x2$visitdate), ]
+
+not.in.x2 <- temp2[is.na(temp2$Listing.number), ]
+not.in.x2 <- not.in.x2[order(not.in.x2$HHID, not.in.x2$date_visit), ]
 row.names(not.in.x2) <- NULL
 
-not.in.odk <- anti_join(x2, m, by = c("date_visit" = 'visitdate', "HHID" = 'hh_id'))
+not.in.odk <- temp2[is.na(temp2$FRA), c(1:4)]
 not.in.odk <- not.in.odk[order(not.in.odk$HHID, not.in.odk$date_visit), ]
 row.names(not.in.odk) <- NULL
 
+
+
+
+
+
+
+######## END - below is not functional ################################
 # 4.) COMBINE TO X-2 ------------------------------------------------------
 
 hhCleanup <- function(x) {
