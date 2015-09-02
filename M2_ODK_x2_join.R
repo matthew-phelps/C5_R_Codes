@@ -22,9 +22,7 @@ ifelse(grepl("zrc340", getwd()),
 ifelse(grepl("zrc340", getwd()),
        data.output.path <- "CHAR - PUT PATH TO RDATA HERE",
        data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata")
-ifelse(grepl("zrc340", getwd()),
-       monthly.enddate.path <- "CHAR - PUT PATH TO RDATA HERE",
-       monthly.enddate.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-end-date.Rdata")
+
 
 
 # 1.) LOAD FILES ----------------------------------------------------------
@@ -194,12 +192,12 @@ row.names(not.in.odk) <- NULL
 # Account for delay in ODK reporting
 not.in.odk <- not.in.odk[not.in.odk$date_visit <= odk.end.date, ]
 
-month_visit <- temp2[temp2$date_visit <= odk.end.date, ]
+visits.month <- temp2[temp2$date_visit <= odk.end.date, ]
 
 
 #  SAVE MERGRED ODK-X2 FILE-----------------------------------------------------
-save(month_visit, file = data.output.path)
-save(end.date.x2, file = )
+save(visits.month, file = data.output.path)
+
 
 
 
