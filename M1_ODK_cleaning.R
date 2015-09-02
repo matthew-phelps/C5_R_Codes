@@ -316,7 +316,8 @@ MonthlyAll<-rbind(mon2, mon3,mon4,mon5,
 
 # Check data
 boxplot(MonthlyAll$visitdate)
-
+min(MonthlyAll$visitdate)
+max(MonthlyAll$visitdate)
 
 # 7.) MAKE DATA FOR HUMAN READIBLE ---------------------------------------------------
 dropVar <- c('x', 'month_auto', 'day_auto', 'y', 'z', 'year_auto', 'auto_date',
