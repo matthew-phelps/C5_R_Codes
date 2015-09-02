@@ -35,6 +35,7 @@ rm(x1.name, x1.path, fileNames.df)
 # Formate dates of x1
 x1_data$base_date <- as.Date(x1_data$Date.of.baseline, "%d.%m.%y")
 x1_data$with_date <- as.Date(x1_data$Date.of.withdrawl.or.move, "%d.%m.%y")
+x1_data$phone.dist <- as.Date(x1_data$Date.of.phone.distribution, "%d.%m.%y")
 
 # Only keep records with a HHID from range of dates for which baseline has been entered
 x1_data <- x1_data[x1_data$HHID > 0, ]
@@ -373,6 +374,15 @@ base_merge <- merge(x1, baselineAll, by.x = "uniqueID", by.y = "uniqueID",
 dropvars <- c("hhid", "slno", "hhid.1")
 base_merge <- base_merge[, !names(base_merge) %in% dropvars]
 save(base_merge, file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata")
+
+
+
+
+
+
+
+
+
 
 
 # First need to fix monthlyall date typos-----------------------------------------------------------------
