@@ -2,14 +2,35 @@
 # Creating dates of validity for each uniqueID, using X-1 Choleraphone distribution sheet from field station
 # DEPENDENCIES: must run creating a joint baseline file and Creating joint monthly visit file2 first
 
+
+# INTRO -------------------------------------------------------------------
+
+
 # If user == Char, do nothing. If else, prepare Matthew's workingspace
 rm(list = ls())
 ifelse(grepl("zrc340", getwd()), 
        B1.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baselineAll.Rdata",
        B1.output.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
+
+ifelse(grepl("zrc340", getwd()), 
+       B2.base.merge.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata",
+       B2.base.merge.output.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata")
+ifelse(grepl("zrc340", getwd()), 
+       not.in.x1.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\Missing_from_X1.csv",
+       not.in.x1.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_X1.csv")
+ifelse(grepl("zrc340", getwd()), 
+       not.in.baseline.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\Missing_from_baseline.csv",
+       not.in.baseline.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_baseline.csv")
+ifelse(grepl("zrc340", getwd()), 
+       overlap.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\Overlap.csv",
+       overlap.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Overlap.csv")
+
+
 ifelse(grepl("zrc340", getwd()), 
        wdmain <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data",
        wdmain <- "C:\\Users\\wrz741\\Dropbox")
+
+"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata"
 
 wdx1<-"\\C5 Field Operations data\\X-1 Cholera phone distribution"
 setwd(paste(wdmain,wdx1,sep=""))
@@ -238,10 +259,10 @@ baselineAll <- baselineAll[!(baselineAll$uniqueID %in% dropouts$uniqueID),]
 
 # 3.) Repeat data check after cleaning -------------------------------
 not.in.baseline.2 <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
-rm(x1.not.in.baseline)
+rm(not.in.baseline)
 
 write.csv2(not.in.baseline.2[, c(8, 1:5)], 
-           file ="C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_baseline.csv",
+           file =not.in.baseline.path,
            row.names = F)
 
 
@@ -282,7 +303,7 @@ names(not_in_X1)[4] <- "baseline_date"
 
 # Send remaing records to Bangladesh for checking
 write.csv2(not_in_X1, 
-           file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_X1.csv",
+           file = not.in.x1.path,
            row.names = F)
 
 
@@ -345,7 +366,7 @@ e1 <- e1[order(e1$HHID), ]
 
 # Write csv to send to BD of problems
 write.csv2(e1[, c(8, 1:5)],
-           file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Overlap.csv",
+           file = overlap.path,
            row.names = F)
 
 
@@ -385,7 +406,12 @@ base_merge <- merge(x1, baselineAll, by.x = "uniqueID", by.y = "uniqueID",
 
 dropvars <- c("hhid", "slno", "hhid.1")
 base_merge <- base_merge[, !names(base_merge) %in% dropvars]
-save(base_merge, file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata")
+
+
+# SAVE OUTPUT -------------------------------------------------------------
+
+
+save(base_merge, file = B2.base.merge.output.path)
 
 
 
@@ -396,38 +422,4 @@ save(base_merge, file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline
 
 
 
-
-# First need to fix monthlyall date typos-----------------------------------------------------------------
-setwd("C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data\\C5 Field Operations data\\X-2 Monthly visit tracking sheet")
-X2<-read.csv2("X-2 monthly visits 4Jul15.csv")
-
-X2$date<-as.Date(X2$Date.of.monthly.visit, "%d.%m.%y")
-X2$uniqueDate<-paste(X2$HHID,"-",X2$date,sep="")
-
-sort(monthly2$visitdate)
-
-###############look into the following mess tomorrow##########################
-# MonthlyAll$date <- with(MonthlyAll, as.Date(paste(year, "-", month, "-", day, sep="")))
-# MonthlyAll$uniqueDate <- paste(MonthlyAll$hhid,"-",MonthlyAll$date,sep="")
-# 
-# sort(MonthlyAll$uniquedate[!(MonthlyAll$uniqueDate %in% X2$uniqueDate)])
-# 
-# monthlyall_not_in_X2<-sort(MonthlyAll$hhid[!(MonthlyAll$uniqueDate %in% X2$uniqueDate)])
-# X2_not_in_monthlyall<-sort(X2$HHID[!(X2$uniqueDate %in% MonthlyAll$uniqueDate)])
-# 
-# X2$HHID[(X2_not_in_monthlyall %in% monthlyall_not_in_X2)]
-# 
-# Monthly_uniqueDates<-
-# X2dates_uniqueDates
-
-
-######################################################
-
-MonthlyAll$uniqueid <- NA
-MonthlyAll$uniqueid[which(MonthlyAll$hh_id==MonthlyAll$hh_id[1])] <- 
-  
-  final_x1_data$uniqueid[which((MonthlyAll$hh_id[1]==final_x1_data$HHID) &   
-                                 (MonthlyAll$date[1] >= final_x1_data$base_date[which(final_x1_data$HHID==MonthlyAll$hh_id[1])] & 
-                                    (MonthlyAll$date[1] <= final_x1_data$with_date[which(final_x1_data$HHID==MonthlyAll$hh_id[1])])))      
-                         ]
 

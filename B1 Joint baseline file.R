@@ -21,7 +21,6 @@ wd47<-"\\C5 Baseline data\\Double-entered data\\Set 3 of 47 households"
 wd69<-"\\C5 Baseline data\\Double-entered data\\Set 2 of 69 households"
 
 
-
 library(memisc)
 library(plyr)
 
