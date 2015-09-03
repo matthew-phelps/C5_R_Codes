@@ -16,7 +16,7 @@ ifelse(grepl("zrc340", getwd()),
        NA,
        rm(list = ls()))
 ifelse(grepl("zrc340", getwd()),
-       data.path <- "CHAR: PATH TO WHERE YOU WANT OUTPUT DATA STORED",
+       data.path <- "PATH HERE \\C5_R_Codes\\Rdata\\month_all.Rdata",
        data.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata")
 ifelse(grepl("zrc340", getwd()),
        ODK.path <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Monthly Visits Data/Raw data direct from ODK",
@@ -311,7 +311,7 @@ mon7$visitdate[mon7$visitdate == '2016-07-13'] <- '2015-07-13'
 
 # 6.) MAKE CLEAN JOIN ----------------------------------------------------------
 
-MonthlyAll<-rbind(mon2, mon3,mon4,mon5,
+MonthlyAll<-rbind(mon2, mon3,mon4,mon5, mon5_5,
                   mon6,mon7)
 
 # Check data
