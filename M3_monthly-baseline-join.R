@@ -1,7 +1,7 @@
 # Author: Matthew Phelps and Char Tamason
 # Desc:    Merge ODK and X-2 files
 # output: Cleaned monthly visits
-# DEPENDENCIES: Requires M1 to have been run
+# DEPENDENCIES: Requires M1, M2, & B1, B2 to have been run
 
 
 # Intro -------------------------------------------------------------------
@@ -17,7 +17,9 @@ ifelse(grepl("zrc340", getwd()),
 ifelse(grepl("zrc340", getwd()),
        monthly_joined_path <- "CHAR - PUT PATH TO CLEANED Monthly-Joined (M2 Output) HERE",
        monthly_joined_path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata")
-
+ifelse(grepl("zrc340", getwd()),
+       data.output.path <- "CHAR - PUT PATH TO CLEANED Monthly-Joined (M2 Output) HERE",
+       data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-baseline_join.Rdata")
 
 # LOAD FILES --------------------------------------------------------------
 
@@ -28,23 +30,35 @@ load(monthly_joined_path)
 load(baseline.path)
 
 
-# temp files to work from
-mz <- visits.month[, c(1:4)]
-bz <- base_merge[, c(1:3, 7:9)]
-
-
-
 # 1.) MERGE and KEEP all records ------------------------------------------
 
-xz <- merge(mz, bz, by.x = "HHID", by.y = "HHID", all = T)
-
-xz <- xz[order(xz$HHID, xz$base_date, xz$date_visit), ]
-x <- xz[!is.na(xz$base_date), ]
-row.names(x) <- NULL
+z <- merge(visits.month, base_merge, by.x = "HHID", by.y = "HHID", all = T)
 
 
-hhCleanup <- function(x, dateVisit, baseDate, withdrawDate, phoneDate) {
-  # separates HHs that moved within the same compound so had two baselines but same HHID and same listing No.
+
+# Order rows and columns for easy reading ---------------------------------
+
+# Rows
+z <- z[order(z$HHID, z$base_date, z$date_visit), ]
+
+# Columns
+y <- match(c('uniqueID'), names(z))
+x <- 1:(ncol(z) - length(y))
+z <- z[, c(y, x)]
+rm(x, y)
+
+
+
+
+# RECORD & REMOVE RECORDS WITHOUT BASELINE --------------------------------
+# these should be fixed upstream.
+noBaseline <- z[is.na(z$base_date), ] 
+z <- z[!is.na(z$base_date), ]
+row.names(z) <- NULL
+
+
+hhCleanup <- function(data = x, dateVisit, baseDate, withdrawDate, phoneDate) {
+  # separates records that have same HHID but different baselines.
   x2 <- data.frame(t(c(1:ncol(x))))
   names(x2) <- names(x)
   for(i in 1:nrow(x)) {
@@ -63,17 +77,11 @@ hhCleanup <- function(x, dateVisit, baseDate, withdrawDate, phoneDate) {
   return (x2)
 }
 
-
-x3 <- hhCleanup(x, dateVisit = "date_visit", baseDate = "base_date",
+x3 <- hhCleanup(data = z, dateVisit = "date_visit", baseDate = "base_date",
           withdrawDate = "with_date", phoneDate = "phone.dist")
 
 
 
-# # Restrict to last X1 date --=- MOVE TO LATER IN CODE
-# visits.end.date <- max(visits.month$date_visit)
-# base.end.date <- max(base_merge$with_date)
-# ifelse(base.end.date <= visits.end.date,
-#        visits.month <- visits.month[visits.month$date_visit <= base.end.date, ],
-#        base_merge <- bbase_merge[base_merge$base_date <= visits.end.date, ])                   
-# 
-# 
+# SAVE DATA ---------------------------------------------------------------
+
+
