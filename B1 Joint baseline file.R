@@ -3,13 +3,18 @@
 # Matthew's pathnames:
 
 
+# Intro -------------------------------------------------------------------
+
+# Prepare Matthew's workspace if user == MATTHEW. If else, setwd to Chars dir
+rm(list = ls())
+ifelse(grepl("zrc340", getwd()), 
+       data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baselineAll.Rdata",
+       data.output.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
+
 #set working directory short cuts so they can be pasted together
-wdmain<-"C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data"
-
-# If Matthew, prepare Matthew's workingspace; else do nothing
-ifelse(grepl("wrz741", getwd()), rm(list = ls()), NA)
-ifelse(grepl("wrz741", getwd()), wdmain <- "C:\\Users\\wrz741\\Dropbox", NA)
-
+ifelse(grepl("zrc340", getwd()), 
+       wdmain <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data",
+       wdmain <- "C:\\Users\\wrz741\\Dropbox")
 
 wd1<-"\\C5 Baseline data\\Pre-double entry\\Set 1, 403 households\\2ndEntry" #correct folder name
 wd47<-"\\C5 Baseline data\\Double-entered data\\Set 3 of 47 households"
@@ -230,7 +235,7 @@ y <- match(c('uniqueID', 'hhid'), names(baselineAll))
 x <- 1:(ncol(baselineAll) - length(y))
 baselineAll <- baselineAll[, c(y, x)]
 rm(x, y)
-save(baselineAll, file = "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
+save(baselineAll, file = data.output.path)
 
 #----------------------------------------------------------------------------
 
