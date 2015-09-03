@@ -148,11 +148,22 @@ mon5_5<-monthly5_5[,c(base_name_list)]
 mon6<-monthly6[,c(base_name_list)]
 mon7<-monthly7[,c(base_name_list)]
 
+
 # Remove un-needed datasets
 rm(monthly7, monthly6, monthly5, monthly5_5, monthly4, monthly3, monthly2)
 
+
+# Add variable to track which version monthly visit comes from ------------
+
+mon7$version <- 7
+mon6$version <- 6
+mon5$version <- 5
+mon5_5$version <- 5.5
+mon4$version <- 4
+mon3$version <- 3
+mon2$version <- 2
 # 3.) COMBINING DATASETS --------------------------------------------------
-MonthlyAll<-rbind(mon2, mon3,mon4,mon5,
+MonthlyAll<-rbind(mon2, mon3,mon4,mon5, mon5_5,
                   mon6,mon7)
 
 # 4.) DATE OF VISIT -------------------------------------------------------
@@ -201,6 +212,9 @@ boxplot(mon2$visitdate)
 head(sort(mon2$visitdate), 7)
 tail(sort(mon2$visitdate), 7)
 # range 2014-11-27 to 2014-12-19 anomalies: 2014-10-30, 2014-11-16, 2014-12-22, 2015-01-14
+
+# Delete duplicated of HHID 185 - entered twice
+mon2 <- mon2[which(mon2$hh_id!=185 | mon2$auto_date!= "Tue Dec 09 00:00:00 UTC 2014"), ]
 
 # Monthly 3: Check & Change date anomolies.
 boxplot(mon3$visitdate)
