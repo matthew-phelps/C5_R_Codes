@@ -103,36 +103,23 @@ personTime <- function(x) {
 
 # GLOBAL VARIABLES --------------------------------------------------------
 endDate <- as.Date('31-12-14', "%d-%m-%y")
-endDate <- Sys.Date()
+#endDate <- Sys.Date()
 
 
 
 # LOAD DATA ---------------------------------------------------------------
 
 load(m3)
-m3$wi
+
 
 # SUBSET VARIABLES --------------------------------------------------------
 m3 <- m3[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date', 'phone.dist', 'with_date' )]
 
 
-# Rename variables for less space.
-x2 <- rename(x2, Num_ppl = Numer.of.ppl.in.household.at.monthly.visit,
-             date.monthly.visit = Date.of.monthly.visit)
-x1 <- rename(x1, Date.baseline = Date.of.baseline, Date.phone.distribution = Date.of.phone.distribution,
-             Date.withdrawl.move = Date.of.withdrawl.or.move)
-x3 <- MonthlyAll[, c('visitdate', 'hh_id')]
 
-x3[x3$hh_id==331,]
+# RESTRICT DATE -----------------------------------------------------------
 
-
-# Change HHID to integer
-x1$HHID <- as.integer(x1$HHID)
-x2$HHID <- as.integer(x2$HHID)
-
-# RESTRICT TO DESIRED TIME-FRAME
-
-a1 <- x1[x1$Date.phone.distribution <= endDate, ]
+m3 <- m3[m3$phone.dist <= endDate, ]
 rm(x1)
 
 a2 <- x2[x2$date.monthly.visit <= endDate,]
