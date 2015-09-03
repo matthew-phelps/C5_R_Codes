@@ -31,12 +31,13 @@ setwd(ODK.path)
 # 1.) LOAD FILES --------------------------------------------------------------
 
 # combining monthly visit files
+# Monthly 2 set is entirely contained within monthly5_5. So we do not load monthly 2
 # monthly 3 is exact duplicate of monthly 1
 # monthly 4 is copy of 1_5, but 1_5 uses "," instead of "." with numbers and causes problems
 # Monthly2 - monthly 6 covers time from Sep 9 2014 to June 12.
 # Monthly7 covers June 15 - present.
 
-monthly2<-read.csv2("C5_Monthlysurvey2.csv", stringsAsFactors=FALSE)
+
 monthly3<-read.csv("C5_monthly_survey_v3_results.csv", stringsAsFactors=FALSE)
 monthly4<-read.csv("C5_monthly_survey_v4_results.csv", stringsAsFactors=FALSE)
 monthly5<-read.csv("C5_monthly_survey_v5_results_feb6tomar15_2015 downloaded apr17.csv", stringsAsFactors=FALSE)
@@ -66,7 +67,7 @@ rm(monthly7.name, fileNames.df)
 # 2.) VARIABLE SELECTION --------------------------------------------------
 
 # Make sure all columns in base name list exist in all monthly sets
-names2<-names(monthly2)
+
 names3<-names(monthly3)
 names4<-names(monthly4)
 names5<-names(monthly5)
@@ -111,7 +112,7 @@ base_name_list <- c("FRA", "hh_id", "auto_date","day","month", "year","first_vis
 
 
 # Verify that each survery version has the required variables
-base_name_list[!(base_name_list %in% names2)]
+
 base_name_list[!(base_name_list %in% names3)] #monthly3 is missing container 11-15 columns
 base_name_list[!(base_name_list %in% names4)]
 base_name_list[!(base_name_list %in% names5)]
@@ -119,8 +120,7 @@ base_name_list[!(base_name_list %in% names6)]
 base_name_list[!(base_name_list %in% names7)]
 
 # To generate a list of missing columns (not needed for these data sets)
-missing_col_list <- names(names2)[!(names2 %in% base_name_list)]
-missing_data <- names2[missing_col_list]
+
  
 # Create dummy columns in monthly 3
 monthly3$cont11.cont11_id<-as.character(NA)
@@ -140,7 +140,7 @@ monthly3$cont15.cont15_size<-as.numeric(NA)
 monthly3$cont15.cont15_times<-as.numeric(NA)
 
 # Create subsets with only wanted (base names) columns
-mon2<-monthly2[,c(base_name_list)]
+
 mon3<-monthly3[,c(base_name_list)]
 mon4<-monthly4[,c(base_name_list)]
 mon5<-monthly5[,c(base_name_list)]
@@ -150,7 +150,7 @@ mon7<-monthly7[,c(base_name_list)]
 
 
 # Remove un-needed datasets
-rm(monthly7, monthly6, monthly5, monthly5_5, monthly4, monthly3, monthly2)
+rm(monthly7, monthly6, monthly5, monthly5_5, monthly4, monthly3)
 
 
 # Add variable to track which version monthly visit comes from ------------
@@ -161,9 +161,9 @@ mon5$version <- 5
 mon5_5$version <- 5.5
 mon4$version <- 4
 mon3$version <- 3
-mon2$version <- 2
+
 # 3.) COMBINING DATASETS --------------------------------------------------
-MonthlyAll<-rbind(mon2, mon3,mon4,mon5, mon5_5,
+MonthlyAll<-rbind(mon3,mon4,mon5, mon5_5,
                   mon6,mon7)
 
 # 4.) DATE OF VISIT -------------------------------------------------------
@@ -172,8 +172,6 @@ MonthlyAll$visitdate<-with(MonthlyAll, paste(day,"-", month,"-", year,sep=""))
 # MonthlyAll$visitdate
 MonthlyAll$visitdate<-as.Date(MonthlyAll$visitdate, "%d-%m-%Y")
 
-mon2$visitdate<-with(mon2, paste(day,"-", month,"-", year,sep=""))
-mon2$visitdate<-as.Date(mon2$visitdate, "%d-%m-%Y")
 mon3$visitdate<-with(mon3, paste(day,"-", month,"-", year,sep=""))
 mon3$visitdate<-as.Date(mon3$visitdate, "%d-%m-%Y")
 mon4$visitdate<-with(mon4, paste(day,"-", month,"-", year,sep=""))
@@ -207,14 +205,6 @@ MonthlyAll$visitdateauto[1]
 x2 <- x2[with(x2, order(HH_baseline, date.monthly.visit)), ]
 x2$HHID <- as.numeric(x2$HHID)
 
-# Monthly 2: Check for date anomolies.
-boxplot(mon2$visitdate)
-head(sort(mon2$visitdate), 7)
-tail(sort(mon2$visitdate), 7)
-# range 2014-11-27 to 2014-12-19 anomalies: 2014-10-30, 2014-11-16, 2014-12-22, 2015-01-14
-
-# Delete duplicated of HHID 185 - entered twice
-mon2 <- mon2[which(mon2$hh_id!=185 | mon2$auto_date!= "Tue Dec 09 00:00:00 UTC 2014"), ]
 
 # Monthly 3: Check & Change date anomolies.
 boxplot(mon3$visitdate)
@@ -325,7 +315,7 @@ mon7$visitdate[mon7$visitdate == '2016-07-13'] <- '2015-07-13'
 
 # 6.) MAKE CLEAN JOIN ----------------------------------------------------------
 
-MonthlyAll<-rbind(mon2, mon3,mon4,mon5, mon5_5,
+MonthlyAll<-rbind(mon3,mon4,mon5, mon5_5,
                   mon6,mon7)
 
 # Check data
