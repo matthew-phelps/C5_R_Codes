@@ -17,10 +17,10 @@ ifelse(grepl("zrc340", getwd()),
        x2.path <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Field Operations data/X-2 Monthly visit tracking sheet",
        x2.path <-"C:\\Users\\wrz741\\Dropbox\\C5 Field Operations data\\X-2 Monthly visit tracking sheet")
 ifelse(grepl("zrc340", getwd()),
-       odk <- "CHAR - PUT PATH TO CLEANED ODK Monthly Visit (M1 Output) HERE",
+       odk <- "CHAR - CHANGE \\C5_R_Codes\\Rdata\\month_all.Rdata",
        odk <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata")
 ifelse(grepl("zrc340", getwd()),
-       data.output.path <- "CHAR - PUT PATH TO RDATA HERE",
+       data.output.path <- "CHAR - CHANGE \\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata",
        data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata")
 
 
@@ -86,7 +86,7 @@ rm(date_wrong)
 # Check ODK for where HH was recorded as being visited twice on same date:
 x <- (duplicated(MonthlyAll[, c('visitdate', 'hh_id')]))
 y <- which(x %in% T) #Gives index of duplicates
-duplicates.odk <- MonthlyAll[c(y, y-1), c('hh_id', 'visitdate', 'FRA')] # gives df of duplicates. y-1 makes sure we get the
+duplicates.odk <- MonthlyAll[c(y, y-1), c('hh_id', 'visitdate', 'FRA', 'version')] # gives df of duplicates. y-1 makes sure we get the
 # 'original' and the 'duplicate'
 
 # Remove duplicates as needed based on info from BD:
