@@ -12,13 +12,13 @@ ifelse(grepl("zrc340", getwd()),
        NA,
        rm(list = ls()) + NA)
 ifelse(grepl("zrc340", getwd()),
-       baseline.path <- "CHAR - PUT PATH TO /Rdata HERE",
+       baseline.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata",
        baseline.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata")
 ifelse(grepl("zrc340", getwd()),
-       monthly_joined_path <- "CHAR - PUT PATH TO CLEANED Monthly-Joined (M2 Output) HERE",
+       monthly_joined_path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata",
        monthly_joined_path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata")
 ifelse(grepl("zrc340", getwd()),
-       data.output.path <- "CHAR - PUT PATH TO CLEANED Monthly-Joined (M2 Output) HERE",
+       data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\monthly-baseline_join.Rdata",
        data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-baseline_join.Rdata")
 
 # LOAD FILES --------------------------------------------------------------
