@@ -3,20 +3,32 @@
 # DEPENDENCIES: must run creating a joint baseline file and Creating joint monthly visit file2 first
 
 # If user == Char, do nothing. If else, prepare Matthew's workingspace
-ifelse(grepl("zrc340", getwd()), NA, rm(list = ls()) + load("C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata"))
-ifelse(grepl("zrc340", getwd()), NA,wdmain <- "C:\\Users\\wrz741\\Dropbox")
+rm(list = ls())
+ifelse(grepl("zrc340", getwd()), 
+       B1.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baselineAll.Rdata",
+       B1.output.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
+ifelse(grepl("zrc340", getwd()), 
+       wdmain <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data",
+       wdmain <- "C:\\Users\\wrz741\\Dropbox")
 
 wdx1<-"\\C5 Field Operations data\\X-1 Cholera phone distribution"
 setwd(paste(wdmain,wdx1,sep=""))
 
-
 library(xlsx)
+
+
+
+# LOAD DATA ---------------------------------------------------------------
+
+load(B1.output.path)
+
 
 # GLOBAL VARIABLES --------------------------------------------------------
 cut.date <- as.Date("2015-05-20")
 
 
 # 1.) Load most recent X-1 version:
+
 fileNames.df <- file.info(list.files(path = getwd(),
                                      pattern = "X-1 Choleraphone distribution.*\\.xlsx$", 
                                      full.names = T))
