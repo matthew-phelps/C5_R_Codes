@@ -12,7 +12,7 @@ library(xlsx)
 # Prepare workspace: if user == CHAR prepare Char's path, else: MAtthew's path
 ifelse(grepl("zrc340", getwd()),
        NA,
-       rm(list = ls()))
+       rm(list = ls()) + NA)
 ifelse(grepl("zrc340", getwd()),
        x2.path <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Field Operations data/X-2 Monthly visit tracking sheet",
        x2.path <-"C:\\Users\\wrz741\\Dropbox\\C5 Field Operations data\\X-2 Monthly visit tracking sheet")
@@ -84,9 +84,9 @@ rm(date_wrong)
 # 3.) CHECK DUPLICATE RECORDS ---------------------------------------------
 
 # Check ODK for where HH was recorded as being visited twice on same date:
-x <- (duplicated(MonthlyAll[, c('visitdate', 'hh_id')]))
+x <- (duplicated(MonthlyAll[, c(1:11)]))
 y <- which(x %in% T) #Gives index of duplicates
-duplicates.odk <- MonthlyAll[c(y, y-1), c('hh_id', 'visitdate', 'FRA', 'version')] # gives df of duplicates. y-1 makes sure we get the
+duplicates.odk <- MonthlyAll[c(y, y-1), ] # gives df of duplicates. y-1 makes sure we get the
 # 'original' and the 'duplicate'
 
 # Remove duplicates as needed based on info from BD:
@@ -109,7 +109,7 @@ rm(x, y, duplicates.x2)
 # Check for typos in entry ------------------------------------------------
 
 # We assume that if there is a 1 - 2 day differene between ODK and X2, we use
-# X2 dates
+# X2 dates CHANGE - NEED TO USE ODK
 temp.merge <- merge(x2, MonthlyAll, by.x = c('HHID', 'date_visit'),  by.y = c('hh_id', 'visitdate') ,  all = T)
 
 x <- split(temp.merge, temp.merge$HHID)

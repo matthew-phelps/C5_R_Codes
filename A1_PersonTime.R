@@ -1,18 +1,26 @@
-# Author: Matthew Phelps
-#Desc: Calculate number of people living in each household at baseline
+# Author: Matthew Phelps and Char Tamason
+# Desc:    Merge ODK and X-2 files
+# output: Cleaned monthly visits
+# DEPENDENCIES: Requires M1, M2, M3 & B1, B2 to have been run
+
 
 # Intro -------------------------------------------------------------------
 
-rm(list = ls())
-graphics.off()
-pc <- "C:/Users/wrz741/Dropbox/C5_R_Codes/Rdata"
-setwd(pc)
-rm(pc)
+
+# Prepare workspace: if user == CHAR prepare Char's path, else: MAtthew's path
+ifelse(grepl("zrc340", getwd()),
+       NA,
+       rm(list = ls()) + NA)
+ifelse(grepl("zrc340", getwd()),
+       m3 <- "CHAR - PUT PATH TO CLEANED Monthly-Joined (M2 Output) HERE",
+       m3 <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-baseline_join.Rdata")
 
 library(dplyr)
-library(xlsx)
 library(data.table)
 #detach("package:plyr", unload=TRUE) # disrupts the dplyr package
+
+
+# FUNCTIONS ---------------------------------------------------------------
 CustomEndDate <- function(x) {
   # Returns the specified end date if the withdrawl field is null
   if (x < endDate & !is.na(x)){
@@ -92,11 +100,21 @@ personTime <- function(x) {
   return(x1)
 }
 
-load("X-1 Choleraphone distribution 31Jul15.Rdata")
-load("X-2 monthly visits 31Jul15.Rdata")
-load("month_all.Rdata")
+
+# GLOBAL VARIABLES --------------------------------------------------------
 endDate <- as.Date('31-12-14', "%d-%m-%y")
 endDate <- Sys.Date()
+
+
+
+# LOAD DATA ---------------------------------------------------------------
+
+load(m3)
+m3$wi
+
+# SUBSET VARIABLES --------------------------------------------------------
+m3 <- m3[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date', 'phone.dist', 'with_date' )]
+
 
 # Rename variables for less space.
 x2 <- rename(x2, Num_ppl = Numer.of.ppl.in.household.at.monthly.visit,
