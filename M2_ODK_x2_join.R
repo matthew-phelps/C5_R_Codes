@@ -5,7 +5,6 @@
 
 
 # Intro -------------------------------------------------------------------
-
 library(dplyr)
 library(xlsx)
 
@@ -17,10 +16,10 @@ ifelse(grepl("zrc340", getwd()),
        x2.path <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Field Operations data/X-2 Monthly visit tracking sheet",
        x2.path <-"C:\\Users\\wrz741\\Dropbox\\C5 Field Operations data\\X-2 Monthly visit tracking sheet")
 ifelse(grepl("zrc340", getwd()),
-       odk <- "CHAR - CHANGE \\C5_R_Codes\\Rdata\\month_all.Rdata",
+       odk <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\month_all.Rdata",
        odk <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata")
 ifelse(grepl("zrc340", getwd()),
-       data.output.path <- "CHAR - CHANGE \\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata",
+       data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata",
        data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata")
 
 
@@ -206,26 +205,4 @@ save(visits.month, file = data.output.path)
 ######## 
 # 4.) COMBINE TO X-2 ------------------------------------------------------
 
-hhCleanup <- function(x) {
-  # separates HHs that moved within the same compound so had two baselines but same HHID and same listing No.
-  m2 <- data.frame(1,2,3)
-  setnames(x2, old = c(1,2,3), new = c(colnames(x)))
-  for(i in 1:nrow(x))  
-    if (x$date.monthly.visit[i] >= x$Date.baseline[i] &
-        x$date.monthly.visit[i] <= x$Date.withdrawl.move[i] ) {
-      x2[i,] <- x[i,]
-    } else {
-      x2[i,] <- NA
-    }
-  x2$date.monthly.visit <- as.Date(x2$date.monthly.visit, origin = "1970-01-01")
-  x2$Date.baseline <- as.Date(x2$Date.baseline, origin = "1970-01-01")
-  x2$Date.phone.distribution <- as.Date(x2$Date.phone.distribution, origin = "1970-01-01")
-  x2$Date.withdrawl.move <- as.Date(x2$Date.withdrawl.move, origin = "1970-01-01")
-  return (x2)
-}
 
-
-x3 <- merge(m, x2, by.x = c("hh_id", 'visitdate'), by.y = c('HHID', 'date.monthly.visit'), all = T)
-
-not.in.monthlyAll <- anti_join(x2, m, by = c('HHID' = "hh_id", "date.monthly.visit" = "visitdate"))
-not.in.x2 <- anti_join(m, x2, by = c('hh_id' = "HHID", "visitdate" = "date.monthly.visit"))
