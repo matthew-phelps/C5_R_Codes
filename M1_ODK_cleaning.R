@@ -194,7 +194,7 @@ MonthlyAll<-cbind(df,MonthlyAll)
 MonthlyAll$visitdateauto<-paste(MonthlyAll$month_auto, MonthlyAll$day_auto, MonthlyAll$year_auto, sep="")
 MonthlyAll$visitdateauto<-as.Date(MonthlyAll$visitdateauto, "%B%d%Y")
 
-MonthlyAll$visitdateauto[1]
+#MonthlyAll$visitdateauto[1]
 # sort(MonthlyAll$visitdate)
 
 
@@ -317,6 +317,20 @@ mon7$visitdate[mon7$visitdate == '2016-07-13'] <- '2015-07-13'
 
 MonthlyAll<-rbind(mon3,mon4,mon5, mon5_5,
                   mon6,mon7)
+
+###Changes from Bimal's checks at field station
+MonthlyAll$cont1.cont1_times<-with(MonthlyAll,ifelse(hh_id==9&month==9&day==20&year==2014,36,cont1.cont1_times))
+MonthlyAll$cont1.cont1_times<-with(MonthlyAll,ifelse(hh_id==89&month==2&day==26&year==2015,6,cont1.cont1_times))
+MonthlyAll$cont1.cont1_times<-with(MonthlyAll,ifelse(hh_id==89&month==4&day==2&year==2015,7,cont1.cont1_times))
+#delete a row that was slightly different than another, FRA 9947 is correct, FRA 6889 is not
+MonthlyAll=MonthlyAll[!((MonthlyAll$FRA==6889)&(MonthlyAll$hh_id==147)&(MonthlyAll$month==10)&(MonthlyAll$day==21)&(MonthlyAll$year==2014)),]
+#change mistakes in container entries for hhid 151
+MonthlyAll$water_point1.wa_pt1<-with(MonthlyAll, ifelse((hh_id==151)&(month==3)&(day==3)&(year==2015),4,water_point1.wa_pt1))
+MonthlyAll$num_wa_pts<-with(MonthlyAll, ifelse((hh_id==151)&(month==3)&(day==3)&(year==2015),1,num_wa_pts))
+MonthlyAll$water_point1.wa_pt1_usebefore<-with(MonthlyAll, ifelse((hh_id==151)&(month==3)&(day==3)&(year==2015),1,water_point1.wa_pt1_usebefore))
+MonthlyAll$water_point1.wa_avail1<-with(MonthlyAll, ifelse((hh_id==151)&(month==3)&(day==3)&(year==2015),3,water_point1.wa_avail1))
+MonthlyAll$water_point1.wa_flow1.wa_time1.aS<-with(MonthlyAll, ifelse((hh_id==151)&(month==3)&(day==3)&(year==2015),"18:00:00",water_point1.wa_flow1.wa_time1.aS))
+MonthlyAll$water_point1.wa_flow1.wa_time1.aE<-with(MonthlyAll, ifelse((hh_id==151)&(month==3)&(day==3)&(year==2015),"17:59:00",water_point1.wa_flow1.wa_time1.aE))
 
 # Check data
 boxplot(MonthlyAll$visitdate)
