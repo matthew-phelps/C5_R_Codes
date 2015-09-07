@@ -114,41 +114,44 @@ temp.merge <- merge(x2, MonthlyAll, by.x = c('HHID', 'date_visit'),  by.y = c('h
 x <- split(temp.merge, temp.merge$HHID)
 
 # Apply myFun1 to each element in the list formed by the "split" above:
-myFun1 <- function (x) {
+dateReplace <- function (x) {
   # On each row, test to see if there is a ODK entry, and the entry before or after was only a X2 entry
   # If row i is odk and row i+1 or i-1 is only x2 - take the date from row i and apply it to row i+1 or i-1
   for (i in 1:nrow(x)){
-    if(i > 1 & i < (nrow(x) - 1)){
-      if(is.na(x[i, ]$FRA) & (is.na(x[i-1, ]$Listing.number) | is.na(x[i+1, ]$Listing.number))) {
-        if(x[i, ]$date_visit <= (x[i-1, ]$date_visit + 2)) {
-          x[i-1, ]$date_visit <- x[i, ]$date_visit
-        } else if (x[i, ]$date_visit >= (x[i+1, ]$date_visit - 2)) {
-          x[i+1, ]$date_visit <- x[i, ]$date_visit
-        }
+    
+    if(i> 1 && i < nrow(x) && is.na(x[i, ]$Listing.number) && (is.na(x[i-1, ]$FRA) | is.na(x[i+1, ]$FRA))){
+      if(x[i, ]$date_visit <= (x[i-1, ]$date_visit + 2)) {
+        x[i-1, ]$date_visit <- x[i, ]$date_visit
+      } else if (x[i, ]$date_visit >= (x[i+1, ]$date_visit - 2)) {
+        x[i+1, ]$date_visit <- x[i, ]$date_visit
       }
+    } else if(i == 1 && nrow(x) >1 && is.na(x[i, ]$Listing.number) && is.na(x[i+1, ]$FRA) && x[i, ]$date_visit >= (x[i+1, ]$date_visit - 2)) {
+      x[i+1, ]$date_visit <- x[i, ]$date_visit 
+      
+    } else if (i == nrow(x) && nrow(x) > 0 && is.na(x[i, ]$Listing.number) && is.na(x[i-1, ]$FRA) && x[i, ]$date_visit <= (x[i-1, ]$date_visit + 2)) {
+      x[i-1, ]$date_visit <- x[i, ]$date_visit
     }
   }
   return (x)
 }
-x <- lapply(x, myFun1)
+
+system.time({x <- lapply(x, dateReplace)})
 
 # Combine all data from duplicate rows into one row, then delete superfluous rows
-for (j in 1:length(x)) {
-  for (i in 1:nrow(x[[j]])){
-    if(i < (nrow(x[[j]]) - 1) &
-       !is.na(x[[j]][i, ]$FRA) &
-       (x[[j]][i, ]$HHID == x[[j]][i + 1, ]$HHID)) {
-      x[[j]][i, ]$ppl <- x[[j]][i + 1, ]$ppl
-      x[[j]][i, ]$Listing.number <- x[[j]][i + 1, ]$Listing.number
-    } else if (i > 1 & 
-               !is.na(x[[j]][i, ]$FRA)) {
-      if(x[[j]][i, ]$HHID == x[[j]][i - 1, ]$HHID) {
-        x[[j]][i, ]$ppl <- x[[j]][i - 1, ]$ppl
-        x[[j]][i, ]$Listing.number <- x[[j]][i - 1, ]$Listing.number
-      }
+
+mergeRows <- function(x) {
+  for (i in 1:nrow(x)){
+    if(i < (nrow(x)) && !is.na(x[i, ]$FRA) && (x[i, ]$date_visit == x[i + 1, ]$date_visit)) {
+      x[i, ]$ppl <- x[i + 1, ]$ppl
+      x[i, ]$Listing.number <- x[i + 1, ]$Listing.number
+    } else if (i > 1 && !is.na(x[i, ]$FRA) && x[i, ]$date_visit == x[i - 1, ]$date_visit) {
+      x[i, ]$ppl <- x[i - 1, ]$ppl
+      x[i, ]$Listing.number <- x[i - 1, ]$Listing.number
     }
   }
+  return (x)  
 }
+system.time({x <- lapply(x, mergeRows)})
 
 # Convert back to df
 temp2 <- do.call(rbind.data.frame, x)
@@ -157,7 +160,7 @@ temp2 <- do.call(rbind.data.frame, x)
 z <- duplicated(temp2[, 1:3])
 sum(z)
 temp2 <- temp2[z == F,  ]
-rm(mz, temp.merge, z, x)
+rm(temp.merge, z, x)
 
 
 # Check missing records ---------------------------------------------------
