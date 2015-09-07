@@ -91,7 +91,7 @@ duplicates.odk <- MonthlyAll[c(y, y-1), ] # gives df of duplicates. y-1 makes su
 # Remove duplicates as needed based on info from BD:
 # Drop HHID 185 duplicate
 # Need to delete row 237 (?) or 109 (?) depending on word from Bangladesh
-droprows <- y[2]
+droprows <- y
 MonthlyAll <- MonthlyAll[-c(droprows), ]
 rm(x, y, duplicates.odk)
 
@@ -113,22 +113,26 @@ temp.merge <- merge(x2, MonthlyAll, by.x = c('HHID', 'date_visit'),  by.y = c('h
 
 x <- split(temp.merge, temp.merge$HHID)
 
-for (j in 1:length(x)) {
-  for (i in 1:nrow(x[[j]])){
-    if(i > 1 & i < (nrow(x[[j]]) - 1)){
-      if(is.na(x[[j]][i, ]$FRA) & (is.na(x[[j]][i-1, ]$Listing.number) | is.na(x[[j]][i+1, ]$Listing.number))) {
-        if(x[[j]][i, ]$date_visit <= (x[[j]][i-1, ]$date_visit + 2)) {
-          x[[j]][i-1, ]$date_visit <- x[[j]][i, ]$date_visit
-        } else if (x[[j]][i, ]$date_visit >= (x[[j]][i+1, ]$date_visit - 2)) {
-          x[[j]][i+1, ]$date_visit <- x[[j]][i, ]$date_visit
+# Apply myFun1 to each element in the list formed by the "split" above:
+myFun1 <- function (x) {
+  # On each row, test to see if there is a ODK entry, and the entry before or after was only a X2 entry
+  # If row i is odk and row i+1 or i-1 is only x2 - take the date from row i and apply it to row i+1 or i-1
+  for (i in 1:nrow(x)){
+    if(i > 1 & i < (nrow(x) - 1)){
+      if(is.na(x[i, ]$FRA) & (is.na(x[i-1, ]$Listing.number) | is.na(x[i+1, ]$Listing.number))) {
+        if(x[i, ]$date_visit <= (x[i-1, ]$date_visit + 2)) {
+          x[i-1, ]$date_visit <- x[i, ]$date_visit
+        } else if (x[i, ]$date_visit >= (x[i+1, ]$date_visit - 2)) {
+          x[i+1, ]$date_visit <- x[i, ]$date_visit
         }
       }
     }
   }
+  return (x)
 }
+x <- lapply(x, myFun1)
 
 # Combine all data from duplicate rows into one row, then delete superfluous rows
-
 for (j in 1:length(x)) {
   for (i in 1:nrow(x[[j]])){
     if(i < (nrow(x[[j]]) - 1) &
