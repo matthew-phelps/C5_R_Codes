@@ -58,14 +58,12 @@ row.names(z) <- NULL
 
 hhCleanup <- function(data, dateVisit, baseDate, withdrawDate, phoneDate) {
   # separates records that have same HHID but different baselines.
-  x2 <- data.frame(t(c(1:ncol(data))))
+  x2 <- data.frame(matrix(ncol=ncol(data), nrow = nrow(data)))
   names(x2) <- names(data)
   for(i in 1:nrow(data)) {
     if (data[i, dateVisit] >= data[i, baseDate] &&
         data[i, dateVisit] <= data[i, withdrawDate] ) {
       x2[i,] <- data[i,]
-    } else {
-      x2[i,] <- NA
     }
   }
   x2$date_visit <- as.Date(x2$date_visit, origin = "1970-01-01")
@@ -75,7 +73,7 @@ hhCleanup <- function(data, dateVisit, baseDate, withdrawDate, phoneDate) {
   x2 <- x2[!is.na(x2$base_date), ]
   return (x2)
 }
-
+  
 system.time({m3 <- hhCleanup(data = z, dateVisit = "date_visit", baseDate = "base_date",
           withdrawDate = "with_date", phoneDate = "phone.dist")})
 
@@ -88,8 +86,8 @@ y <- match(c('base_date', "phone.dist", 'with_date'), names(m3))
 x <- 4:(ncol(m3) - length(y))
 z <- 1:(ncol(m3) - (length(y) + length(x)))
 m4<- m3[, c(z, y, x)]
-rm(x, y, z)
+rm(x, y, z, m3)
 
 # SAVE DATA ---------------------------------------------------------------
-save(m3, file = data.output.path)
+save(m4, file = data.output.path)
 
