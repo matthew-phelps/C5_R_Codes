@@ -18,8 +18,8 @@ ifelse(grepl("zrc340", getwd()),
        monthly_joined_path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata",
        monthly_joined_path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata")
 ifelse(grepl("zrc340", getwd()),
-       data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\monthly-baseline_join.Rdata",
-       data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-baseline_join.Rdata")
+       data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata",
+       data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata")
 
 # LOAD FILES --------------------------------------------------------------
 
@@ -81,8 +81,15 @@ system.time({m3 <- hhCleanup(data = z, dateVisit = "date_visit", baseDate = "bas
 
 
 
-# SAVE DATA ---------------------------------------------------------------
+# FORMATTING --------------------------------------------------------------
 
 m3 <- m3[order(m3$HHID, m3$date_visit), ]
+y <- match(c('base_date', "phone.dist", 'with_date'), names(m3))
+x <- 4:(ncol(m3) - length(y))
+z <- 1:(ncol(m3) - (length(y) + length(x)))
+m4<- m3[, c(z, y, x)]
+rm(x, y, z)
+
+# SAVE DATA ---------------------------------------------------------------
 save(m3, file = data.output.path)
 
