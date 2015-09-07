@@ -67,7 +67,7 @@ x2 <- x2[!is.na(x2$HHID), ]
 
 # clean columns for simplicity
 x2$Date.of.monthly.visit <- NULL
-x2$ppl <- x2$Numer.of.ppl.in.household.at.monthly.visit
+x2$ppl <- as.numeric(x2$Numer.of.ppl.in.household.at.monthly.visit)
 x2$Numer.of.ppl.in.household.at.monthly.visit <- NULL
 
 
