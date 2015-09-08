@@ -16,16 +16,17 @@ ifelse(grepl("zrc340", getwd()),
        data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\person-time.Rdata",
        data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\person-time.Rdata")
 ifelse(grepl("zrc340", getwd()),
-       functions.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\c_5_functions_source_file.R",
-       functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\c_5_functions_source_file.R")
+       functions.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\c_5_functions_source_file.R",
+       functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
 
-c_5_functions_source_file.R
+
 library(dplyr)
 library(data.table)
 #detach("package:plyr", unload=TRUE) # disrupts the dplyr package
 
 
 # FUNCTIONS ---------------------------------------------------------------
+
 source(functions.path)
 
 # GLOBAL VARIABLES  & FUNCTIONS--------------------------------------------------------
