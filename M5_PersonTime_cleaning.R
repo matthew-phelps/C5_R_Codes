@@ -87,16 +87,25 @@ m5 <- ptCalc(m4)
 
 # ERROR CHECKING ----------------------------------------------------------
 
+# Check individual entries for errors.
 min(m5$pt, na.rm=T)
 max(m5$pt)
 which.max(m5$pt)
 boxplot(m5$pt)
 
 
+# Check households aggregated for errors.
+# summarize pt by uniqueID:
+households <- m5 %>%
+  group_by(uniqueID) %>%
+  summarise(
+    pt_hh = sum(pt, na.rm = T)
+  )
+
+# Check outliers:
+boxplot(households$pt_hh)
 
 # ANALYSIS ----------------------------------------------------------------
-
-
 
 # WRITE TO FILE -----------------------------------------------------------
 
