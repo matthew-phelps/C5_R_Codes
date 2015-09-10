@@ -71,18 +71,18 @@ names69[!(names69 %in% names47)] #nothing needs to be added to main47
 
 names47[!(names47 %in% names1)]
 names69[!(names69 %in% names1)]
-main[,c("q55_oth", "q67_3_9",  "q67_3_10", "q67_4_12", "q67_4_13", "q67_4_14", "q67_4_15", "q67_5_6")]<-NA
+main[,c("entdate","q55_oth", "q67_3_9",  "q67_3_10", "q67_4_12", "q67_4_13", "q67_4_14", "q67_4_15", "q67_5_6")]<-NA
 
 names1[!(names1 %in% names69)]
 names47[!(names47 %in% names69)]
 main69[,c("q67_3_7",  "q67_3_8", "q67_4_11", "q67_3_9", "q67_3_10", "q67_4_12", "q67_4_13", "q67_4_14", "q67_4_15", "q67_5_6")]<-NA
 
 ##create readable dates
-spss2date <- function(x) as.Date(x/86400, origin = "1582-10-14")
+spss2date <- function(x)  x + ISOdate(1582,10,14) 
 
 main$intdate <- spss2date(main$intdate)
 main47$intdate <- spss2date(main47$intdate)
-main69$intdate <- spss2date(main69$intdate)#no dates entered yet, waiting for data entry
+main69$intdate <- spss2date(main69$intdate)
 
 # Format HHID with leading 0s in order to make unique ID
 main$hhid <- formatC(main$hhid, width = 3, format = 'd', flag = 0)
