@@ -16,7 +16,7 @@ ifelse(grepl("zrc340", getwd()),
        wdmain <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data",
        wdmain <- "C:\\Users\\wrz741\\Dropbox")
 
-wd1<-"\\C5 Baseline data\\Pre-double entry\\Set 1, 403 households\\2ndEntry" #correct folder name
+wd1<-"\\C5 Baseline data\\Double-entered data\\Set 1 of 403 households\\FinalEntry"
 wd47<-"\\C5 Baseline data\\Double-entered data\\Set 3 of 47 households"
 wd69<-"\\C5 Baseline data\\Double-entered data\\Set 2 of 69 households"
 
@@ -26,10 +26,10 @@ library(plyr)
 
 #load baseline data sets
 setwd(paste(wdmain,wd1,sep=""))
-main<-as.data.set(spss.system.file('main_2ndentry with dates.sav'),stringsAsFactors=FALSE)#correct file name
-HH_member<-as.data.set(spss.system.file('Q11_2ndEntry.sav'), stringsAsFactors=FALSE)#correct file name
-water_use1<-as.data.set(spss.system.file('q13_18_2ndEntry.sav'), stringsAsFactors=FALSE)#correct file name
-distance<-as.data.set(spss.system.file('Q45_46_2ndentry.sav'), stringsAsFactors=FALSE)#correct file name
+main<-as.data.set(spss.system.file('main_FinalEntry.sav'),stringsAsFactors=FALSE)#correct file name
+HH_member<-as.data.set(spss.system.file('Q11_FinalEntry.sav'), stringsAsFactors=FALSE)#correct file name
+water_use1<-as.data.set(spss.system.file('q13_18_FinalEntry.sav'), stringsAsFactors=FALSE)#correct file name
+distance<-as.data.set(spss.system.file('Q45_46_FinalEntry.sav'), stringsAsFactors=FALSE)#correct file name
 
 setwd(paste(wdmain,wd69,sep=""))
 main69<-as.data.set(spss.system.file('main_FinalEntry_69q.sav'),stringsAsFactors=FALSE) 
