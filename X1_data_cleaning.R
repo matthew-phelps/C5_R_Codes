@@ -3,11 +3,23 @@
 
 # Intro -------------------------------------------------------------------
 
+
+# Prepare Matthew's workspace if user == MATTHEW. If else, setwd to Chars dir
 rm(list = ls())
 graphics.off()
-pc <- "C:/Users/wrz741/Dropbox/C5 Field Operations data/Folder Amal"
-setwd(pc)
-rm(pc)
+ifelse(grepl("zrc340", getwd()), 
+       data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baselineAll.Rdata",
+       data.output.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
+
+#set working directory short cuts so they can be pasted together
+ifelse(grepl("zrc340", getwd()), 
+       wdmain <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data",
+       wdmain <- "C:\\Users\\wrz741\\Dropbox")
+
+wdx1 <- "\\C5 Field Operations data\\X-1 Cholera phone distribution"
+setwd(paste(wdmain,wdx1,sep=""))
+
+rm(wdx1,wdmain)
 
 
 
