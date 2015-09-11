@@ -31,7 +31,7 @@ ifelse(grepl("zrc340", getwd()),
        wdmain <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data",
        wdmain <- "C:\\Users\\wrz741\\Dropbox")
 
-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata"
+#"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata"
 
 wdx1<-"\\C5 Field Operations data\\X-1 Cholera phone distribution"
 setwd(paste(wdmain,wdx1,sep=""))
@@ -244,13 +244,13 @@ baselineAll$hhid[baselineAll$uniqueID == '088_2014-06-01'] <- 85
 baselineAll$hhid[baselineAll$uniqueID == '155_2014-10-31'] <- 217
 
 # # Changes to baseline dates on email from Bimal:
-baselineAll$intdate[baselineAll$uniqueID == "333_2014-04-20"] <- "2014-07-20"
-baselineAll$intdate [baselineAll$uniqueID == "067_2014-12-09"] <- "2014-06-05"
-baselineAll$intdate [baselineAll$uniqueID == "252_2014-12-12"] <- "2014-06-01"
+baselineAll$base_date[baselineAll$uniqueID == "333_2014-04-20"] <- "2014-07-20"
+baselineAll$base_date [baselineAll$uniqueID == "067_2014-12-09"] <- "2014-06-05"
+baselineAll$base_date [baselineAll$uniqueID == "252_2014-12-12"] <- "2014-06-01"
 
 # Re-create unique IDs with new dates
 baselineAll$hhid <- formatC(baselineAll$hhid, width = 3, format = 'd', flag = 0)
-baselineAll$uniqueID<-paste(baselineAll$hhid,"_",baselineAll$intdate,sep="")
+baselineAll$uniqueID<-paste(baselineAll$hhid,"_",baselineAll$base_date,sep="")
 baselineAll$hhid <- as.numeric(baselineAll$hhid)
 
 x1_data$HHID <- formatC(x1_data$HHID, width = 3, format = 'd', flag = 0)
@@ -323,7 +323,7 @@ write.csv2(not.in.baseline.2[, c(8, 1:5)],
 
 x1_data <- x1_data[order(x1_data$HHID), ]
 
-not_in_X1<-as.data.frame(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid", "intdate")])
+not_in_X1<-as.data.frame(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid", "base_date")])
 
 
 
@@ -353,7 +353,7 @@ not_in_X1 <- not_in_X1[!(not_in_X1$hhid == 67 |
 
 # 6.) RE-RUN DATA CHECK AFTER CLEANING X1 -------------------------------------
 
-not_in_X1<-as.data.frame(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid", "listing", "intdate")])
+not_in_X1<-as.data.frame(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid", "listing", "base_date")])
 names(not_in_X1)[4] <- "baseline_date"
 
 # Send remaing records to Bangladesh for checking
@@ -382,7 +382,7 @@ baseline_in_X1<-c(sort(baselineAll$uniqueID[(baselineAll$uniqueID %in% x1_data$u
 # 6.) Check date ranges -------------------------------------------------------
 # (& make sure same HHIDs do not overlap in time) 
 summary(x1_data$base_date)
-summary(baselineAll$intdate)
+summary(baselineAll$base_date)
 
 baselineAll$uniqueID
 
@@ -467,12 +467,6 @@ base_merge <- base_merge[, !names(base_merge) %in% dropvars]
 
 
 save(base_merge, file = B2.base.merge.output.path)
-
-
-
-
-
-
 
 
 
