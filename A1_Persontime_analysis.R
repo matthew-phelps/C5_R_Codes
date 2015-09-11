@@ -13,6 +13,9 @@ rm(list = ls())
 ifelse(grepl("zrc340", getwd()),
        pt <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\person-time.Rdata",
        pt <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\person-time.Rdata")
+ifelse(grepl("zrc340", getwd()),
+       functions.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\c_5_functions_source_file.R",
+       functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
 
 library(dplyr)
 library(data.table)
@@ -20,7 +23,7 @@ library(data.table)
 
 
 # FUNCTIONS ---------------------------------------------------------------
-
+source(functions.path)
 
 # GLOBAL VARIABLES  & FUNCTIONS--------------------------------------------------------
 endDate <- as.Date('31-12-14', "%d-%m-%y")
@@ -46,7 +49,8 @@ min(a1$with_date)
 max(a1$with_date)
 
 
-# Sum PT ------------------------------------------------------------------
+# CALCULATE PT BASED ON CUSTOM END DATE ------------------------------------------------------------------
+a1 <- ptCalc(a1)
 
 pt.days <- sum(a1$pt)
 pt.years <- pt.days/365

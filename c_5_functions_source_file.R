@@ -3,6 +3,41 @@
 # output: Function objects
 # DEPENDENCIES: none
 
+dateReplace <- function (x) {
+  # On each row, test to see if there is a ODK entry, and the entry before or after was only a X2 entry
+  # If row i is odk and row i+1 or i-1 is only x2 - take the date from row i and apply it to row i+1 or i-1
+  for (i in 1:nrow(x)){
+    if(i> 1 && i < nrow(x) && is.na(x[i, ]$Listing.number) && (is.na(x[i-1, ]$FRA) | is.na(x[i+1, ]$FRA))){
+      if(x[i, ]$date_visit <= (x[i-1, ]$date_visit + 2)) {
+        x[i-1, ]$date_visit <- x[i, ]$date_visit
+      } else if (x[i, ]$date_visit >= (x[i+1, ]$date_visit - 2)) {
+        x[i+1, ]$date_visit <- x[i, ]$date_visit
+      }
+    } else if(i == 1 && nrow(x) >1 && is.na(x[i, ]$Listing.number) && is.na(x[i+1, ]$FRA) && x[i, ]$date_visit >= (x[i+1, ]$date_visit - 2)) {
+      x[i+1, ]$date_visit <- x[i, ]$date_visit 
+      
+    } else if (i == nrow(x) && nrow(x) > 0 && is.na(x[i, ]$Listing.number) && is.na(x[i-1, ]$FRA) && x[i, ]$date_visit <= (x[i-1, ]$date_visit + 2)) {
+      x[i-1, ]$date_visit <- x[i, ]$date_visit
+    }
+  }
+  return (x)
+}
+
+
+mergeRows <- function(x) {
+  for (i in 1:nrow(x)){
+    if(i < (nrow(x)) && !is.na(x[i, ]$FRA) && (x[i, ]$date_visit == x[i + 1, ]$date_visit)) {
+      x[i, ]$ppl <- x[i + 1, ]$ppl
+      x[i, ]$Listing.number <- x[i + 1, ]$Listing.number
+    } else if (i > 1 && !is.na(x[i, ]$FRA) && x[i, ]$date_visit == x[i - 1, ]$date_visit) {
+      x[i, ]$ppl <- x[i - 1, ]$ppl
+      x[i, ]$Listing.number <- x[i - 1, ]$Listing.number
+    }
+  }
+  return (x)  
+}
+
+
 ptPerHHID <- function(x) {
   # Caluclates person-time since either last monthly visit or phone.dis - depending
   # on which was most recent.
