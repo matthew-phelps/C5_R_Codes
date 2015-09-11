@@ -5,7 +5,8 @@
 
 
 # Intro -------------------------------------------------------------------
-
+library(dplyr)
+library(data.table)
 
 # Prepare workspace: if user == CHAR prepare Char's path, else: MAtthew's path
 rm(list = ls())
@@ -17,8 +18,7 @@ ifelse(grepl("zrc340", getwd()),
        functions.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\c_5_functions_source_file.R",
        functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
 
-library(dplyr)
-library(data.table)
+
 #detach("package:plyr", unload=TRUE) # disrupts the dplyr package
 
 
