@@ -1,6 +1,6 @@
 # Authors: Char Tamason and Matthew Phelps
-# Desc: Cleans the baseline data
-# Output: Clean baseline data
+# Desc: Combine X1 and data-entry Baseline, then cleans the baseline data
+# Output: Clean, joined, baseline data
 # DEPENDENCIES: must run B1 and M1 first
 
 
