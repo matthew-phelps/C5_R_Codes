@@ -20,7 +20,6 @@ wd1<-"\\C5 Baseline data\\Double-entered data\\Set 1 of 403 households\\FinalEnt
 wd47<-"\\C5 Baseline data\\Double-entered data\\Set 3 of 47 households"
 wd69<-"\\C5 Baseline data\\Double-entered data\\Set 2 of 69 households"
 
-
 library(memisc)
 library(plyr)
 
@@ -84,21 +83,6 @@ main$intdate <- spss2date(main$intdate)
 main47$intdate <- spss2date(main47$intdate)
 main69$intdate <- spss2date(main69$intdate)
 
-# Format HHID with leading 0s in order to make unique ID
-main$hhid <- formatC(main$hhid, width = 3, format = 'd', flag = 0)
-main47$hhid <- formatC(main47$hhid, width = 3, format = 'd', flag = 0)
-main69$hhid <- formatC(main69$hhid, width = 3, format = 'd', flag = 0)
-
-# Create unique id in main baseline files
-main$uniqueID<-paste(main$hhid,"_",main$intdate,sep="")
-main47$uniqueID<-paste(main47$hhid,"_",main47$intdate,sep="")
-main69$uniqueID<-paste(main69$hhid,"_",main69$intdate,sep="")
-
-# Return HHID to original formatting:
-main$hhid <- as.numeric(main$hhid)
-main47$hhid <- as.numeric(main47$hhid)
-main69$hhid <- as.numeric(main69$hhid)
-
 
 #create slno for main47 and main69, will come in helpful when merging datasets later
 main47$slno<-as.numeric(paste(main47$hhid,".",47,sep=""))
@@ -107,10 +91,23 @@ main69$slno<-as.numeric(paste(main69$hhid,".",69,sep=""))
 #merge baselines
 baselineAll<-rbind(main,main69,main47)
 
-#add unique id onto q11
-Q11<-merge(Q11, main[,c("uniqueID", "slno")], by="slno")
-Q11_47<-merge(Q11_47, main47[,c("uniqueID", "hhid")], by="hhid")
-Q11_69<-merge(Q11_69, main69[,c("uniqueID", "hhid")], by="hhid")
+#fix unique ids, remove the hour:minute:second from spss2date function
+baselineAll$intdate<-as.character(baselineAll$intdate)
+temp<-strsplit(baselineAll$intdate, " ")
+mat  <- matrix(unlist(temp), ncol=2, byrow=TRUE)
+df <- as.data.frame(mat)
+colnames(df) <- c("base_date", "_")
+baselineAll<-cbind(df[c("base_date")],baselineAll)
+baselineAll$base_date
+# Format HHID with leading 0s in order to make unique ID
+baselineAll$hhid <- formatC(baselineAll$hhid, width = 3, format = 'd', flag = 0)
+
+# Create unique id in main baseline files
+baselineAll$uniqueID<-paste(baselineAll$hhid,"_",baselineAll$base_date,sep="")
+
+# Return HHID to original formatting:
+baselineAll$hhid <- as.numeric(baselineAll$hhid)
+
 
 #combine all Q11s
 Q11_47$slno<-as.numeric(paste(Q11_47$hhid,".",47,sep=""))
@@ -145,11 +142,6 @@ sum(Q11_all$child_U5) == sum(baselineAll$children_U5)
 
 #create total household members variable
 baselineAll$total_HH_members<-baselineAll$children_5_17+baselineAll$children_U5+baselineAll$adults
-
-#add unique id onto water use
-water_use1<-merge(water_use1, main[,c("uniqueID", "slno")], by="slno", incomparables = NA)
-water_use47<-merge(water_use47, main47[,c("uniqueID", "hhid")], by="hhid", incomparables = NA)
-water_use69<-merge(water_use69, main69[,c("uniqueID", "hhid")], by="hhid", incomparables = NA)
 
 #create water user group code
 #go into spss files and search for "showar" in q14oth. Change corresponding q14 to 888
