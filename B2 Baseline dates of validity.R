@@ -1,6 +1,6 @@
 # Authors: Char Tamason and Matthew Phelps
 # Creating dates of validity for each uniqueID, using X-1 Choleraphone distribution sheet from field station
-# DEPENDENCIES: must run creating a joint baseline file and Creating joint monthly visit file2 first
+# DEPENDENCIES: must run B1 and M1 first
 
 
 # INTRO -------------------------------------------------------------------
