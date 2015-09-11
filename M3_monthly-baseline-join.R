@@ -52,7 +52,9 @@ rm(x, y)
 
 # RECORD & REMOVE RECORDS WITHOUT BASELINE --------------------------------
 # these should be fixed upstream.
+
 noBaseline <- z[is.na(z$base_date), ] 
+
 z <- z[!is.na(z$base_date), ]
 row.names(z) <- NULL
 

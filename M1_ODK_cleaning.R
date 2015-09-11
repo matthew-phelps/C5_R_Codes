@@ -3,9 +3,7 @@
 # output: Joined ODK table?
 # Dependencies: NONE
 
-# PATH CHANGES in lines:
-# 18, 39, 57, 318 
-# 
+
 
 # Intro -------------------------------------------------------------------
 
