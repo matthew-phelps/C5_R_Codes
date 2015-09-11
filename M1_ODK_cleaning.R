@@ -1,7 +1,7 @@
 # Author: Char Tamason & Matthew Phelps
 # Desc:    Join most recent ODK data table and merge with older versions of survey
 # output: Joined ODK table?
-# Dependencies: X2_, X_1 A1_
+# Dependencies: NONE
 
 # PATH CHANGES in lines:
 # 18, 39, 57, 318 

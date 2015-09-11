@@ -1,6 +1,6 @@
 # Author: Matthew Phelps
-# Desc:    Analysis of PT
-# output: Analysis
+# Desc:    Person-time calculations
+# output: Person-time data for each hosehold
 # DEPENDENCIES: Requires M1-M5 & B1, B2 to have been run
 
 
