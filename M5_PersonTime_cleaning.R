@@ -1,7 +1,7 @@
 # Author: Matthew Phelps
 # Desc:    Calculate pt and check for errors based on pt
 # output: PT per monthly visit per unique ID
-# DEPENDENCIES: Requires M1, M2, M3, M4 & B1, B2 to have been run
+# DEPENDENCIES: Requires M1-M4 & B1, B2 to have been run
 
 
 # Intro -------------------------------------------------------------------

@@ -1,5 +1,6 @@
 # Authors: Char Tamason and Matthew Phelps
-# Creating dates of validity for each uniqueID, using X-1 Choleraphone distribution sheet from field station
+# Desc: Cleans the baseline data
+# Output: Clean baseline data
 # DEPENDENCIES: must run B1 and M1 first
 
 
