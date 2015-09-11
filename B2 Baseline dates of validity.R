@@ -9,8 +9,8 @@
 # If user == Char, do nothing. If else, prepare Matthew's workingspace
 rm(list = ls())
 ifelse(grepl("zrc340", getwd()), 
-       B1.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baselineAll.Rdata",
-       B1.output.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
+       B1.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baselineAll.Rdata",
+       B1.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
 
 ifelse(grepl("zrc340", getwd()), 
        B2.base.merge.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata",
@@ -41,7 +41,7 @@ library(xlsx)
 
 # LOAD DATA ---------------------------------------------------------------
 
-load(B1.output.path)
+load(B1.path)
 
 
 # GLOBAL VARIABLES --------------------------------------------------------
@@ -71,12 +71,14 @@ x1_data$with_date <- as.Date(x1_data$Date.of.withdrawl.or.move, "%d.%m.%y")
 x1_data$phone.dist <- as.Date(x1_data$Date.of.phone.distribution, "%d.%m.%y")
 
 # Only keep records with a HHID from range of dates for which baseline has been entered
-x1_data <- x1_data[x1_data$HHID > 0, ]
+x1_data$HHID <- as.numeric(x1_data$HHID)
+x1_data <- x1_data[!is.na(x1_data$HHID), ]
 x1_data <- x1_data[x1_data$base_date <= cut.date, ]
 
 
 
 # Create unique IDs for x1
+x1_data$HHID <- formatC(x1_data$HHID, width = 3, format = 'd', flag = 0)
 x1_data$uniqueID <- paste(x1_data$HHID, "_", x1_data$base_date, sep="")
 
 # Return HHID to numeric format
@@ -214,10 +216,14 @@ x1_data$base_date[x1_data$uniqueID== "248_2014-08-07"] <- "2014-07-07"
 x1_data$base_date[x1_data$uniqueID== "028_2014-09-12"] <- "2014-09-11"
 x1_data$base_date[x1_data$uniqueID== "295_2014-08-18"] <- "2014-08-08"
 
-# Change dates in baseline that are incorrect, in order to match with X-1
-baselineAll$intdate[baselineAll$uniqueID == "333_2014-04-20"] <- "2014-07-20"
+x1_data$base_date[x1_data$uniqueID== "028_2014-09-12"] <- "2014-09-11"
+x1_data$base_date[x1_data$uniqueID== "083_2014-09-12"] <- "2014-09-11"
 
-# # Changes to baseline based on email from Bimal:
+# # Changes to X-1 HHIDs based on email from Bimal 2015-09-08:
+x1_data$base_date[x1_data$uniqueID== "220_2014-06-11"] <- "2014-07-11"
+x1_data$base_date[x1_data$uniqueID== "253_2014-08-26"] <- "2014-08-15"
+
+# # Changes to baseline HHID based on email from Bimal:
 baselineAll$hhid[baselineAll$uniqueID == "172_2014-10-21"] <- 60
 
 baselineAll$hhid[baselineAll$uniqueID == "114_2014-10-20"] <- 144
@@ -229,7 +235,15 @@ baselineAll$hhid[baselineAll$uniqueID == "191_2014-10-27"] <- 322
 baselineAll$hhid[baselineAll$uniqueID == "182_2014-11-14"] <- 332
 baselineAll$hhid[baselineAll$uniqueID == "236_2014-11-14"] <- 391
 
+# Changes to baseline HHIDs based on email from Bimal 2015-09-08:
+baselineAll$hhid[baselineAll$uniqueID =='117_2014-10-24'] <- 171
+baselineAll$hhid[baselineAll$uniqueID =='382_2014-07-11'] <- 220
+baselineAll$hhid[baselineAll$uniqueID =='054_2014-09-25'] <- 254
+baselineAll$hhid[baselineAll$uniqueID == '088_2014-06-01'] <- 85
+baselineAll$hhid[baselineAll$uniqueID == '155_2014-10-31'] <- 217
+
 # # Changes to baseline dates on email from Bimal:
+baselineAll$intdate[baselineAll$uniqueID == "333_2014-04-20"] <- "2014-07-20"
 baselineAll$intdate [baselineAll$uniqueID == "067_2014-12-09"] <- "2014-06-05"
 baselineAll$intdate [baselineAll$uniqueID == "252_2014-12-12"] <- "2014-06-01"
 
@@ -246,11 +260,49 @@ x1_data$HHID <- as.numeric(x1_data$HHID)
 # DROPOUTS FROM BASELINE ----------------------------------------------------
 
 # People to record as dropouts between baseline and monthly
-dropouts <-data.frame(uniqueID = c("300_2014-08-22", "322_2014-07-12", "332_2014-08-14", 
-              "391_2014-07-11"))
+dropouts <-data.frame(uniqueID = c("300_2014-08-22",
+                                   "322_2014-07-12",
+                                   "332_2014-08-14",
+                                   "391_2014-07-11",
+                                   '018_2014-09-19',
+                                   '027_2014-08-27',
+                                   '047_2014-07-20',
+                                   '049_2014-09-12',
+                                   '050_2014-09-05',
+                                   '075_2014-09-15',
+                                   '123_2014-08-06',
+                                   '145_2014-10-24',
+                                   '184_2014-08-22',
+                                   '171_2014-11-14',
+                                   '186_2014-08-17',
+                                   '189_2014-10-13',
+                                   '205_2014-10-31',
+                                   '217_2014-07-25',
+                                   '222_2014-08-22',
+                                   '229_2014-10-17',
+                                   '245_2014-08-19',
+                                   '237_2014-12-03',
+                                   '254_2014-08-08',
+                                   '274_2014-08-04',
+                                   '287_2014-08-09',
+                                   '293_2014-08-08',
+                                   '323_2014-08-25',
+                                   '330_2014-08-13',
+                                   '346_2014-07-16',
+                                   '351_2014-07-16',
+                                   '357_2014-07-14',
+                                   '357_2014-12-02',
+                                   '393_2014-07-16'
+                                   ))
+# Not dropouts, just errors
+omitt <- data.frame(uniqueID = c("253_2014-08-15"))
+                    
+# x1_data$uniqueID[x1_data$uniqueID == "184_201-11-24"] == baselineAll$uniqueID[baselineAll$uniqueID == "155_2014-10-31"]
+# baselineAll$uniqueID[baselineAll$uniqueID == "155_2014-10-31"]
 
 # Remove records from baseline:
 baselineAll <- baselineAll[!(baselineAll$uniqueID %in% dropouts$uniqueID),]
+baselineAll <- baselineAll[!(baselineAll$uniqueID %in% omitt$uniqueID),]
 
 
 
@@ -260,7 +312,7 @@ baselineAll <- baselineAll[!(baselineAll$uniqueID %in% dropouts$uniqueID),]
 # 3.) Repeat data check after cleaning -------------------------------
 not.in.baseline.2 <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
 rm(not.in.baseline)
-
+x1_data$uniqueID[x1_data$uniqueID == "382_2014-07-11"] == baselineAll$uniqueID[baselineAll$uniqueID == "382_2014-07-11"]
 write.csv2(not.in.baseline.2[, c(8, 1:5)], 
            file =not.in.baseline.path,
            row.names = F)
@@ -271,6 +323,8 @@ write.csv2(not.in.baseline.2[, c(8, 1:5)],
 x1_data <- x1_data[order(x1_data$HHID), ]
 
 not_in_X1<-as.data.frame(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid", "intdate")])
+
+
 
 # make list object of missing X1 records to make manual cleaning easier:
 missing.ls <- vector("list", length(not_in_X1$hhid))
