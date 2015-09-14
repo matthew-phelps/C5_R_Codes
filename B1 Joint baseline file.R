@@ -223,40 +223,16 @@ distance_to_source1<-as.data.frame(distance_to_source1)
 baselineAll<-cbind(baselineAll,distance_to_source1)
 baselineAll$distance_to_source1
 
-# Move Unique ID to front column and save dataset -------------------------
+# Move Unique ID to front column -------------------------
 y <- match(c('uniqueID', 'hhid'), names(baselineAll))
-x <- 1:(ncol(baselineAll) - length(y))
+x <- 1:ncol(baselineAll)
+x <- x[-c(y)]
 baselineAll <- baselineAll[, c(y, x)]
 rm(x, y)
+
+
+
+# SAVE --------------------------------------------------------------------
 save(baselineAll, file = data.output.path)
 
-
-
-#----------------------------------------------------------------------------
-
-# if desired storage capacity need to do for baseline data sets 1 and 2
-#water_storage<-as.data.set(spss.system.file('Q24_Q30.sav'))
-#ddply(water_storage, c("q26"),
-#       summarise,
-#       count = sum(q26[hhid==hhid]))
-#create calculation for total storage capacity (volume*number of containers); this may have been done already in a separate file
-#if needed q19_drinkwater<-as.data.set(spss.system.file('q19.sav'))
-#ddply(q19_drinkwater,c("hhid"),
-#       summarise,
-#       count = length(hhid[q19==19.1 & q19_1==1]))
-
-
-#count duplicates
-
-
-
-
-#variables to include
-#Q6 rooms in house
-#Q9_1 electricity
-#Q10 by whom is the house occupied, 1=nuclear family, 2=multiple families, 
-         #3=unrelated persons, 4= nuclear family with one or more related persons, 777=other
-#12 income, use other R file for income calculation
-
-#see "R script for wealth quintiles and water use by quintiles"
 
