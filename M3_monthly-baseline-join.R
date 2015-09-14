@@ -47,8 +47,8 @@ z <- z[order(z$HHID, z$base_date.x, z$date_visit), ]
 
 # Columns
 y <- match(c('uniqueID'), names(z))
-x <- 1:(ncol(z) - length(y))
-z <- z[, c(y, x)]
+x <- 1:ncol(base_merge)
+x <- x[-c(y)]
 rm(x, y)
 
 
@@ -73,11 +73,10 @@ system.time({m3 <- hhCleanup(data = z, dateVisit = "date_visit", baseDate = "bas
 
 m3 <- m3[order(m3$HHID, m3$date_visit), ]
 y <- match(c('base_date.x', "phone.dist", 'with_date'), names(m3))
-x <- 4:(ncol(m3) - length(y))
-z <- 1:(ncol(m3) - (length(y) + length(x)))
-m4<- m3[, c(z, y, x)]
-rm(x, y, z, m3)
-
+x <- 1:ncol(m3)
+x <- x[-c(y)]
+m4<- m3[, c(y, x)]
+rm(x, y, m3)
 # SAVE DATA ---------------------------------------------------------------
 save(m4, file = data.output.path)
 
