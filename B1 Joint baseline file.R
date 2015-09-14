@@ -10,6 +10,9 @@ rm(list = ls())
 ifelse(grepl("zrc340", getwd()), 
        data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baselineAll.Rdata",
        data.output.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
+ifelse(grepl("zrc340", getwd()), 
+       data.output.path2<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\Q11_all.Rdata",
+       data.output.path2<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Q11_all.Rdata")
 
 #set working directory short cuts so they can be pasted together
 ifelse(grepl("zrc340", getwd()), 
@@ -124,6 +127,9 @@ Q11_all<-rbind(Q11,Q11_47,Q11_69) # one 999, is adult, no need to change
 Q11_all$child_U5 <- ifelse(Q11_all$q11_4 < 5, 1, 0)
 Q11_all$child_5_17 <- ifelse(Q11_all$q11_4 >= 5 & Q11_all$q11_4 <18, 1, 0)
 Q11_all$adult <- ifelse(Q11_all$q11_4 >= 18, 1, 0)
+
+#create Q11 data so it can be used in descriptive analysis 
+save(Q11_all, file = data.output.path2)
 
 # For each unique "slno" in df Q11_all, sum the number of adults, children U5 and children 5-17.
 # Change "slno" to "hhid" if you wish to count based on HHID.
