@@ -72,7 +72,7 @@ system.time({m3 <- hhCleanup(data = z, dateVisit = "date_visit", baseDate = "bas
 # FORMATTING --------------------------------------------------------------
 
 m3 <- m3[order(m3$HHID, m3$date_visit), ]
-y <- match(c('base_date', "phone.dist", 'with_date'), names(m3))
+y <- match(c('base_date.x', "phone.dist", 'with_date'), names(m3))
 x <- 4:(ncol(m3) - length(y))
 z <- 1:(ncol(m3) - (length(y) + length(x)))
 m4<- m3[, c(z, y, x)]
