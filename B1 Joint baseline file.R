@@ -98,6 +98,7 @@ mat  <- matrix(unlist(temp), ncol=2, byrow=TRUE)
 df <- as.data.frame(mat)
 colnames(df) <- c("base_date", "_")
 baselineAll<-cbind(df[c("base_date")],baselineAll)
+baselineAll$base_date <- as.Date(baselineAll$base_date)
 baselineAll$base_date
 # Format HHID with leading 0s in order to make unique ID
 baselineAll$hhid <- formatC(baselineAll$hhid, width = 3, format = 'd', flag = 0)
@@ -227,6 +228,8 @@ x <- 1:(ncol(baselineAll) - length(y))
 baselineAll <- baselineAll[, c(y, x)]
 rm(x, y)
 save(baselineAll, file = data.output.path)
+
+
 
 #----------------------------------------------------------------------------
 
