@@ -341,8 +341,8 @@ dropVar <- c('x', 'month_auto', 'day_auto', 'y', 'z', 'year_auto', 'auto_date',
 MonthlyAll <- MonthlyAll[, !names(MonthlyAll) %in% dropVar]
 
 y <- match(c('visitdate'), names(MonthlyAll))
-x <- 1:(ncol(MonthlyAll) - length(y))
-MonthlyAll <- MonthlyAll[, c(y, x)]
+x <- 1:ncol(MonthlyAll)
+x <- x[-c(y)]
 rm(x, y)
 
 MonthlyAll <- MonthlyAll[order(MonthlyAll$hh_id, MonthlyAll$visitdate), ]
