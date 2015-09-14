@@ -108,8 +108,10 @@ ptPerHHID <- function(x) {
   } 
   return(x)
 }
-ptCalc <- function(x) {
+ptCalc <- function(x, end.date) {
   # Calculates person time over entire dataset. Uses 'ptPerHHID' function
+  x <- x[(x$phone.dist <= end.date & x$date_visit <= end.date), ]
+  x$with_date[x$with_date > end.date] <- end.date 
   x$pt <- NA
   x1 <- x[complete.cases(x[, 1:7]), ]
   x1 <- split(x1, f = x1$uniqueID) 

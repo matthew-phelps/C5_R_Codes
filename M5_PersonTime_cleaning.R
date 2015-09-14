@@ -40,14 +40,14 @@ load(clean_monthly_basebase.path)
 
 
 # SUBSET VARIABLES --------------------------------------------------------
-m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date', 'phone.dist', 'with_date' )]
+m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date.x', 'phone.dist', 'with_date' )]
 
 
 
 
 # PERSONE TIME for each household during each time-frame
 
-m5 <- ptCalc(m4)
+m5 <- ptCalc(m4, end.date = endDate)
 
 
 
@@ -71,6 +71,13 @@ households <- m5 %>%
 # Check outliers:
 boxplot(households$pt_hh)
 
+
+
+
+# SUM ---------------------------------------------------------------------
+
+pt.days <- sum(m5$pt)
+pt.years <- pt.days / 365
 
 # WRITE TO FILE -----------------------------------------------------------
 

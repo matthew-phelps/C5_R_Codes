@@ -25,7 +25,9 @@ ifelse(grepl("zrc340", getwd()),
 ifelse(grepl("zrc340", getwd()), 
        overlap.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\Overlap.csv",
        overlap.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Overlap.csv")
-
+ifelse(grepl("zrc340", getwd()),
+       functions.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\c_5_functions_source_file.R",
+       functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
 
 ifelse(grepl("zrc340", getwd()), 
        wdmain <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data",
@@ -42,7 +44,7 @@ library(xlsx)
 # LOAD DATA ---------------------------------------------------------------
 
 load(B1.path)
-
+source(functions.path)
 
 # GLOBAL VARIABLES --------------------------------------------------------
 cut.date <- as.Date("2015-05-20")
@@ -400,6 +402,7 @@ for (i in 1:length(x1_split)){
 # Turn list back to df
 x1 <- do.call(rbind.data.frame, x1_split)
 row.names(x1) <- NULL
+rm(x1_data, x1_split)
 
 # There are no interval errors when this statement is TRUE: 
 nrow(x1) == sum(x1$interval_check)
@@ -420,10 +423,11 @@ write.csv2(e1[, c(8, 1:5)],
 # MOVING VS DROPOUTS ------------------------------------------------------
 # Change phone.dist date for houses that moved but stayed in study.
 
+x1 <- moveDates(x = x1, factor = x1$HHID)
 
 
 
-xz <- moveDates(x = x1, factor = x1$HHID)
+
 # 8.) MERGE x1 and baseline --------------------------
 
 base_merge <- merge(x1, baselineAll, by.x = "uniqueID", by.y = "uniqueID",
