@@ -1,60 +1,96 @@
 #baseline descriptives
 
-
-
+install.packages("lme4")
+library(lme4)
 # Load data ---------------------------------------------------------------
-#run B1 first
+ifelse(grepl("zrc340", getwd()), 
+       Q11.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\Q11_all.Rdata",
+       Q11.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Q11_all.Rdata")
+ifelse(grepl("zrc340", getwd()), 
+       m4.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata",
+       m4.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata")
 
-
+load(m4.path)
+load(Q11.path)
 # Water access groups -----------------------------------------------------
 #
 #q14_recoded, 1 = pipe/tap, 2= hand pump, 3= well with bucket
 #q14a_recoded, WASA=1; deep tube well/submersible =2,3 <-2 ; well/shallow tube well = 4,5 <-3;
 #q15_recoded, is there a tank? 1=yes, 0=no
 #use_bucket, is a bucket needed to withdraw water? 1=yes, 0=no
-#baselineAll$distance_to_source1, anything over 20 meters =21
-#MonthlyAll$daily_volume<-as.numeric(MonthlyAll$cont1.cont1_size)*(as.numeric(MonthlyAll$cont1.cont1_times))
+#m4$distance_to_source1, anything over 20 meters =21
+#m4$daily_volume<-as.numeric(m4$cont1.cont1_size)*(as.numeric(m4$cont1.cont1_times))
 #for primary water source 
-baselineAll$water_access_group<-with(baselineAll, ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1==0,1, #tap, tank inside home
+
+m4$water_access_group<-with(m4, ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1==0,1, #tap, tank inside home
                                                         ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,2, #tap, tank 0-9 meters
-                                                        ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1>10,3, #tap, tank further than 10 meters
+                                                        ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1>=10,3, #tap, tank further than 10 meters
                                                         ifelse(q14_recoded==2&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,4, #handpump, well 0-9 meters
-                                                        ifelse(q14_recoded==2&q15_recoded==1&distance_to_source1>10,5, #handpump, well further than 10 meters
+                                                        ifelse(q14_recoded==2&q15_recoded==1&distance_to_source1>=10,5, #handpump, well further than 10 meters
                                                         ifelse(q14_recoded==3&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,6, #bucket, well 0-9 meters
-                                                        ifelse(q14_recoded==3&q15_recoded==1&distance_to_source1>10,7, #bucket, well further than 10 meters
+                                                        ifelse(q14_recoded==3&q15_recoded==1&distance_to_source1>=10,7, #bucket, well further than 10 meters
                                                         ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1==0,8, # tap, no tank, inside home
                                                         ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1>0&distance_to_source1<10,9, #tap, no tank, 1-9 meters
-                                                        ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1>10,10,777))))))))))) #tap, no tank, >10 meters
+                                                        ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1>=10,10,777))))))))))) #tap, no tank, >10 meters
+
+#preliminary analysis based on primary water source
+m4$water_access_group<-with(m4, ifelse(q14_recoded==1&q15_recoded==1,1, #tap, tank 
+                                       ifelse(q14_recoded==1&q15_recoded==0,2, #tap, no tank 
+                                              ifelse(q14_recoded==2&q15_recoded==1,3, #hand pump, tank 
+                                                     ifelse(q14_recoded==2&q15_recoded==0,4, #handpump, no tank
+                                                            ifelse(q14_recoded==3&q15_recoded==1,5, #bucket,tank
+                                                                   ifelse(q14_recoded==3&q15_recoded==0,5,777))))))) #bucket, well 
+                                                                          
+#preliminary analysis based on primary water source
+m4$water_access_group2<-with(m4, ifelse(q14_recoded==1&q15_recoded==1,1, #tap, tank 
+                                       ifelse(q14_recoded==1&q15_recoded==0,4, #tap, no tank 
+                                              ifelse(q14_recoded==2&q15_recoded==1,2, #hand pump, tank 
+                                                     ifelse(q14_recoded==2&q15_recoded==0,5, #handpump, no tank
+                                                            ifelse(q14_recoded==3&q15_recoded==1,3, #bucket,tank
+                                                                   ifelse(q14_recoded==3&q15_recoded==0,3,777))))))) #bucket, well 
+
+
+#sub<-m4[m4$water_access_group==777,c("q14_recoded","q15_recoded","distance_to_source1")]
 
 #average water consumption per activity in liters: adult bath= 37, child bath = 14, wash dishes = 25, wash clothes =43
-MonthlyAll$other_water_in.adult_bathe_in<-as.numeric(MonthlyAll$other_water_in.adult_bathe_in)
+m4$other_water_in.adult_bathe_in<-as.numeric(m4$other_water_in.adult_bathe_in)
+m4$other_water_out.adult_bathe_out<-as.numeric(m4$other_water_out.adult_bathe_out)
+m4$other_water_in.wash_plate_in<-as.numeric(m4$other_water_in.wash_plate_in)
+m4$other_water_out.wash_plate_out<-as.numeric(m4$other_water_out.wash_plate_out)
+m4$other_water_out.child_bathe_out<-as.numeric(m4$other_water_out.child_bathe_out)
+m4$other_water_in.child_bathe_in<-as.numeric(m4$other_water_in.child_bathe_in)
+m4$other_water_in.wash_clothes_in<-as.numeric(m4$other_water_in.wash_clothes_in)
+m4$other_water_out.wash_clothes_out<-as.numeric(m4$other_water_out.wash_clothes_out)
 
-x[c("a", "b")][is.na(x[c("a", "b")])] <- 0
+#subset only data from monthly visits
+monthly<-m4[which(!(is.na(m4$FRA))),]
+monthly<-as.data.frame(monthly)
+monthly[is.na(monthly)]<-0
 
-MonthlyAll[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
-                              "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
-                              "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
-                              "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size",
-                              "cont9.cont9_times","cont10.cont10_size","cont10.cont10_times","cont11.cont11_size",
-                              "cont11.cont11_times","cont12.cont12_size","cont12.cont12_times","cont13.cont13_size",
-                              "cont13.cont13_times","cont14.cont14_size","cont14.cont14_times",                              
-                              "other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
-                              "other_water_in.wash_plate_in","other_water_out.wash_plate_out",
-                              "other_water_out.child_bathe_out","other_water_in.child_bathe_in",
-                              "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")][is.na(MonthlyAll[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
-                          "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
-                          "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
-                          "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size",
-                          "cont9.cont9_times","cont10.cont10_size","cont10.cont10_times","cont11.cont11_size",
-                          "cont11.cont11_times","cont12.cont12_size","cont12.cont12_times","cont13.cont13_size",
-                          "cont13.cont13_times","cont14.cont14_size","cont14.cont14_times",                              
-                          "other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
-                          "other_water_in.wash_plate_in","other_water_out.wash_plate_out",
-                          "other_water_out.child_bathe_out","other_water_in.child_bathe_in",
-                          "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")])]<-0
-
-
-MonthlyAll$daily_volume<-with(MonthlyAll, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
+# sub<-monthly[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
+#                               "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
+#                               "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
+#                               "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size",
+#                               "cont9.cont9_times","cont10.cont10_size","cont10.cont10_times","cont11.cont11_size",
+#                               "cont11.cont11_times","cont12.cont12_size","cont12.cont12_times","cont13.cont13_size",
+#                               "cont13.cont13_times","cont14.cont14_size","cont14.cont14_times",                              
+#                               "other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
+#                               "other_water_in.wash_plate_in","other_water_out.wash_plate_out",
+#                               "other_water_out.child_bathe_out","other_water_in.child_bathe_in",
+#                               "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")][is.na(m4[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
+#                           "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
+#                           "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
+#                           "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size",
+#                           "cont9.cont9_times","cont10.cont10_size","cont10.cont10_times","cont11.cont11_size",
+#                           "cont11.cont11_times","cont12.cont12_size","cont12.cont12_times","cont13.cont13_size",
+#                           "cont13.cont13_times","cont14.cont14_size","cont14.cont14_times",                              
+#                           "other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
+#                           "other_water_in.wash_plate_in","other_water_out.wash_plate_out",
+#                           "other_water_out.child_bathe_out","other_water_in.child_bathe_in",
+#                           "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")])]<-0
+# 
+# order(is.na(MonthlyAll$cont1.cont1_size))
+monthly$daily_volume<-with(monthly, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
                                                        (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
                                                      +(cont6.cont6_size*cont6.cont6_times)+(cont7.cont7_size*cont7.cont7_times)+(cont8.cont8_size*cont8.cont8_times)
                                                      +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
@@ -69,11 +105,38 @@ MonthlyAll$daily_volume<-with(MonthlyAll, (cont1.cont1_size*cont1.cont1_times)+(
 
 # Household size ----------------------------------------------------------
 
-baselineAll$child_5_17 
-baselineAll$adult
-baselineAll$total_members<- baselineAll$child_5_17 + baselineAll$adult
+monthly$children<-monthly$children_U5+monthly$children_5_17
+monthly$total_hh_members<- monthly$children + monthly$adult
 
+monthly$daily_h2o_percapita<-with(monthly, daily_volume/total_hh_members)
 
+#summary(monthly$daily_h2o_percapita)
+
+#create month variable
+monthly$date_visit_character<-as.character(monthly$date_visit)
+temp<-strsplit(monthly$date_visit_character, "-")
+mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
+df <- as.data.frame(mat)
+colnames(df) <- c("year", "month", "day")
+monthly<- cbind(monthly,df)
+
+lm(monthly$daily_h2o_percapita~monthly$water_access_group)
+
+#model 1, 1= tap,tank 2= tap,no tank, 3=handpump, tank, 4= handpump no tank, 5= bucket tank
+model1=lmer(daily_h2o_percapita ~ month*water_access_group + (1|uniqueID), data=monthly)
+summary(model1)
+model1.null=lmer(daily_h2o_percapita ~ water_access_group + (1|uniqueID), data=monthly)
+summary(model.null)
+
+#model 2, 1= tap,tank 2= handpump, tank, 3= bucket tank 4= tap,no tank, 5= handpump no tank 
+model2=lmer(daily_h2o_percapita ~ month*water_access_group2 + (1|uniqueID), data=monthly)
+summary(model1)
+model2.null=lmer(daily_h2o_percapita ~ water_access_group2 + (1|uniqueID), data=monthly)
+summary(model.null)
+
+#anova analysis to look for statistical significance 
+anova(model1,model1.null)
+anova(model2,model2.null)
 
 # Water Source ------------------------------------------------------------
 #q14a_recoded WASA=1; deep tube well/submersible = 2 ; well/shallow tube well = 3
@@ -81,17 +144,17 @@ baselineAll$total_members<- baselineAll$child_5_17 + baselineAll$adult
 
 # Household structure -----------------------------------------------------
 #q10 nuclear =1, multiple families =2, unrelated persons = 3, nuclear family with 1+ unrelated = 4, other=777
-#table(baselineAll$q10oth)
-baselineAll[baselineAll$q10oth=="SINGLE","q10"]<-3 #single is mess hall, same as unrelated people
-baselineAll[baselineAll$q10oth=="SINGLE.","q10"]<-3 #single is mess hall, same as unrelated people
-baselineAll[baselineAll$q10oth=="SINGLE (MESS)","q10"]<-3 #single is mess hall, same as unrelated people
-baselineAll[baselineAll$q10oth=="SINGLE PERSON","q10"]<-3 #single is mess hall, same as unrelated people
-baselineAll[grep("^SINGLE MEMBER,", baselineAll$q10oth),"q10"]<-4 #this is one single person living with nuclear family
-baselineAll[grep("^ONE", baselineAll$q10oth),"q10"]<-4 #this is one single person living with nuclear family
-baselineAll[grep("^ONLY", baselineAll$q10oth),"q10"]<-1 #two sisters living together
-#baselineAll$q10oth[baselineAll$q10==777]
+#table(m4$q10oth)
+m4[m4$q10oth=="SINGLE","q10"]<-3 #single is mess hall, same as unrelated people
+m4[m4$q10oth=="SINGLE.","q10"]<-3 #single is mess hall, same as unrelated people
+m4[m4$q10oth=="SINGLE (MESS)","q10"]<-3 #single is mess hall, same as unrelated people
+m4[m4$q10oth=="SINGLE PERSON","q10"]<-3 #single is mess hall, same as unrelated people
+m4[grep("^SINGLE MEMBER,", m4$q10oth),"q10"]<-4 #this is one single person living with nuclear family
+m4[grep("^ONE", m4$q10oth),"q10"]<-4 #this is one single person living with nuclear family
+m4[grep("^ONLY", m4$q10oth),"q10"]<-1 #two sisters living together
+#m4$q10oth[m4$q10==777]
 
-baselineAll$nuclear_family<- with(baselineAll, ifelse(q10==1|q10==2|q10==4,1,0)) #is it one or more nuclear families (1) or primarily unrelated people (0)?
+m4$nuclear_family<- with(m4, ifelse(q10==1|q10==2|q10==4,1,0)) #is it one or more nuclear families (1) or primarily unrelated people (0)?
 
 # Occupation --------------------------------------------------------------
 ###q11_6 employment: unemployed/student/retired=6, Un-skilled labor = 1, skilled labor = 2, Garments =3, salaried job = 4, spiritual healer=5, other = 777
@@ -111,47 +174,47 @@ table(sub$jobs)
 
 # Household monthly income ------------------------------------------------
 #monthly income = average monthly household income + monthly remittances received - monthly remittances sent + annual remittances received/12 - annual remittances sent/12 - monthly loan payment
-baselineAll$Monthly_income<- baselineAll$q12 + baselineAll$q12a2 - baselineAll$q12a1 + 
-  (baselineAll$q12a3/12)-(baselineAll$q12a4/12)- baselineAll$q12d
+m4$Monthly_income<- m4$q12 + m4$q12a2 - m4$q12a1 + 
+  (m4$q12a3/12)-(m4$q12a4/12)- m4$q12d
 
-baselineAll$monthly_income_percapita<-baselineAll$Monthly_income/(baselineAll$total_HH_members)
+m4$monthly_income_percapita<-m4$Monthly_income/(m4$total_HH_members)
 
-# View(baselineAll$monthly_income_percapita)
+# View(m4$monthly_income_percapita)
 #create column with income quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
-baselineAll$pc_income_quintile<-as.integer(cut(baselineAll$monthly_income_percapita, quantile(baselineAll$Monthly_income_percapita, 
+m4$pc_income_quintile<-as.integer(cut(m4$monthly_income_percapita, quantile(m4$Monthly_income_percapita, 
     
                                                                                                                                                                                         probs=0:5/5, include.lowest=TRUE)))
 # Asset calculation -------------------------------------------------------
 #shared facilities (water q17, kitchen q31, latrines q35) 0=all shared, 1=2of3 shared, 2= 1of3 shared
-baselineAll$shared_facilities<- with(baselineAll, ifelse(q17==1& q31 >=1 & q35==1, 0, 
+m4$shared_facilities<- with(m4, ifelse(q17==1& q31 >=1 & q35==1, 0, 
                                                   ifelse(q17==0& q31 >=1 & q35==1, 1,
                                                     ifelse(q17==1& q31 >=1 & q35==0, 1,
                                                     ifelse(q17==1& q31 ==0 & q35==1, 1,
                                                     ifelse(q17==0& q31 >=1 & q35==0, 2,
                                                     ifelse(q17==0& q31 ==0 & q35==1, 2,
                                                     ifelse(q17==1& q31 ==0 & q35==0, 2, NA))))))))
-#table(baselineAll$shared_facilities)
+#table(m4$shared_facilities)
 
 #### Assets continued: ownership of items
 # in q9_20_oth1, q9_20_oth2, q9_20_oth3 meatshelf (cupboard), dressing table (dresser), and sofa should earn 1 point, rickshaw should earn 2, 
-baselineAll$q9_20_oth1<-as.character(baselineAll$q9_20_oth1)
-baselineAll$q9_20_oth2 <-as.character(baselineAll$q9_20_oth2)
-baselineAll$q9_20_oth3 <-as.character(baselineAll$q9_20_oth3)
+m4$q9_20_oth1<-as.character(m4$q9_20_oth1)
+m4$q9_20_oth2 <-as.character(m4$q9_20_oth2)
+m4$q9_20_oth3 <-as.character(m4$q9_20_oth3)
 
 #recode spelling errors, everything that starts with M becomes MEAT SHELF, D becomes DRESSING TABLE
-#grep("^C", baselineAll$q9_20_oth1, value=T) #to search for resopnses by start letter
+#grep("^C", m4$q9_20_oth1, value=T) #to search for resopnses by start letter
 
-baselineAll[grep("^M", baselineAll$q9_20_oth1), "q9_20_oth1"] <- as.character("MEAT SHELF")
-baselineAll[grep("^DRE", baselineAll$q9_20_oth1), "q9_20_oth1"] <- as.character("DRESSING TABLE")
+m4[grep("^M", m4$q9_20_oth1), "q9_20_oth1"] <- as.character("MEAT SHELF")
+m4[grep("^DRE", m4$q9_20_oth1), "q9_20_oth1"] <- as.character("DRESSING TABLE")
 
-baselineAll[grep("^IRON", baselineAll$q9_20_oth2), "q9_20_oth2"] <- as.character("MEAT SHELF")
-baselineAll[grep("^M", baselineAll$q9_20_oth2), "q9_20_oth2"] <- as.character("MEAT SHELF")
-baselineAll[grep("^DRE", baselineAll$q9_20_oth2), "q9_20_oth2"] <- as.character("DRESSING TABLE")
+m4[grep("^IRON", m4$q9_20_oth2), "q9_20_oth2"] <- as.character("MEAT SHELF")
+m4[grep("^M", m4$q9_20_oth2), "q9_20_oth2"] <- as.character("MEAT SHELF")
+m4[grep("^DRE", m4$q9_20_oth2), "q9_20_oth2"] <- as.character("DRESSING TABLE")
 
-baselineAll[grep("^M", baselineAll$q9_20_oth3), "q9_20_oth3"] <- as.character("MEAT SHELF")
-baselineAll[grep("^IRON", baselineAll$q9_20_oth3), "q9_20_oth3"] <- as.character("MEAT SHELF")
+m4[grep("^M", m4$q9_20_oth3), "q9_20_oth3"] <- as.character("MEAT SHELF")
+m4[grep("^IRON", m4$q9_20_oth3), "q9_20_oth3"] <- as.character("MEAT SHELF")
 
-baselineAll$q9_20_oth1p <- with(baselineAll, ifelse(q9_20_oth1=="COMPUTER",3,
+m4$q9_20_oth1p <- with(m4, ifelse(q9_20_oth1=="COMPUTER",3,
                                                     ifelse(q9_20_oth1=="VEDEO CAMERA",2,
                                                     ifelse(q9_20_oth1=="STEEL MITSHAFE",1,
                                                     ifelse(q9_20_oth1=="DRESSING TABLE",1,
@@ -163,7 +226,7 @@ baselineAll$q9_20_oth1p <- with(baselineAll, ifelse(q9_20_oth1=="COMPUTER",3,
                                                     ifelse(q9_20_oth1=="RICKSHAW.",2,0 # in 9_20_oth2
                                                      )))))))))))
 
-baselineAll$q9_20_oth2p <- with(baselineAll, ifelse(q9_20_oth2=="COMPUTER",3,
+m4$q9_20_oth2p <- with(m4, ifelse(q9_20_oth2=="COMPUTER",3,
                                                     ifelse(q9_20_oth2=="VEDEO CAMERA",2,
                                                     ifelse(q9_20_oth2=="STEEL MITSHAFE",1,
                                                     ifelse(q9_20_oth2=="DRESSING TABLE",1,
@@ -175,7 +238,7 @@ baselineAll$q9_20_oth2p <- with(baselineAll, ifelse(q9_20_oth2=="COMPUTER",3,
                                                     ifelse(q9_20_oth2=="RICKSHAW.",2,0 # in 9_20_oth2
                                                         )))))))))))
 
-baselineAll$q9_20_oth3p <- with(baselineAll, ifelse(q9_20_oth3=="COMPUTER",3,
+m4$q9_20_oth3p <- with(m4, ifelse(q9_20_oth3=="COMPUTER",3,
                                                     ifelse(q9_20_oth3=="VEDEO CAMERA",2,
                                                     ifelse(q9_20_oth3=="STEEL MITSHAFE",1,
                                                     ifelse(q9_20_oth3=="DRESSING TABLE",1,
@@ -186,28 +249,28 @@ baselineAll$q9_20_oth3p <- with(baselineAll, ifelse(q9_20_oth3=="COMPUTER",3,
                                                     ifelse(q9_20_oth3=="SOFA SET",1,
                                                     ifelse(q9_20_oth3=="RICKSHAW.",2,0 # in 9_20_oth2
                                                         )))))))))))
-baselineAll$q9_other_sum<-with(baselineAll, q9_20_oth1p+q9_20_oth2p+q9_20_oth3p)
+m4$q9_other_sum<-with(m4, q9_20_oth1p+q9_20_oth2p+q9_20_oth3p)
 
-table(baselineAll$q9_20_oth1)
+table(m4$q9_20_oth1)
 #count assets
-baselineAll$asset_score<-NA
-baselineAll$asset_score<- (baselineAll$q9_other_sum + 
-                             as.numeric(baselineAll$q9_2) + as.numeric(baselineAll$q9_3) +
-                             as.numeric(baselineAll$q9_5) +  
-                             as.numeric(baselineAll$q9_7) + as.numeric(baselineAll$q9_8) +
-                             as.numeric(baselineAll$q9_9) + 
-                             as.numeric(baselineAll$q9_16) + as.numeric(baselineAll$q9_18)+ 
-                             ((as.numeric(baselineAll$q9_1) + as.numeric(baselineAll$q9_6) +
-                                 as.numeric(baselineAll$q9_10) + (as.numeric(baselineAll$q9_11) + 
-                                                                    as.numeric(baselineAll$q9_12) + as.numeric(baselineAll$q9_14) + 
-                                                                    as.numeric(baselineAll$q9_15 + as.numeric(baselineAll$q9_17))*2) + 
-                                 ((as.numeric(baselineAll$q9_13) + as.numeric(baselineAll$q9_19) + 
-                                     baselineAll$shared_facilities)*3))))
+m4$asset_score<-NA
+m4$asset_score<- (m4$q9_other_sum + 
+                             as.numeric(m4$q9_2) + as.numeric(m4$q9_3) +
+                             as.numeric(m4$q9_5) +  
+                             as.numeric(m4$q9_7) + as.numeric(m4$q9_8) +
+                             as.numeric(m4$q9_9) + 
+                             as.numeric(m4$q9_16) + as.numeric(m4$q9_18)+ 
+                             ((as.numeric(m4$q9_1) + as.numeric(m4$q9_6) +
+                                 as.numeric(m4$q9_10) + (as.numeric(m4$q9_11) + 
+                                                                    as.numeric(m4$q9_12) + as.numeric(m4$q9_14) + 
+                                                                    as.numeric(m4$q9_15 + as.numeric(m4$q9_17))*2) + 
+                                 ((as.numeric(m4$q9_13) + as.numeric(m4$q9_19) + 
+                                     m4$shared_facilities)*3))))
 
 #create column with asset quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
-baselineAll$asset_score[is.na(baselineAll$asset_score)]<-0
+m4$asset_score[is.na(m4$asset_score)]<-0
 
-baselineAll$asset_quintile<-as.integer(cut(baselineAll$asset_score, quantile(baselineAll$asset_score, 
+m4$asset_quintile<-as.integer(cut(m4$asset_score, quantile(m4$asset_score, 
                                                                              probs=0:5/5, include.lowest=TRUE)))
 
 
