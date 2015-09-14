@@ -207,15 +207,15 @@ temp3 <- do.call(rbind.data.frame, x)
 # Check duplicates
 z <- duplicated(temp3[, 1:3])
 sum(z)
-temp3 <- temp3[z == F,  ]
-rm(temp.x3.odk.merge, z, x)
+visits.month <- temp3[z == F,  ]
+rm(temp.x3.odk.merge, z, x, temp3)
 
 # Check missing records
-not.in.x2 <- temp3[is.na(temp3$Listing.number), c("HHID", 'date_visit', 'FRA', 'Listing.number')]
+not.in.x2 <- visits.month[is.na(visits.month$Listing.number), c("HHID", 'date_visit', 'FRA', 'Listing.number')]
 not.in.x2 <- not.in.x2[order(not.in.x2$HHID, not.in.x2$date_visit), ]
 row.names(not.in.x2) <- NULL
 
-not.in.odk <- temp3[is.na(temp3$FRA), c("HHID", 'date_visit', 'ppl', "Listing.number")]
+not.in.odk <- visits.month[is.na(visits.month$FRA), c("HHID", 'date_visit', 'ppl', "Listing.number")]
 not.in.odk <- not.in.odk[order(not.in.odk$HHID, not.in.odk$date_visit), ]
 row.names(not.in.odk) <- NULL
 
