@@ -343,6 +343,7 @@ MonthlyAll <- MonthlyAll[, !names(MonthlyAll) %in% dropVar]
 y <- match(c('visitdate'), names(MonthlyAll))
 x <- 1:ncol(MonthlyAll)
 x <- x[-c(y)]
+MonthlyAll <- MonthlyAll[, c(y, x)]
 rm(x, y)
 
 MonthlyAll <- MonthlyAll[order(MonthlyAll$hh_id, MonthlyAll$visitdate), ]
