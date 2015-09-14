@@ -215,12 +215,13 @@ distance69$slno<-as.numeric(paste(distance69$hhid,".",69, sep=""))
 dall<-rbind(distance,distance47,distance69)
 
 dall$q45<-as.numeric(dall$q45)
+dall$q46_1[is.na(dall$q46_1)]<-21 #all NAs were GPS locations, taken because distance was more than 20 meters
+
 distance_to_source1<-dall$q46_1[dall$q45==1]
+distance_to_source1<-as.data.frame(distance_to_source1)
 
 baselineAll<-cbind(baselineAll,distance_to_source1)
-baselineAll$distance_to_source1[is.na(baselineAll$distance_to_source1)]<-21 #all NAs were GPS locations, taken because distance was more than 20 meters
-
-
+baselineAll$distance_to_source1
 
 # Move Unique ID to front column and save dataset -------------------------
 y <- match(c('uniqueID', 'hhid'), names(baselineAll))
