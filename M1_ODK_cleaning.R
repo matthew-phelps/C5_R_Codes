@@ -352,8 +352,5 @@ row.names(MonthlyAll) <- NULL
 
 save(MonthlyAll, file = data.path)
 
-# 8.) CLEAN WORKSPACE -----------------------------------------------------
-rm(list = ls()[!(ls() %in% c('MonthlyAll'))])
-
 
 

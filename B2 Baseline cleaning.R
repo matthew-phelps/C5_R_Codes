@@ -31,7 +31,6 @@ ifelse(grepl("zrc340", getwd()),
        wdmain <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data",
        wdmain <- "C:\\Users\\wrz741\\Dropbox")
 
-#"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata"
 
 wdx1<-"\\C5 Field Operations data\\X-1 Cholera phone distribution"
 setwd(paste(wdmain,wdx1,sep=""))
@@ -458,8 +457,9 @@ write.csv2(e1[, c(8, 1:5)],
 
 base_merge <- merge(x1, baselineAll, by.x = "uniqueID", by.y = "uniqueID",
                     all = F)
-
-dropvars <- c("hhid", "slno", "hhid.1")
+base_merge$base_date.x == base_merge$base_date.y
+rename(base_merge)
+dropvars <- c("hhid", "slno", "hhid.1", "base_date.y")
 base_merge <- base_merge[, !names(base_merge) %in% dropvars]
 
 
