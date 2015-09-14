@@ -67,3 +67,22 @@ ptCalc <- function(x) {
   row.names(z) <- NULL
   z
 }
+
+
+hhCleanup <- function(data, dateVisit, baseDate, withdrawDate, phoneDate) {
+  # separates records that have same HHID but different baselines.
+  x2 <- data.frame(matrix(ncol=ncol(data), nrow = nrow(data)))
+  names(x2) <- names(data)
+  for(i in 1:nrow(data)) {
+    if (data[i, dateVisit] >= data[i, baseDate] &&
+        data[i, dateVisit] <= data[i, withdrawDate] ) {
+      x2[i,] <- data[i,]
+    }
+  }
+  x2$date_visit <- as.Date(x2$date_visit, origin = "1970-01-01")
+  x2$base_date <- as.Date(x2$base_date, origin = "1970-01-01")
+  x2$phone.dist <- as.Date(x2$phone.dist, origin = "1970-01-01")
+  x2$with_date <- as.Date(x2$with_date, origin = "1970-01-01")
+  x2 <- x2[!is.na(x2$base_date), ]
+  return (x2)
+}

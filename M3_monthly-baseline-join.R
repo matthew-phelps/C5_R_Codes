@@ -20,7 +20,9 @@ ifelse(grepl("zrc340", getwd()),
 ifelse(grepl("zrc340", getwd()),
        data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata",
        data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata")
-
+ifelse(grepl("zrc340", getwd()),
+       functions.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\c_5_functions_source_file.R",
+       functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
 # LOAD FILES --------------------------------------------------------------
 
 # Monthly data
@@ -29,8 +31,10 @@ load(monthly_joined_path)
 # Baseline data
 load(baseline.path)
 
+# load functions
+source(functions.path)
 
-# 1.) MERGE and KEEP all records ------------------------------------------
+# 1.) MERGE Baseline and monthly: KEEP all records ------------------------------------------
 
 z <- merge(visits.month, base_merge, by.x = "HHID", by.y = "HHID", all = T)
 
@@ -39,7 +43,7 @@ z <- merge(visits.month, base_merge, by.x = "HHID", by.y = "HHID", all = T)
 # Order rows and columns for easy reading ---------------------------------
 
 # Rows
-z <- z[order(z$HHID, z$base_date, z$date_visit), ]
+z <- z[order(z$HHID, z$base_date.x, z$date_visit), ]
 
 # Columns
 y <- match(c('uniqueID'), names(z))
@@ -58,25 +62,9 @@ noBaseline <- z[is.na(z$base_date), ]
 z <- z[!is.na(z$base_date), ]
 row.names(z) <- NULL
 
-hhCleanup <- function(data, dateVisit, baseDate, withdrawDate, phoneDate) {
-  # separates records that have same HHID but different baselines.
-  x2 <- data.frame(matrix(ncol=ncol(data), nrow = nrow(data)))
-  names(x2) <- names(data)
-  for(i in 1:nrow(data)) {
-    if (data[i, dateVisit] >= data[i, baseDate] &&
-        data[i, dateVisit] <= data[i, withdrawDate] ) {
-      x2[i,] <- data[i,]
-    }
-  }
-  x2$date_visit <- as.Date(x2$date_visit, origin = "1970-01-01")
-  x2$base_date <- as.Date(x2$base_date, origin = "1970-01-01")
-  x2$phone.dist <- as.Date(x2$phone.dist, origin = "1970-01-01")
-  x2$with_date <- as.Date(x2$with_date, origin = "1970-01-01")
-  x2 <- x2[!is.na(x2$base_date), ]
-  return (x2)
-}
+
   
-system.time({m3 <- hhCleanup(data = z, dateVisit = "date_visit", baseDate = "base_date",
+system.time({m3 <- hhCleanup(data = z, dateVisit = "date_visit", baseDate = "base_date.x",
           withdrawDate = "with_date", phoneDate = "phone.dist")})
 
 
