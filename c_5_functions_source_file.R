@@ -3,6 +3,35 @@
 # output: Function objects
 # DEPENDENCIES: none
 
+# B2 functions ------------------------------------------------------------
+
+moveInternal <- function(x) {
+  # Check to see if household moved. If hh moved, use the withdaw date of previous
+  # hh's entry as the phone.dist date to make sure we don't double count person time
+  x <- x[order(x$base_date), ]
+  x$phone.dist2 <- x$phone.dist
+  x$moved <- F
+  for (i in 1:nrow(x)) {
+    if(nrow(x) > 1 && i < nrow(x) && x$phone.dist[i] == x$phone.dist[i+1]) {
+      x$phone.dist2[i+1] <- x$with_date[i]
+      x$moved <- T
+    }
+  }
+  x$phone.dist <- x$phone.dist2
+  x$phone.dist2 <- NULL
+  return(x)
+}
+
+moveDates <- function (x, factor) {
+  x.temp <- split(x = x, f = factor)
+  z.temp <- lapply(x.temp, moveInternal)
+  z1.temp <- do.call(rbind.data.frame, z.temp)
+  return(z1.temp)
+}
+
+
+
+# M2 Functions ------------------------------------------------------------
 dateReplace <- function (x) {
   # On each row, test to see if there is a ODK entry, and the entry before or after was only a X2 entry
   # If row i is odk and row i+1 or i-1 is only x2 - take the date from row i and apply it to row i+1 or i-1
@@ -23,7 +52,6 @@ dateReplace <- function (x) {
   return (x)
 }
 
-
 mergeRows <- function(x) {
   for (i in 1:nrow(x)){
     if(i < (nrow(x)) && !is.na(x[i, ]$FRA) && (x[i, ]$date_visit == x[i + 1, ]$date_visit)) {
@@ -38,6 +66,29 @@ mergeRows <- function(x) {
 }
 
 
+
+# M3 Functions ------------------------------------------------------------
+hhCleanup <- function(data, dateVisit, baseDate, withdrawDate, phoneDate) {
+  # separates records that have same HHID but different baselines.
+  x2 <- data.frame(matrix(ncol=ncol(data), nrow = nrow(data)))
+  names(x2) <- names(data)
+  for(i in 1:nrow(data)) {
+    if (data[i, dateVisit] >= data[i, baseDate] &&
+        data[i, dateVisit] <= data[i, withdrawDate] ) {
+      x2[i,] <- data[i,]
+    }
+  }
+  x2$date_visit <- as.Date(x2$date_visit, origin = "1970-01-01")
+  x2$base_date <- as.Date(x2$base_date, origin = "1970-01-01")
+  x2$phone.dist <- as.Date(x2$phone.dist, origin = "1970-01-01")
+  x2$with_date <- as.Date(x2$with_date, origin = "1970-01-01")
+  x2 <- x2[!is.na(x2$base_date), ]
+  return (x2)
+}
+
+
+
+# M5 Functions ------------------------------------------------------------
 ptPerHHID <- function(x) {
   # Caluclates person-time since either last monthly visit or phone.dis - depending
   # on which was most recent.
@@ -69,20 +120,5 @@ ptCalc <- function(x) {
 }
 
 
-hhCleanup <- function(data, dateVisit, baseDate, withdrawDate, phoneDate) {
-  # separates records that have same HHID but different baselines.
-  x2 <- data.frame(matrix(ncol=ncol(data), nrow = nrow(data)))
-  names(x2) <- names(data)
-  for(i in 1:nrow(data)) {
-    if (data[i, dateVisit] >= data[i, baseDate] &&
-        data[i, dateVisit] <= data[i, withdrawDate] ) {
-      x2[i,] <- data[i,]
-    }
-  }
-  x2$date_visit <- as.Date(x2$date_visit, origin = "1970-01-01")
-  x2$base_date <- as.Date(x2$base_date, origin = "1970-01-01")
-  x2$phone.dist <- as.Date(x2$phone.dist, origin = "1970-01-01")
-  x2$with_date <- as.Date(x2$with_date, origin = "1970-01-01")
-  x2 <- x2[!is.na(x2$base_date), ]
-  return (x2)
-}
+
+
