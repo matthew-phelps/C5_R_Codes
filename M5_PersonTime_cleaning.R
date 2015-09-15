@@ -31,7 +31,7 @@ source(functions.path)
 
 # GLOBAL VARIABLES  & FUNCTIONS--------------------------------------------------------
 endDate <- as.Date('31-12-14', "%d-%m-%y")
-endDate <- Sys.Date()
+#endDate <- Sys.Date()
 
 
 # LOAD DATA ---------------------------------------------------------------
@@ -40,7 +40,7 @@ load(clean_monthly_basebase.path)
 
 
 # SUBSET VARIABLES --------------------------------------------------------
-m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date.x', 'phone.dist', 'with_date' )]
+m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date', 'phone.dist', 'with_date' )]
 
 
 
