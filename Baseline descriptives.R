@@ -13,6 +13,12 @@ ifelse(grepl("zrc340", getwd()),
 
 load(m4.path)
 load(Q11.path)
+
+# Household size at baseline----------------------------------------------------------
+
+monthly$children<-monthly$children_U5+monthly$children_5_17
+monthly$total_hh_members<- monthly$children + monthly$adult
+
 # Water access groups -----------------------------------------------------
 #
 #q14_recoded, 1 = pipe/tap, 2= hand pump, 3= well with bucket
@@ -104,7 +110,10 @@ monthly$daily_volume<-with(monthly, (cont1.cont1_size*cont1.cont1_times)+(cont2.
 
 #average water consumption per activity in liters: adult bath= 37, child bath = 14, wash dishes = 25, wash clothes =43
 #create H20 per capita variable
-monthly$daily_h2o_percapita<-with(monthly, daily_volume/total_hh_members)
+
+monthly$ppl<-ifelse(monthly$ppl==0,monthly$total_HH_members,monthly$ppl)
+monthly$daily_h2o_percapita<-with(monthly, daily_volume/ppl)
+
 #quintiles based on daily H20 consumption per capita
 monthly$h2o_percap_quintile<-as.integer(cut(monthly$daily_h2o_percapita,
                                             quantile(monthly$daily_h2o_percapita,probs=0:5/5,include.lowest=TRUE)))
@@ -115,13 +124,6 @@ waterusebytap<-lm(monthly$h2o_percap_quintile~monthly$q14_recoded) #tap vs. hand
 summary(waterusebytap)
 waterusebysource<-lm(monthly$h2o_percap_quintile~monthly$q14a_recoded) #WASA, DTW, STW
 summary(waterusebysource)
-
-
-# Household size ----------------------------------------------------------
-
-monthly$children<-monthly$children_U5+monthly$children_5_17
-monthly$total_hh_members<- monthly$children + monthly$adult
-
 
 
 #summary(monthly$daily_h2o_percapita)
@@ -167,7 +169,7 @@ table(sub$jobs)
 monthly$Monthly_income<- monthly$q12 + monthly$q12a2 - monthly$q12a1 + 
   (monthly$q12a3/12)-(monthly$q12a4/12)- monthly$q12d
 
-monthly$monthly_income_percapita<-monthly$Monthly_income/(monthly$total_HH_members)
+monthly$monthly_income_percapita<-monthly$Monthly_income/(monthly$ppl)
 
 # View(monthly$monthly_income_percapita)
 #create column with income quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
@@ -264,14 +266,23 @@ monthly$asset_quintile<-as.integer(cut(monthly$asset_score, quantile(monthly$ass
                                                                              probs=0:5/5, include.lowest=TRUE)))
 
 # Calculate time that water was available during the previous 24 hours --------
+#Add 6 hours to get into correct time zone
+hrs <- function(u) {
+  x <- u * 3600
+  return(x)
+}
+monthly$water_flow1_end2<-strptime(monthly$water_point1.wa_flow1.wa_time1.aE,"%H:%M:%S")+hrs(6)
+monthly$water_flow1_start2<-strptime(monthly$water_point1.wa_flow1.wa_time1.aS,"%H:%M:%S")-hrs(18)
+monthly$water_flow1_end1<-strptime(monthly$water_point1.wa_flow1.wa_time1.aE,"%H:%M:%S")
+monthly$water_flow1_start1<-strptime(monthly$water_point1.wa_flow1.wa_time1.aS,"%H:%M:%S")
 
-monthly$water_flow1_end<-strptime(monthly$water_point1.wa_flow1.wa_time1.aE,"%H:%M:%S")
-monthly$water_flow1_start<-strptime(monthly$water_point1.wa_flow1.wa_time1.aS,"%H:%M:%S")
-monthly$flow1<-difftime(monthly$water_flow1_start,monthly$water_flow1_end)
+monthly$flow1<-difftime(monthly$water_flow1_end1,monthly$water_flow1_start1, units=("hours"))
+monthly$flow2<-difftime(monthly$water_flow1_end2,monthly$water_flow1_start2, units=("hours"))
 
-View(monthly[,c("flow1","water_flow1_end", "water_flow1_start")])
+View(monthly[,c("water_flow1_end1", "water_flow1_start1","water_flow1_end2", "water_flow1_start2")])
 
-monthly$water_flow1_end1$hour<-monthly$water_flow1_end$hour +6
+##############following does not work#################
+monthly$water_flow1_end1$hour<-with(monthly, times(water_flow1_end$hour+6))
 
 monthly$water_flow1_end<-as.POSIXlt(monthly$water_point1.wa_flow1.wa_time1.aE, format="%H:%M:%S")$hour
 
@@ -283,6 +294,9 @@ View(monthly[,c("water_point1.wa_avail1","water_point1.wa_flow1.wa_time1.aS",
 
 monthly$water_end1<-with(monthly,ifelse(water_point1.wa_flow1.wa_time1.aE<water_point1.wa_flow1.wa_time1.aS,water_point1.wa_flow1.wa_time1.aE+24:00:00,water_point1.wa_flow1.wa_time1.aE))
 
+#is there 24 hours water access
+monthly$allday_h2o <-with(monthly, ifelse(water_point1.wa_flow1.wa_time1.aE=="17:59:00"&
+                                            water_point1.wa_flow1.wa_time1.aS=="18:00:00", 1, 0))
 
 # Linear models -----------------------------------------------------------
 
@@ -305,14 +319,28 @@ summary(model.null)
 
 #model 2, 1= tap,tank 2= handpump, tank, 3= bucket tank 4= tap,no tank, 5= handpump no tank 
 model2=lmer(daily_h2o_percapita ~ month*water_access_group2 + (1|uniqueID), data=monthly)
-summary(model2)
+#summary(model2)
 model2.null=lmer(daily_h2o_percapita ~ water_access_group2 + (1|uniqueID), data=monthly)
-summary(model2.null)
+#summary(model2.null)
+
+model24.null=lmer(daily_h2o_percapita ~ allday_h2o + water_access_group2 + (1|uniqueID), data=monthly)
+model24=lmer(daily_h2o_percapita ~ month*allday_h2o + water_access_group2 + (1|uniqueID), data=monthly)
+
+model24.null=lmer(daily_h2o_percapita ~ allday_h2o + water_access_group + (1|uniqueID), data=monthly)
+model24=lmer(daily_h2o_percapita ~ month*allday_h2o + water_access_group + (1|uniqueID), data=monthly)
+
+modelq2.null=lmer(h2o_percap_quintile ~ allday_h2o + water_access_group2 + (1|uniqueID), data=monthly)
+modelq2=lmer(h2o_percap_quintile ~ month*allday_h2o + water_access_group2 + (1|uniqueID), data=monthly)
+
+modelq.null=lmer(h2o_percap_quintile ~ allday_h2o + water_access_group + (1|uniqueID), data=monthly)
+modelq=lmer(h2o_percap_quintile ~ month*allday_h2o + water_access_group + (1|uniqueID), data=monthly)
+
 
 #anova analysis to look for statistical significance 
 anova(model1,model1.null)
 anova(model2,model2.null)
+anova(model24,model24.null)
+anova(modelq,modelq.null)
+anova(modelq2,modelq2.null)
 
 
-
-V
