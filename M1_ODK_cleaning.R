@@ -67,14 +67,13 @@ rm(monthly7.name, fileNames.df)
 names3<-names(monthly3)
 names4<-names(monthly4)
 names5<-names(monthly5)
-names5<-names(monthly5_5)
+names5_5<-names(monthly5_5)
 names6<-names(monthly6)
 names7<-names(monthly7)
 
-
 # Variables to keep. If later during anlaysis we need to add more variables - add them to this list:
 
-base_name_list <- c("FRA", "hh_id", "auto_date","day","month", "year","first_visit","num_wa_pts","water_point1.wa_pt1",
+base_name_list <- c("FRA", "hh_id", "auto_date","day","month", "year","first_visit", 'visit_num', 'survey_round', "num_wa_pts","water_point1.wa_pt1",
                     "water_point1.wa_pt1_usebefore",  "water_point1.wa_source1",  "water_point1.wa_source1_other",  
                     "water_point1.wa_tank1",  "water_point1.wa_tank1_other",	"water_point1.wa_avail1",
                     "water_point1.wa_flow1.wa_time1.aS",  "water_point1.wa_flow1.wa_time1.aE",	
@@ -110,15 +109,16 @@ base_name_list <- c("FRA", "hh_id", "auto_date","day","month", "year","first_vis
 # Verify that each survery version has the required variables
 
 base_name_list[!(base_name_list %in% names3)] #monthly3 is missing container 11-15 columns
-base_name_list[!(base_name_list %in% names4)]
-base_name_list[!(base_name_list %in% names5)]
+base_name_list[!(base_name_list %in% names4)] # missing "visit_num"
+base_name_list[!(base_name_list %in% names5)] # missing "visit_num"
+base_name_list[!(base_name_list %in% names5_5)]
 base_name_list[!(base_name_list %in% names6)]
 base_name_list[!(base_name_list %in% names7)]
 
 # To generate a list of missing columns (not needed for these data sets)
 
  
-# Create dummy columns in monthly 3
+# Create dummy columns in datasets that are missing variables
 monthly3$cont11.cont11_id<-as.character(NA)
 monthly3$cont11.cont11_size<-as.numeric(NA)
 monthly3$cont11.cont11_times<-as.numeric(NA)
@@ -134,6 +134,8 @@ monthly3$cont14.cont14_times<-as.numeric(NA)
 monthly3$cont15.cont15_id<-as.character(NA)
 monthly3$cont15.cont15_size<-as.numeric(NA)
 monthly3$cont15.cont15_times<-as.numeric(NA)
+monthly3$visit_num <- monthly4$visit_num <- monthly5$visit_num <- monthly5_5$visit_num <- as.numeric(NA)
+
 
 # Create subsets with only wanted (base names) columns
 

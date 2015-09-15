@@ -211,11 +211,11 @@ visits.month <- temp3[z == F,  ]
 rm(temp.x3.odk.merge, z, x, temp3)
 
 # Check missing records
-not.in.x2 <- visits.month[is.na(visits.month$Listing.number), c("HHID", 'date_visit', 'FRA', 'Listing.number')]
+not.in.x2 <- visits.month[is.na(visits.month$Listing.number), c("HHID", 'date_visit', 'FRA', 'Listing.number', "visit_num", "survey_round")]
 not.in.x2 <- not.in.x2[order(not.in.x2$HHID, not.in.x2$date_visit), ]
 row.names(not.in.x2) <- NULL
 
-not.in.odk <- visits.month[is.na(visits.month$FRA), c("HHID", 'date_visit', 'ppl', "Listing.number")]
+not.in.odk <- visits.month[is.na(visits.month$FRA), c("HHID", 'date_visit', 'ppl', "Listing.number", "visit_num", "survey_round")]
 not.in.odk <- not.in.odk[order(not.in.odk$HHID, not.in.odk$date_visit), ]
 row.names(not.in.odk) <- NULL
 
