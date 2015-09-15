@@ -197,9 +197,9 @@ MonthlyAll$visitdateauto<-as.Date(MonthlyAll$visitdateauto, "%B%d%Y")
 # 5.) CLEANING EACH MONTHLY DATASET ---------------------------------------
 
 
-# Sort x2 by date so we can compare to monthly visit files:
-x2 <- x2[with(x2, order(HH_baseline, date.monthly.visit)), ]
-x2$HHID <- as.numeric(x2$HHID)
+# # Sort x2 by date so we can compare to monthly visit files:
+# x2 <- x2[with(x2, order(HH_baseline, date.monthly.visit)), ]
+# x2$HHID <- as.numeric(x2$HHID)
 
 
 # Monthly 3: Check & Change date anomolies.
@@ -212,7 +212,7 @@ tail(sort(mon3$visitdate), 7)
 mon3$visitdate[mon3$visitdate=="2015-09-25"]<-as.Date("2014-09-25")
 mon3$hh_id[mon3$visitdate=="2014-08-15"] #HHID 398
 mon3$visitdate[mon3$hh_id==398] #"2014-11-07" "2014-08-15"
-x2$date[x2$HHID==398] #"2014-09-16" is the closest and is not repeated above
+# x2$date[x2$HHID==398] #"2014-09-16" is the closest and is not repeated above
 mon3$visitdate[mon3$visitdate=="2014-08-15"]<-as.Date("2014-09-16")
 
 
@@ -225,7 +225,7 @@ sort(mon5_5$visitdate) #range 2014-10-13 to 2015-01-03, anomalies:  2015-01-14
 mon5_5$hh_id[mon5_5$visitdate=="2015-01-14"] #hhid 400
 
 MonthlyAll$visitdate[MonthlyAll$hh_id==400] #"2015-01-14" "2014-11-13" "2014-09-29" "2015-02-13" "2015-01-14" "2015-03-20" "2015-05-08"
-x2$date[x2$HHID==400] #"2014-09-29" "2014-11-14" "2015-02-13" "2015-03-20" "2015-05-08" "2015-06-19"
+# x2$date[x2$HHID==400] #"2014-09-29" "2014-11-14" "2015-02-13" "2015-03-20" "2015-05-08" "2015-06-19"
 #no changes, a duplicate will be deleted later
 
 
@@ -239,12 +239,12 @@ mon5$visitdate[mon5$visitdate=="2016-02-18"]<- as.Date("2015-02-18")
 
 mon5$hh_id[mon5$visitdate=="2014-12-26"] #hhid 297
 MonthlyAll$visitdate[MonthlyAll$hh_id==297] #"2014-11-16" "2014-12-26" "2015-03-30" "2015-05-26"
-x2$date[x2$HHID==297]  #"2014-11-21" "2015-02-13" "2015-03-30" "2015-05-26 
+# x2$date[x2$HHID==297]  #"2014-11-21" "2015-02-13" "2015-03-30" "2015-05-26 
 mon5$visitdate[mon5$visitdate=="2014-12-26"]<- as.Date("2015-02-13") ## Hmm, are we sure?
 
 mon5$hh_id[mon5$visitdate=="2015-01-02"]
 MonthlyAll$visitdate[MonthlyAll$hh_id==207] #"2014-11-28" "2015-01-02" "2015-04-23" "2015-05-27"
-x2$date[x2$HHID==207]  #"2014-11-28" "2015-02-06" "2015-04-23" "2015-05-27" "2015-07-03"
+# x2$date[x2$HHID==207]  #"2014-11-28" "2015-02-06" "2015-04-23" "2015-05-27" "2015-07-03"
 mon5$visitdate[mon5$visitdate=="2015-01-02"]<- as.Date("2015-02-06") 
 
 
@@ -259,17 +259,17 @@ mon6$visitdate[mon6$visitdate=="2016-05-11"]<-as.Date("2015-05-11")
 
 mon6$hh_id[mon6$visitdate=="2015-02-01"] #hhid 196
 MonthlyAll$visitdate[MonthlyAll$hh_id==196] #"2014-12-10" "2015-02-23" "2015-02-01" "2015-06-04"
-x2$date[x2$HHID==196] #"2014-12-10" "2015-02-23" "2015-04-01" "2015-06-04"
+# x2$date[x2$HHID==196] #"2014-12-10" "2015-02-23" "2015-04-01" "2015-06-04"
 mon6$visitdate[mon6$visitdate=="2015-02-01"]<-as.Date("2015-04-01")
 
 mon6$hh_id[mon6$visitdate=="2015-07-08"] #hhid 85
 MonthlyAll$visitdate[MonthlyAll$hh_id==85] #  "2014-09-20" "2014-11-11" "2015-02-16" "2015-03-24" "2015-07-08"
-x2$date[x2$HHID==085] # "2014-09-20" "2014-11-11" "2015-02-16" "2015-03-24" "2015-03-04" "2015-04-22" "2015-05-08" "2015-06-23"
+# x2$date[x2$HHID==085] # "2014-09-20" "2014-11-11" "2015-02-16" "2015-03-24" "2015-03-04" "2015-04-22" "2015-05-08" "2015-06-23"
 mon6$visitdate[mon6$visitdate=="2015-07-08"]<-as.Date("2015-05-08")
 
 mon6$hh_id[mon6$visitdate=="2015-08-12"] #hhid347
 MonthlyAll$visitdate[MonthlyAll$hh_id==347] #"2014-12-11" "2015-02-07" "2014-12-11" "2015-03-16" "2015-08-12"
-x2$date[x2$HHID==347] # "2014-12-11" "2015-02-07" "2015-03-16" "2015-05-12"
+# x2$date[x2$HHID==347] # "2014-12-11" "2015-02-07" "2015-03-16" "2015-05-12"
 mon6$visitdate[mon6$visitdate=="2015-08-12"]<-as.Date("2015-05-12")
 
 
@@ -287,24 +287,24 @@ late <- mon7[mon7$visitdate > end.date, ]
 
 y <- mon7$hh_id[mon7$visitdate=="2014-07-06"]
 MonthlyAll$visitdate[MonthlyAll$hh_id==y]
-x2$date[x2$HHID==y]
+# x2$date[x2$HHID==y]
 mon7$visitdate[mon7$visitdate == '2014-07-06'] <- as.Date('2015-07-06')
 
 y <- mon7$hh_id[mon7$visitdate=="2015-04-04"] #hhid269
 MonthlyAll[MonthlyAll$hh_id==y,] 
-x2$date[x2$HHID==y]
+# x2$date[x2$HHID==y]
 #### doesn't work: mon7[which(mon7$visitdate=="2015-04-04"& mon7$hh_id==123),]<-NULL 
 #### # simply doesn't make sense in this date range for monthly 7, no in line with previous monthly visit dates, and doesn't match and  date
 ## Matt's guess: the hhid was recorded incorrectly- this belongs to another house
 
 y <- mon7$hh_id[mon7$visitdate=="2016-07-09"]
 MonthlyAll$visitdate[MonthlyAll$hh_id==y]
-x2$date[x2$HHID==y]
+# x2$date[x2$HHID==y]
 mon7$visitdate[mon7$visitdate == '2016-07-09'] <- as.Date('2015-07-09')
 
 y <- mon7$hh_id[mon7$visitdate=="2016-07-13"]
 MonthlyAll$visitdate[MonthlyAll$hh_id==y]
-x2$date[x2$HHID==y]
+# x2$date[x2$HHID==y]
 mon7$visitdate[mon7$visitdate == '2016-07-13'] <- as.Date('2015-07-13')
 
 
