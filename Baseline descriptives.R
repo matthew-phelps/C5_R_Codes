@@ -1,7 +1,8 @@
 #baseline descriptives
 
-install.packages("lme4")
+library(chron)
 library(lme4)
+
 # Load data ---------------------------------------------------------------
 ifelse(grepl("zrc340", getwd()), 
        Q11.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\Q11_all.Rdata",
@@ -102,41 +103,30 @@ monthly$daily_volume<-with(monthly, (cont1.cont1_size*cont1.cont1_times)+(cont2.
                               
 
 #average water consumption per activity in liters: adult bath= 37, child bath = 14, wash dishes = 25, wash clothes =43
+#create H20 per capita variable
+monthly$daily_h2o_percapita<-with(monthly, daily_volume/total_hh_members)
+#quintiles based on daily H20 consumption per capita
+monthly$h2o_percap_quintile<-as.integer(cut(monthly$daily_h2o_percapita,
+                                            quantile(monthly$daily_h2o_percapita,probs=0:5/5,include.lowest=TRUE)))
+
+waterusebytank<-lm(monthly$h2o_percap_quintile~monthly$q15_recoded) #is there a tank present
+summary(waterusebytank)         
+waterusebytap<-lm(monthly$h2o_percap_quintile~monthly$q14_recoded) #tap vs. handpump vs. bucket
+summary(waterusebytap)
+waterusebysource<-lm(monthly$h2o_percap_quintile~monthly$q14a_recoded) #WASA, DTW, STW
+summary(waterusebysource)
+
 
 # Household size ----------------------------------------------------------
 
 monthly$children<-monthly$children_U5+monthly$children_5_17
 monthly$total_hh_members<- monthly$children + monthly$adult
 
-monthly$daily_h2o_percapita<-with(monthly, daily_volume/total_hh_members)
+
 
 #summary(monthly$daily_h2o_percapita)
 
-#create month variable
-monthly$date_visit_character<-as.character(monthly$date_visit)
-temp<-strsplit(monthly$date_visit_character, "-")
-mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
-df <- as.data.frame(mat)
-colnames(df) <- c("year", "month", "day")
-monthly<- cbind(monthly,df)
 
-lm(monthly$daily_h2o_percapita~monthly$water_access_group)
-
-#model 1, 1= tap,tank 2= tap,no tank, 3=handpump, tank, 4= handpump no tank, 5= bucket tank
-model1=lmer(daily_h2o_percapita ~ month*water_access_group + (1|uniqueID), data=monthly)
-summary(model1)
-model1.null=lmer(daily_h2o_percapita ~ water_access_group + (1|uniqueID), data=monthly)
-summary(model.null)
-
-#model 2, 1= tap,tank 2= handpump, tank, 3= bucket tank 4= tap,no tank, 5= handpump no tank 
-model2=lmer(daily_h2o_percapita ~ month*water_access_group2 + (1|uniqueID), data=monthly)
-summary(model1)
-model2.null=lmer(daily_h2o_percapita ~ water_access_group2 + (1|uniqueID), data=monthly)
-summary(model.null)
-
-#anova analysis to look for statistical significance 
-anova(model1,model1.null)
-anova(model2,model2.null)
 
 # Water Source ------------------------------------------------------------
 #q14a_recoded WASA=1; deep tube well/submersible = 2 ; well/shallow tube well = 3
@@ -145,16 +135,16 @@ anova(model2,model2.null)
 # Household structure -----------------------------------------------------
 #q10 nuclear =1, multiple families =2, unrelated persons = 3, nuclear family with 1+ unrelated = 4, other=777
 #table(m4$q10oth)
-m4[m4$q10oth=="SINGLE","q10"]<-3 #single is mess hall, same as unrelated people
-m4[m4$q10oth=="SINGLE.","q10"]<-3 #single is mess hall, same as unrelated people
-m4[m4$q10oth=="SINGLE (MESS)","q10"]<-3 #single is mess hall, same as unrelated people
-m4[m4$q10oth=="SINGLE PERSON","q10"]<-3 #single is mess hall, same as unrelated people
-m4[grep("^SINGLE MEMBER,", m4$q10oth),"q10"]<-4 #this is one single person living with nuclear family
-m4[grep("^ONE", m4$q10oth),"q10"]<-4 #this is one single person living with nuclear family
-m4[grep("^ONLY", m4$q10oth),"q10"]<-1 #two sisters living together
-#m4$q10oth[m4$q10==777]
+monthly[monthly$q10oth=="SINGLE","q10"]<-3 #single is mess hall, same as unrelated people
+monthly[monthly$q10oth=="SINGLE.","q10"]<-3 #single is mess hall, same as unrelated people
+monthly[monthly$q10oth=="SINGLE (MESS)","q10"]<-3 #single is mess hall, same as unrelated people
+monthly[monthly$q10oth=="SINGLE PERSON","q10"]<-3 #single is mess hall, same as unrelated people
+monthly[grep("^SINGLE MEMBER,", monthly$q10oth),"q10"]<-4 #this is one single person living with nuclear family
+monthly[grep("^ONE", monthly$q10oth),"q10"]<-4 #this is one single person living with nuclear family
+monthly[grep("^ONLY", monthly$q10oth),"q10"]<-1 #two sisters living together
+#monthly$q10oth[monthly$q10==777]
 
-m4$nuclear_family<- with(m4, ifelse(q10==1|q10==2|q10==4,1,0)) #is it one or more nuclear families (1) or primarily unrelated people (0)?
+monthly$nuclear_family<- with(monthly, ifelse(q10==1|q10==2|q10==4,1,0)) #is it one or more nuclear families (1) or primarily unrelated people (0)?
 
 # Occupation --------------------------------------------------------------
 ###q11_6 employment: unemployed/student/retired=6, Un-skilled labor = 1, skilled labor = 2, Garments =3, salaried job = 4, spiritual healer=5, other = 777
@@ -174,47 +164,47 @@ table(sub$jobs)
 
 # Household monthly income ------------------------------------------------
 #monthly income = average monthly household income + monthly remittances received - monthly remittances sent + annual remittances received/12 - annual remittances sent/12 - monthly loan payment
-m4$Monthly_income<- m4$q12 + m4$q12a2 - m4$q12a1 + 
-  (m4$q12a3/12)-(m4$q12a4/12)- m4$q12d
+monthly$Monthly_income<- monthly$q12 + monthly$q12a2 - monthly$q12a1 + 
+  (monthly$q12a3/12)-(monthly$q12a4/12)- monthly$q12d
 
-m4$monthly_income_percapita<-m4$Monthly_income/(m4$total_HH_members)
+monthly$monthly_income_percapita<-monthly$Monthly_income/(monthly$total_HH_members)
 
-# View(m4$monthly_income_percapita)
+# View(monthly$monthly_income_percapita)
 #create column with income quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
-m4$pc_income_quintile<-as.integer(cut(m4$monthly_income_percapita, quantile(m4$Monthly_income_percapita, 
+monthly$pc_income_quintile<-as.integer(cut(monthly$monthly_income_percapita, quantile(monthly$Monthly_income_percapita, 
     
                                                                                                                                                                                         probs=0:5/5, include.lowest=TRUE)))
 # Asset calculation -------------------------------------------------------
 #shared facilities (water q17, kitchen q31, latrines q35) 0=all shared, 1=2of3 shared, 2= 1of3 shared
-m4$shared_facilities<- with(m4, ifelse(q17==1& q31 >=1 & q35==1, 0, 
+monthly$shared_facilities<- with(monthly, ifelse(q17==1& q31 >=1 & q35==1, 0, 
                                                   ifelse(q17==0& q31 >=1 & q35==1, 1,
                                                     ifelse(q17==1& q31 >=1 & q35==0, 1,
                                                     ifelse(q17==1& q31 ==0 & q35==1, 1,
                                                     ifelse(q17==0& q31 >=1 & q35==0, 2,
                                                     ifelse(q17==0& q31 ==0 & q35==1, 2,
                                                     ifelse(q17==1& q31 ==0 & q35==0, 2, NA))))))))
-#table(m4$shared_facilities)
+#table(monthly$shared_facilities)
 
 #### Assets continued: ownership of items
 # in q9_20_oth1, q9_20_oth2, q9_20_oth3 meatshelf (cupboard), dressing table (dresser), and sofa should earn 1 point, rickshaw should earn 2, 
-m4$q9_20_oth1<-as.character(m4$q9_20_oth1)
-m4$q9_20_oth2 <-as.character(m4$q9_20_oth2)
-m4$q9_20_oth3 <-as.character(m4$q9_20_oth3)
+monthly$q9_20_oth1<-as.character(monthly$q9_20_oth1)
+monthly$q9_20_oth2 <-as.character(monthly$q9_20_oth2)
+monthly$q9_20_oth3 <-as.character(monthly$q9_20_oth3)
 
 #recode spelling errors, everything that starts with M becomes MEAT SHELF, D becomes DRESSING TABLE
-#grep("^C", m4$q9_20_oth1, value=T) #to search for resopnses by start letter
+#grep("^C", monthly$q9_20_oth1, value=T) #to search for resopnses by start letter
 
-m4[grep("^M", m4$q9_20_oth1), "q9_20_oth1"] <- as.character("MEAT SHELF")
-m4[grep("^DRE", m4$q9_20_oth1), "q9_20_oth1"] <- as.character("DRESSING TABLE")
+monthly[grep("^M", monthly$q9_20_oth1), "q9_20_oth1"] <- as.character("MEAT SHELF")
+monthly[grep("^DRE", monthly$q9_20_oth1), "q9_20_oth1"] <- as.character("DRESSING TABLE")
 
-m4[grep("^IRON", m4$q9_20_oth2), "q9_20_oth2"] <- as.character("MEAT SHELF")
-m4[grep("^M", m4$q9_20_oth2), "q9_20_oth2"] <- as.character("MEAT SHELF")
-m4[grep("^DRE", m4$q9_20_oth2), "q9_20_oth2"] <- as.character("DRESSING TABLE")
+monthly[grep("^IRON", monthly$q9_20_oth2), "q9_20_oth2"] <- as.character("MEAT SHELF")
+monthly[grep("^M", monthly$q9_20_oth2), "q9_20_oth2"] <- as.character("MEAT SHELF")
+monthly[grep("^DRE", monthly$q9_20_oth2), "q9_20_oth2"] <- as.character("DRESSING TABLE")
 
-m4[grep("^M", m4$q9_20_oth3), "q9_20_oth3"] <- as.character("MEAT SHELF")
-m4[grep("^IRON", m4$q9_20_oth3), "q9_20_oth3"] <- as.character("MEAT SHELF")
+monthly[grep("^M", monthly$q9_20_oth3), "q9_20_oth3"] <- as.character("MEAT SHELF")
+monthly[grep("^IRON", monthly$q9_20_oth3), "q9_20_oth3"] <- as.character("MEAT SHELF")
 
-m4$q9_20_oth1p <- with(m4, ifelse(q9_20_oth1=="COMPUTER",3,
+monthly$q9_20_oth1p <- with(monthly, ifelse(q9_20_oth1=="COMPUTER",3,
                                                     ifelse(q9_20_oth1=="VEDEO CAMERA",2,
                                                     ifelse(q9_20_oth1=="STEEL MITSHAFE",1,
                                                     ifelse(q9_20_oth1=="DRESSING TABLE",1,
@@ -226,7 +216,7 @@ m4$q9_20_oth1p <- with(m4, ifelse(q9_20_oth1=="COMPUTER",3,
                                                     ifelse(q9_20_oth1=="RICKSHAW.",2,0 # in 9_20_oth2
                                                      )))))))))))
 
-m4$q9_20_oth2p <- with(m4, ifelse(q9_20_oth2=="COMPUTER",3,
+monthly$q9_20_oth2p <- with(monthly, ifelse(q9_20_oth2=="COMPUTER",3,
                                                     ifelse(q9_20_oth2=="VEDEO CAMERA",2,
                                                     ifelse(q9_20_oth2=="STEEL MITSHAFE",1,
                                                     ifelse(q9_20_oth2=="DRESSING TABLE",1,
@@ -238,7 +228,7 @@ m4$q9_20_oth2p <- with(m4, ifelse(q9_20_oth2=="COMPUTER",3,
                                                     ifelse(q9_20_oth2=="RICKSHAW.",2,0 # in 9_20_oth2
                                                         )))))))))))
 
-m4$q9_20_oth3p <- with(m4, ifelse(q9_20_oth3=="COMPUTER",3,
+monthly$q9_20_oth3p <- with(monthly, ifelse(q9_20_oth3=="COMPUTER",3,
                                                     ifelse(q9_20_oth3=="VEDEO CAMERA",2,
                                                     ifelse(q9_20_oth3=="STEEL MITSHAFE",1,
                                                     ifelse(q9_20_oth3=="DRESSING TABLE",1,
@@ -249,28 +239,80 @@ m4$q9_20_oth3p <- with(m4, ifelse(q9_20_oth3=="COMPUTER",3,
                                                     ifelse(q9_20_oth3=="SOFA SET",1,
                                                     ifelse(q9_20_oth3=="RICKSHAW.",2,0 # in 9_20_oth2
                                                         )))))))))))
-m4$q9_other_sum<-with(m4, q9_20_oth1p+q9_20_oth2p+q9_20_oth3p)
+monthly$q9_other_sum<-with(monthly, q9_20_oth1p+q9_20_oth2p+q9_20_oth3p)
 
-table(m4$q9_20_oth1)
+table(monthly$q9_20_oth1)
 #count assets
-m4$asset_score<-NA
-m4$asset_score<- (m4$q9_other_sum + 
-                             as.numeric(m4$q9_2) + as.numeric(m4$q9_3) +
-                             as.numeric(m4$q9_5) +  
-                             as.numeric(m4$q9_7) + as.numeric(m4$q9_8) +
-                             as.numeric(m4$q9_9) + 
-                             as.numeric(m4$q9_16) + as.numeric(m4$q9_18)+ 
-                             ((as.numeric(m4$q9_1) + as.numeric(m4$q9_6) +
-                                 as.numeric(m4$q9_10) + (as.numeric(m4$q9_11) + 
-                                                                    as.numeric(m4$q9_12) + as.numeric(m4$q9_14) + 
-                                                                    as.numeric(m4$q9_15 + as.numeric(m4$q9_17))*2) + 
-                                 ((as.numeric(m4$q9_13) + as.numeric(m4$q9_19) + 
-                                     m4$shared_facilities)*3))))
+monthly$asset_score<-NA
+monthly$asset_score<- (monthly$q9_other_sum + 
+                             as.numeric(monthly$q9_2) + as.numeric(monthly$q9_3) +
+                             as.numeric(monthly$q9_5) +  
+                             as.numeric(monthly$q9_7) + as.numeric(monthly$q9_8) +
+                             as.numeric(monthly$q9_9) + 
+                             as.numeric(monthly$q9_16) + as.numeric(monthly$q9_18)+ 
+                             ((as.numeric(monthly$q9_1) + as.numeric(monthly$q9_6) +
+                                 as.numeric(monthly$q9_10) + (as.numeric(monthly$q9_11) + 
+                                                                    as.numeric(monthly$q9_12) + as.numeric(monthly$q9_14) + 
+                                                                    as.numeric(monthly$q9_15 + as.numeric(monthly$q9_17))*2) + 
+                                 ((as.numeric(monthly$q9_13) + as.numeric(monthly$q9_19) + 
+                                     monthly$shared_facilities)*3))))
 
 #create column with asset quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
-m4$asset_score[is.na(m4$asset_score)]<-0
+monthly$asset_score[is.na(monthly$asset_score)]<-0
 
-m4$asset_quintile<-as.integer(cut(m4$asset_score, quantile(m4$asset_score, 
+monthly$asset_quintile<-as.integer(cut(monthly$asset_score, quantile(monthly$asset_score, 
                                                                              probs=0:5/5, include.lowest=TRUE)))
 
+# Calculate time that water was available during the previous 24 hours --------
 
+monthly$water_flow1_end<-strptime(monthly$water_point1.wa_flow1.wa_time1.aE,"%H:%M:%S")
+monthly$water_flow1_start<-strptime(monthly$water_point1.wa_flow1.wa_time1.aS,"%H:%M:%S")
+monthly$flow1<-difftime(monthly$water_flow1_start,monthly$water_flow1_end)
+
+View(monthly[,c("flow1","water_flow1_end", "water_flow1_start")])
+
+monthly$water_flow1_end1$hour<-monthly$water_flow1_end$hour +6
+
+monthly$water_flow1_end<-as.POSIXlt(monthly$water_point1.wa_flow1.wa_time1.aE, format="%H:%M:%S")$hour
+
+View(monthly[,c("water_point1.wa_avail1","water_point1.wa_flow1.wa_time1.aS",
+               "water_point1.wa_flow1.wa_time1.aE", "water_point1.wa_flow1.wa_time1a",  
+               "water_point1.wa_flow1.wa_time1.bS", "water_point1.wa_flow1.wa_time1.bE",
+               "water_point1.wa_flow1.wa_time1b",   "water_point1.wa_flow1.wa_time1.cS",
+               "water_point1.wa_flow1.wa_time1.cE", "water_point1.wa_flow1.wa_time1c","flow1")])
+
+monthly$water_end1<-with(monthly,ifelse(water_point1.wa_flow1.wa_time1.aE<water_point1.wa_flow1.wa_time1.aS,water_point1.wa_flow1.wa_time1.aE+24:00:00,water_point1.wa_flow1.wa_time1.aE))
+
+
+# Linear models -----------------------------------------------------------
+
+
+#first create month variable
+monthly$date_visit_character<-as.character(monthly$date_visit)
+temp<-strsplit(monthly$date_visit_character, "-")
+mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
+df <- as.data.frame(mat)
+colnames(df) <- c("year", "month", "day")
+monthly<- cbind(monthly,df)
+
+lm(monthly$daily_h2o_percapita~monthly$water_access_group)
+
+#model 1, 1= tap,tank 2= tap,no tank, 3=handpump, tank, 4= handpump no tank, 5= bucket tank
+model1=lmer(daily_h2o_percapita ~ month*water_access_group + (1|uniqueID) +(1|asset_score), data=monthly)
+summary(model1)
+model1.null=lmer(daily_h2o_percapita ~ water_access_group + (1|uniqueID)+(1|asset_score), data=monthly)
+summary(model.null)
+
+#model 2, 1= tap,tank 2= handpump, tank, 3= bucket tank 4= tap,no tank, 5= handpump no tank 
+model2=lmer(daily_h2o_percapita ~ month*water_access_group2 + (1|uniqueID), data=monthly)
+summary(model2)
+model2.null=lmer(daily_h2o_percapita ~ water_access_group2 + (1|uniqueID), data=monthly)
+summary(model2.null)
+
+#anova analysis to look for statistical significance 
+anova(model1,model1.null)
+anova(model2,model2.null)
+
+
+
+V
