@@ -8,9 +8,8 @@
 
 
 # Prepare workspace: if user == CHAR prepare Char's path, else: MAtthew's path
-ifelse(grepl("zrc340", getwd()),
-       NA,
-       rm(list = ls()) + NA)
+
+rm(list = ls())
 ifelse(grepl("zrc340", getwd()),
        baseline.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata",
        baseline.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata")
@@ -72,7 +71,7 @@ system.time({m3 <- hhCleanup(data = z, dateVisit = "date_visit", baseDate = "bas
 # FORMATTING --------------------------------------------------------------
 
 m3 <- m3[order(m3$HHID, m3$date_visit), ]
-y <- match(c('base_date.x', "phone.dist", 'with_date'), names(m3))
+y <- match(c('uniqueID', 'base_date', "phone.dist", 'with_date'), names(m3))
 x <- 1:ncol(m3)
 x <- x[-c(y)]
 m4<- m3[, c(y, x)]
