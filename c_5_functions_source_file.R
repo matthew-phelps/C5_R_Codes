@@ -90,14 +90,16 @@ hhCleanup <- function(data, dateVisit, baseDate, withdrawDate, phoneDate) {
 
 # M5 Functions ------------------------------------------------------------
 ptPerHHID <- function(x, end.date) {
-  # Caluclates person-time since either last monthly visit or phone.dis - depending
-  # on which was most recent.
+  # First section calculates person-time for HH where the phone was distributed
+  # before end.date, but the 1st monthly-visit occurs after end.date
   if (x$phone.dist[1] <=end.date && x$date_visit[1] > end.date) {
     x <- x[1,]
     x$pt[1] <- x$ppl[1] * as.numeric(end.date - x$phone.dist[1])
   } else {
     x <- x[x$date_visit <= end.date, ]
   }
+  # Caluclates person-time since either last monthly visit or phone.dis - depending
+  # on which was most recent.
   for (i in 1:nrow(x)) {
     if (i == 1 && x$date_visit[i] >= x$phone.dist[i] && nrow(x) > 1) {
       x$pt[i] <- x$ppl[i] * as.numeric(x$date_visit[i] - x$phone.dist[i])
@@ -114,6 +116,8 @@ ptPerHHID <- function(x, end.date) {
   } 
   return(x)
 }
+
+
 ptCalc <- function(x, end.date) {
   # Calculates person time over entire dataset. Uses 'ptPerHHID' function
   x <- x[x$phone.dist <= end.date, ]
