@@ -134,5 +134,12 @@ ptCalc <- function(x, end.date) {
 
 
 
-
+pt48hr <- function(x, end.date) {
+  # Calculates person time over entire dataset. Uses 'ptPerHHID' function
+  x <- x[(x$phone.dist <= end.date & x$date_visit <= end.date), ]
+  x$with_date[x$with_date > end.date] <- end.date 
+  x1 <- x[complete.cases(x[, 1:7]), ]
+  x1$pt48hr <- 2 * x1$ppl
+  x1
+}
 

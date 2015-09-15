@@ -46,7 +46,8 @@ m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date', 'phone.dist',
 
 
 # PERSONE TIME for each household during each time-frame
-
+# PERSON TIME 48-hr visits
+m48hr <- pt48hr(m4, end.date = endDate)
 m5 <- ptCalc(m4, end.date = endDate)
 
 
@@ -76,8 +77,11 @@ boxplot(households$pt_hh)
 
 # SUM ---------------------------------------------------------------------
 
-pt.days <- sum(m5$pt)
-pt.years <- pt.days / 365
+pt.days.phone <- sum(m5$pt)
+pt.years.phone <- pt.days / 365
+
+pt.days.48hr <- sum(m48hr$pt48hr)
+pt.years.48hr <- pt.days.48hr / 365
 
 # WRITE TO FILE -----------------------------------------------------------
 
