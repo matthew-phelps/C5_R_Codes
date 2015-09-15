@@ -10,9 +10,7 @@
 
  
 # Prepare Matthew's workspace if user == MATTHEW. If else, setwd to Chars dir
-ifelse(grepl("zrc340", getwd()),
-       NA,
-       rm(list = ls()))
+rm(list = ls())
 ifelse(grepl("zrc340", getwd()),
        data.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\month_all.Rdata",
        data.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata")
