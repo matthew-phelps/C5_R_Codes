@@ -125,6 +125,14 @@ sub<-monthly[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.
 # order(is.na(MonthlyAll$cont1.cont1_size))
 
 monthly$bath_pc<-with(monthly,(other_water_in.adult_bathe_in+other_water_out.adult_bathe_out+other_water_in.child_bathe_in+other_water_out.child_bathe_out)/monthly$ppl)
+#check that all houses with child baths have children
+monthly$bath_child<-with(monthly,(other_water_in.child_bathe_in+other_water_out.child_bathe_out))
+write.csv2(monthly[monthly$bath_child>=1&monthly$children==0,c("new_per","new_per1_age","HHID", 
+          "date_visit", "FRA","ppl","other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
+          "other_water_in.child_bathe_in","other_water_out.child_bathe_out")],
+           file="Too many child baths.csv")
+
+monthly[monthly$HHID==246&monthly$new_per==2,c("new_per2_age")]
 
 setwd("C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\Sent to bangladesh for clarification")
 write.csv2(monthly[monthly$bath_pc>3,c("HHID", "date_visit", "FRA","ppl","other_water_in.adult_bathe_in","other_water_out.adult_bathe_out","other_water_in.child_bathe_in","other_water_out.child_bathe_out")], 
@@ -132,21 +140,27 @@ write.csv2(monthly[monthly$bath_pc>3,c("HHID", "date_visit", "FRA","ppl","other_
 
 
 monthly$dishes<-with(monthly,(other_water_in.wash_plate_in+other_water_out.wash_plate_out))
-range(monthly$dishes)
+write.csv2(monthly[monthly$dishes>5,c("HHID", "date_visit", "FRA","ppl","other_water_in.wash_plate_in",
+                                             "other_water_out.wash_plate_out")],file="Too many dishes.csv")
 
+monthly$clothes<-with(monthly,(other_water_in.wash_clothes_in+other_water_out.wash_clothes_out))
+write.csv2(monthly[monthly$clothes>5,c("HHID", "date_visit", "FRA","ppl","other_water_in.wash_clothes_in",
+                                      "other_water_out.wash_clothes_out")],file="Too many clothes.csv")
+
+list(monthly[monthly$clothes>0,])
+  
 monthly[which(monthly$other_water_in.child_bathe_in==6&monthly$uniqueID=="269_2015-02-17"),"other_water_in.child_bathe_in"]<-0
 
-monthly$dat
+
 
 monthly$daily_volume<-with(monthly, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
                                                        (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
                                                      +(cont6.cont6_size*cont6.cont6_times)+(cont7.cont7_size*cont7.cont7_times)+(cont8.cont8_size*cont8.cont8_times)
                                                      +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
                                                      +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times)
-                                                     +((other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)*37) + #will probably change once more detailed information is received from Rebeca
-                                                       ((other_water_in.wash_plate_in+other_water_out.wash_plate_out)*25) +
-                                                       ((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*14)+
-                                                       ((other_water_in.wash_clothes_in+other_water_out.wash_clothes_out)*43))                              
+                                                     +((other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)*37)  #will probably change once more detailed information is received from Rebeca
+                                                     +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*14)
+                                                     +((other_water_in.wash_clothes_in+other_water_out.wash_clothes_out)*43))                              
                               
 
 #average water consumption per activity in liters: adult bath= 37, child bath = 14, wash dishes = 25, wash clothes =43
