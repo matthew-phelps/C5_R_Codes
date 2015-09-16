@@ -14,6 +14,11 @@ ifelse(grepl("zrc340", getwd()),
 load(m4.path)
 load(Q11.path)
 
+#subset only data from monthly visits (gets ride of unmatched x-2 entries)
+monthly<-m4[which(!(is.na(m4$FRA))),]
+monthly<-as.data.frame(monthly)
+monthly[is.na(monthly)]<-0
+
 # Household size at baseline----------------------------------------------------------
 
 monthly$children<-monthly$children_U5+monthly$children_5_17
@@ -27,29 +32,49 @@ monthly$total_hh_members<- monthly$children + monthly$adult
 #use_bucket, is a bucket needed to withdraw water? 1=yes, 0=no
 #m4$distance_to_source1, anything over 20 meters =21
 #m4$daily_volume<-as.numeric(m4$cont1.cont1_size)*(as.numeric(m4$cont1.cont1_times))
+
 #for primary water source 
 
-m4$water_access_group<-with(m4, ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1==0,1, #tap, tank inside home
+
+monthly$water_access_group_d<-with(monthly, ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1==0,1, #tap, tank inside home
                                                         ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,2, #tap, tank 0-9 meters
                                                         ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1>=10,3, #tap, tank further than 10 meters
-                                                        ifelse(q14_recoded==2&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,4, #handpump, well 0-9 meters
-                                                        ifelse(q14_recoded==2&q15_recoded==1&distance_to_source1>=10,5, #handpump, well further than 10 meters
-                                                        ifelse(q14_recoded==3&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,6, #bucket, well 0-9 meters
-                                                        ifelse(q14_recoded==3&q15_recoded==1&distance_to_source1>=10,7, #bucket, well further than 10 meters
-                                                        ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1==0,8, # tap, no tank, inside home
-                                                        ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1>0&distance_to_source1<10,9, #tap, no tank, 1-9 meters
-                                                        ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1>=10,10,777))))))))))) #tap, no tank, >10 meters
+                                                        ifelse(q14_recoded==2&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,7, #handpump, well 0-9 meters
+                                                        ifelse(q14_recoded==2&q15_recoded==1&distance_to_source1>=10,8, #handpump, well further than 10 meters
+                                                        ifelse(q14_recoded==2&q15_recoded==0&distance_to_source1>0&distance_to_source1<10,9, #handpump, no well, 0-9 meters
+                                                        ifelse(q14_recoded==2&q15_recoded==0&distance_to_source1>=10,10, #handpump, no well, further than 10 meters
+                                                        ifelse(q14_recoded==3&distance_to_source1>0&distance_to_source1<10,11, #bucket, (well implied) 0-9 meters
+                                                        ifelse(q14_recoded==3&distance_to_source1>=10,12, #bucket, (well implied) further than 10 meters
+                                                        ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1==0,4, # tap, no tank, inside home
+                                                        ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1>0&distance_to_source1<10,5, #tap, no tank, 1-9 meters
+                                                        ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1>=10,6,777))))))))))))) #tap, no tank, >10 meters
 
-#preliminary analysis based on primary water source
-m4$water_access_group<-with(m4, ifelse(q14_recoded==1&q15_recoded==1,1, #tap, tank 
+monthly$water_access_group_d2<-with(monthly, ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1==0,1, #tap, tank inside home
+                                         ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,2, #tap, tank 0-9 meters
+                                                ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1>=10,3, #tap, tank further than 10 meters
+                                                       ifelse(q14_recoded==2&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,4, #handpump, well 0-9 meters
+                                                              ifelse(q14_recoded==2&q15_recoded==1&distance_to_source1>=10,5, #handpump, well further than 10 meters
+                                                                     ifelse(q14_recoded==2&q15_recoded==0&distance_to_source1>0&distance_to_source1<10,6, #handpump, no well, 0-9 meters
+                                                                            ifelse(q14_recoded==2&q15_recoded==0&distance_to_source1>=10,7, #handpump, no well, further than 10 meters
+                                                                                   ifelse(q14_recoded==3&distance_to_source1>0&distance_to_source1<10,8, #bucket, (well implied) 0-9 meters
+                                                                                          ifelse(q14_recoded==3&distance_to_source1>=10,9, #bucket, (well implied) further than 10 meters
+                                                                                                 ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1==0,10, # tap, no tank, inside home
+                                                                                                        ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1>0&distance_to_source1<10,11, #tap, no tank, 1-9 meters
+                                                                                                               ifelse(q14_recoded==1&q15_recoded==0&distance_to_source1>=10,12,777))))))))))))) #tap, no tank, >10 meters                                         
+                                       
+#preliminary analysis based on primary water source, means of water extraction and presence of tank
+monthly$water_access_group<-with(monthly, ifelse(q14_recoded==1&q15_recoded==1,1, #tap, tank 
                                        ifelse(q14_recoded==1&q15_recoded==0,2, #tap, no tank 
                                               ifelse(q14_recoded==2&q15_recoded==1,3, #hand pump, tank 
-                                                     ifelse(q14_recoded==2&q15_recoded==0,4, #handpump, no tank
+                                                     ifelse(q14_recoded==2&q15_recoded==0,3, #handpump, no tank
                                                             ifelse(q14_recoded==3&q15_recoded==1,5, #bucket,tank
                                                                    ifelse(q14_recoded==3&q15_recoded==0,5,777))))))) #bucket, well 
+
+#monthly[monthly$water_access_group==777,c("q14_recoded")]
+
                                                                           
-#preliminary analysis based on primary water source
-m4$water_access_group2<-with(m4, ifelse(q14_recoded==1&q15_recoded==1,1, #tap, tank 
+#preliminary analysis based on primary water source, means of water extraction and presence of tank
+monthly$water_access_group2<-with(monthly, ifelse(q14_recoded==1&q15_recoded==1,1, #tap, tank 
                                        ifelse(q14_recoded==1&q15_recoded==0,4, #tap, no tank 
                                               ifelse(q14_recoded==2&q15_recoded==1,2, #hand pump, tank 
                                                      ifelse(q14_recoded==2&q15_recoded==0,5, #handpump, no tank
@@ -57,34 +82,35 @@ m4$water_access_group2<-with(m4, ifelse(q14_recoded==1&q15_recoded==1,1, #tap, t
                                                                    ifelse(q14_recoded==3&q15_recoded==0,3,777))))))) #bucket, well 
 
 
-#sub<-m4[m4$water_access_group==777,c("q14_recoded","q15_recoded","distance_to_source1")]
+
+#sub<-monthly[monthly$water_access_group==777,c("q14_recoded","q15_recoded","distance_to_source1")]
 
 #average water consumption per activity in liters: adult bath= 37, child bath = 14, wash dishes = 25, wash clothes =43
-m4$other_water_in.adult_bathe_in<-as.numeric(m4$other_water_in.adult_bathe_in)
-m4$other_water_out.adult_bathe_out<-as.numeric(m4$other_water_out.adult_bathe_out)
-m4$other_water_in.wash_plate_in<-as.numeric(m4$other_water_in.wash_plate_in)
-m4$other_water_out.wash_plate_out<-as.numeric(m4$other_water_out.wash_plate_out)
-m4$other_water_out.child_bathe_out<-as.numeric(m4$other_water_out.child_bathe_out)
-m4$other_water_in.child_bathe_in<-as.numeric(m4$other_water_in.child_bathe_in)
-m4$other_water_in.wash_clothes_in<-as.numeric(m4$other_water_in.wash_clothes_in)
-m4$other_water_out.wash_clothes_out<-as.numeric(m4$other_water_out.wash_clothes_out)
+monthly$other_water_in.adult_bathe_in<-as.numeric(monthly$other_water_in.adult_bathe_in)
+monthly$other_water_out.adult_bathe_out<-as.numeric(monthly$other_water_out.adult_bathe_out)
+monthly$other_water_in.wash_plate_in<-as.numeric(monthly$other_water_in.wash_plate_in)
+monthly$other_water_out.wash_plate_out<-as.numeric(monthly$other_water_out.wash_plate_out)
+monthly$other_water_out.child_bathe_out<-as.numeric(monthly$other_water_out.child_bathe_out)
+monthly$other_water_in.child_bathe_in<-as.numeric(monthly$other_water_in.child_bathe_in)
+monthly$other_water_in.wash_clothes_in<-as.numeric(monthly$other_water_in.wash_clothes_in)
+monthly$other_water_out.wash_clothes_out<-as.numeric(monthly$other_water_out.wash_clothes_out)
 
-#subset only data from monthly visits
-monthly<-m4[which(!(is.na(m4$FRA))),]
-monthly<-as.data.frame(monthly)
-monthly[is.na(monthly)]<-0
 
-# sub<-monthly[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
-#                               "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
-#                               "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
-#                               "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size",
-#                               "cont9.cont9_times","cont10.cont10_size","cont10.cont10_times","cont11.cont11_size",
-#                               "cont11.cont11_times","cont12.cont12_size","cont12.cont12_times","cont13.cont13_size",
-#                               "cont13.cont13_times","cont14.cont14_size","cont14.cont14_times",                              
-#                               "other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
-#                               "other_water_in.wash_plate_in","other_water_out.wash_plate_out",
-#                               "other_water_out.child_bathe_out","other_water_in.child_bathe_in",
-#                               "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")][is.na(m4[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
+
+
+
+sub<-monthly[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
+                              "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
+                              "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
+                              "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size",
+                              "cont9.cont9_times","cont10.cont10_size","cont10.cont10_times","cont11.cont11_size",
+                              "cont11.cont11_times","cont12.cont12_size","cont12.cont12_times","cont13.cont13_size",
+                              "cont13.cont13_times","cont14.cont14_size","cont14.cont14_times",                              
+                              "other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
+                              "other_water_in.wash_plate_in","other_water_out.wash_plate_out",
+                              "other_water_out.child_bathe_out","other_water_in.child_bathe_in",
+                              "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")]
+#[is.na(monthly[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
 #                           "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
 #                           "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
 #                           "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size",
@@ -97,6 +123,21 @@ monthly[is.na(monthly)]<-0
 #                           "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")])]<-0
 # 
 # order(is.na(MonthlyAll$cont1.cont1_size))
+
+monthly$bath_pc<-with(monthly,(other_water_in.adult_bathe_in+other_water_out.adult_bathe_out+other_water_in.child_bathe_in+other_water_out.child_bathe_out)/monthly$ppl)
+
+setwd("C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\Sent to bangladesh for clarification")
+write.csv2(monthly[monthly$bath_pc>3,c("HHID", "date_visit", "FRA","ppl","other_water_in.adult_bathe_in","other_water_out.adult_bathe_out","other_water_in.child_bathe_in","other_water_out.child_bathe_out")], 
+           file="Too many baths.csv")
+
+
+monthly$dishes<-with(monthly,(other_water_in.wash_plate_in+other_water_out.wash_plate_out))
+range(monthly$dishes)
+
+monthly[which(monthly$other_water_in.child_bathe_in==6&monthly$uniqueID=="269_2015-02-17"),"other_water_in.child_bathe_in"]<-0
+
+monthly$dat
+
 monthly$daily_volume<-with(monthly, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
                                                        (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
                                                      +(cont6.cont6_size*cont6.cont6_times)+(cont7.cont7_size*cont7.cont7_times)+(cont8.cont8_size*cont8.cont8_times)
@@ -136,7 +177,7 @@ summary(waterusebysource)
 
 # Household structure -----------------------------------------------------
 #q10 nuclear =1, multiple families =2, unrelated persons = 3, nuclear family with 1+ unrelated = 4, other=777
-#table(m4$q10oth)
+#table(monthly$q10oth)
 monthly[monthly$q10oth=="SINGLE","q10"]<-3 #single is mess hall, same as unrelated people
 monthly[monthly$q10oth=="SINGLE.","q10"]<-3 #single is mess hall, same as unrelated people
 monthly[monthly$q10oth=="SINGLE (MESS)","q10"]<-3 #single is mess hall, same as unrelated people
@@ -298,6 +339,34 @@ monthly$water_end1<-with(monthly,ifelse(water_point1.wa_flow1.wa_time1.aE<water_
 monthly$allday_h2o <-with(monthly, ifelse(water_point1.wa_flow1.wa_time1.aE=="17:59:00"&
                                             water_point1.wa_flow1.wa_time1.aS=="18:00:00", 1, 0))
 
+
+# linear regressions -------------------------------------------------------
+#look for relationships between water consumption and different variables
+lmq15<-lm(daily_h2o_percapita~q15_recoded,monthly) # p=0.2319
+lmq14<-lm(daily_h2o_percapita~q14_recoded,monthly) # p=0.381
+lmq14a<-lm(daily_h2o_percapita~q14a_recoded,monthly)#p=0.5836
+monthly$h20_distance_coded<-with(monthly, ifelse(distance_to_source1==0,1,
+                                   ifelse(distance_to_source1>0&distance_to_source1<=10,2,
+                                          ifelse(distance_to_source1>10&distance_to_source1<=20,3,4))))
+
+lm_watergroupd<-lm(daily_h2o_percapita~water_access_group_d,monthly)#p=0.3102
+lm_watergroupd2<-lm(daily_h2o_percapita~water_access_group_d2,monthly) #p=0.2393
+
+lm_watergroup1<-lm(daily_h2o_percapita~water_access_group,monthly) #p=0.03695 0.2928
+lm_watergroup2<-lm(daily_h2o_percapita~water_access_group2,monthly)#p=0.3109
+
+lm_dist<-lm(daily_h2o_percapita~h20_distance_coded,monthly)# p=0.8836
+monthly$h2o_inside_home<-with(monthly, ifelse(distance_to_source1==0,1,2))
+lm_h2oinsidehome<-lm(daily_h2o_percapita~h2o_inside_home,monthly)# p=0.4038
+summary(lm_watergroup1)
+
+with(monthly,table(q14a==2~q15_recoded))
+summary(monthly[monthly$q14a_recoded==2&monthly$allday_h2o==1&monthly$q15_recoded==1,]) #100, 82 of which have tanks
+summary(monthly[monthly$q14a_recoded==2&monthly$allday_h2o==0&monthly$q15_recoded==1,]) #762, 645 of which have tanks
+summary(monthly[monthly$q14a_recoded==2&monthly$q15_recoded==1,])# 727
+
+####use boxplots here#### boxplot(frequency ~ attitude*gender,
+##col=c("white","lightgray"),politeness)
 # Linear models -----------------------------------------------------------
 
 
