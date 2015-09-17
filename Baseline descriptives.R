@@ -8,8 +8,11 @@ ifelse(grepl("zrc340", getwd()),
        Q11.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\Q11_all.Rdata",
        Q11.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Q11_all.Rdata")
 ifelse(grepl("zrc340", getwd()), 
-       m4.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata",
-       m4.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata")
+       m4.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata",
+       m4.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata")
+ifelse(grepl("zrc340", getwd()), 
+       data.out.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\monthly-water.Rdata",
+       data.out.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-water.Rdata")
 
 load(m4.path)
 load(Q11.path)
@@ -199,7 +202,7 @@ waterusebysource<-lm(monthly$h2o_percap_quintile~monthly$q14a_recoded) #WASA, DT
 summary(waterusebysource)
 
 
-boxplot(daily_h2o_percapita~month, data=monthly,)
+boxplot(daily_h2o_percapita~month, data=monthly)
 
 #summary(monthly$daily_h2o_percapita)
 
@@ -372,6 +375,11 @@ monthly$water_end1<-with(monthly,ifelse(water_point1.wa_flow1.wa_time1.aE<water_
 #is there 24 hours water access
 monthly$allday_h2o <-with(monthly, ifelse(water_point1.wa_flow1.wa_time1.aE=="17:59:00"&
                                             water_point1.wa_flow1.wa_time1.aS=="18:00:00", 1, 0))
+
+
+
+save(monthly, file = monthly.out.path)
+
 
 
 # linear regressions -------------------------------------------------------
