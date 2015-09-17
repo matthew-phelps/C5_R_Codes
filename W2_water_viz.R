@@ -28,6 +28,7 @@ boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group =
 boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 5, ])
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 #plot a subset of unique ids
@@ -39,6 +40,12 @@ sub<-sub[order(sub$year.month),]
 sub$month<-formatC(sub$month,width=2,format='d', flag = 0)
 sub$year.month<-as.numeric(with(sub, ifelse(month=="09"|month=="10"|month=="11"|month=="12",paste("14.",month,sep=""),paste("15.",month,sep=""))))
 
+=======
+nrow(monthly[monthly$water_access_group == 1, ])
+nrow(monthly[monthly$water_access_group == 2, ])
+nrow(monthly[monthly$water_access_group == 3, ])
+nrow(monthly[monthly$water_access_group == 5, ])
+>>>>>>> origin/master
 
 nuniqueid<-max(sub$slno.1) #create number of lines, slno is a unique number created during baseline phase to merge baselines and is numeric
 xrange<-range(sub$year.month)
