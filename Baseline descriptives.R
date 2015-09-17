@@ -33,6 +33,13 @@ monthly$total_hh_members<- monthly$children + monthly$adult
 #m4$distance_to_source1, anything over 20 meters =21
 #m4$daily_volume<-as.numeric(m4$cont1.cont1_size)*(as.numeric(m4$cont1.cont1_times))
 
+#first create month variable
+monthly$date_visit_character<-as.character(monthly$date_visit)
+temp<-strsplit(monthly$date_visit_character, "-")
+mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
+df <- as.data.frame(mat)
+colnames(df) <- c("year", "month", "day")
+monthly<- cbind(monthly,df)
 #for primary water source 
 
 
@@ -95,21 +102,18 @@ monthly$other_water_in.child_bathe_in<-as.numeric(monthly$other_water_in.child_b
 monthly$other_water_in.wash_clothes_in<-as.numeric(monthly$other_water_in.wash_clothes_in)
 monthly$other_water_out.wash_clothes_out<-as.numeric(monthly$other_water_out.wash_clothes_out)
 
-
-
-
-
-sub<-monthly[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
-                              "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
-                              "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
-                              "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size",
-                              "cont9.cont9_times","cont10.cont10_size","cont10.cont10_times","cont11.cont11_size",
-                              "cont11.cont11_times","cont12.cont12_size","cont12.cont12_times","cont13.cont13_size",
-                              "cont13.cont13_times","cont14.cont14_size","cont14.cont14_times",                              
-                              "other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
-                              "other_water_in.wash_plate_in","other_water_out.wash_plate_out",
-                              "other_water_out.child_bathe_out","other_water_in.child_bathe_in",
-                              "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")]
+# 
+# sub<-monthly[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
+#                               "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
+#                               "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
+#                               "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size",
+#                               "cont9.cont9_times","cont10.cont10_size","cont10.cont10_times","cont11.cont11_size",
+#                               "cont11.cont11_times","cont12.cont12_size","cont12.cont12_times","cont13.cont13_size",
+#                               "cont13.cont13_times","cont14.cont14_size","cont14.cont14_times",                              
+#                               "other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
+#                               "other_water_in.wash_plate_in","other_water_out.wash_plate_out",
+#                               "other_water_out.child_bathe_out","other_water_in.child_bathe_in",
+#                               "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")]
 #[is.na(monthly[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
 #                           "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
 #                           "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size",
@@ -124,6 +128,7 @@ sub<-monthly[c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.
 # 
 # order(is.na(MonthlyAll$cont1.cont1_size))
 
+#Checking data on activities done without a container
 monthly$bath_pc<-with(monthly,(other_water_in.adult_bathe_in+other_water_out.adult_bathe_out+other_water_in.child_bathe_in+other_water_out.child_bathe_out)/monthly$ppl)
 #check that all houses with child baths have children
 monthly$bath_child<-with(monthly,(other_water_in.child_bathe_in+other_water_out.child_bathe_out))
@@ -140,14 +145,16 @@ write.csv2(monthly[monthly$bath_pc>3,c("HHID", "date_visit", "FRA","ppl","other_
 
 
 monthly$dishes<-with(monthly,(other_water_in.wash_plate_in+other_water_out.wash_plate_out))
-write.csv2(monthly[monthly$dishes>5,c("HHID", "date_visit", "FRA","ppl","other_water_in.wash_plate_in",
-                                             "other_water_out.wash_plate_out")],file="Too many dishes.csv")
+write.csv2(monthly[monthly$dishes>0,c("HHID", "date_visit", "FRA","ppl","other_water_in.wash_plate_in",
+                                             "other_water_out.wash_plate_out")],file="Washed dishes.csv")
+
+monthly[monthly$dishes>0,c("HHID")]
 
 monthly$clothes<-with(monthly,(other_water_in.wash_clothes_in+other_water_out.wash_clothes_out))
 write.csv2(monthly[monthly$clothes>5,c("HHID", "date_visit", "FRA","ppl","other_water_in.wash_clothes_in",
                                       "other_water_out.wash_clothes_out")],file="Too many clothes.csv")
 
-list(monthly[monthly$clothes>0,])
+range(monthly[monthly$clothes>0,c("clothes")])
   
 monthly[which(monthly$other_water_in.child_bathe_in==6&monthly$uniqueID=="269_2015-02-17"),"other_water_in.child_bathe_in"]<-0
 
@@ -159,15 +166,26 @@ monthly$daily_volume<-with(monthly, (cont1.cont1_size*cont1.cont1_times)+(cont2.
                                                      +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
                                                      +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times)
                                                      +((other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)*37)  #will probably change once more detailed information is received from Rebeca
-                                                     +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*14)
-                                                     +((other_water_in.wash_clothes_in+other_water_out.wash_clothes_out)*43))                              
-                              
+                                                     +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*14))
+                                                                                   
+                           
 
 #average water consumption per activity in liters: adult bath= 37, child bath = 14, wash dishes = 25, wash clothes =43
 #create H20 per capita variable
 
 monthly$ppl<-ifelse(monthly$ppl==0,monthly$total_HH_members,monthly$ppl)
 monthly$daily_h2o_percapita<-with(monthly, daily_volume/ppl)
+
+#check values
+View(monthly[monthly$daily_h2o_percapita>200, c("cont1.cont1_size","cont1.cont1_times","cont2.cont2_size","cont2.cont2_times",                           
+                                          "cont3.cont3_size","cont3.cont3_times","cont4.cont4_size","cont4.cont4_times",
+                                          "cont5.cont5_size","cont5.cont5_times","cont6.cont6_size","cont6.cont6_times","cont7.cont7_size", 
+                                          "cont7.cont7_times", "cont8.cont8_size","cont8.cont8_times","cont9.cont9_size", 
+                                          "cont9.cont9_times","cont10.cont10_size","cont10.cont10_times","cont11.cont11_size",
+                                          "cont11.cont11_times","cont12.cont12_size","cont12.cont12_times","cont13.cont13_size",
+                                                                     "cont13.cont13_times","cont14.cont14_size","cont14.cont14_times",                              
+                                                                     "other_water_in.adult_bathe_in","other_water_out.adult_bathe_out",
+                                                                     "other_water_out.child_bathe_out","other_water_in.child_bathe_in")])   
 
 #quintiles based on daily H20 consumption per capita
 monthly$h2o_percap_quintile<-as.integer(cut(monthly$daily_h2o_percapita,
@@ -180,6 +198,8 @@ summary(waterusebytap)
 waterusebysource<-lm(monthly$h2o_percap_quintile~monthly$q14a_recoded) #WASA, DTW, STW
 summary(waterusebysource)
 
+
+boxplot(daily_h2o_percapita~month, data=monthly,)
 
 #summary(monthly$daily_h2o_percapita)
 
@@ -384,15 +404,9 @@ summary(monthly[monthly$q14a_recoded==2&monthly$q15_recoded==1,])# 727
 # Linear models -----------------------------------------------------------
 
 
-#first create month variable
-monthly$date_visit_character<-as.character(monthly$date_visit)
-temp<-strsplit(monthly$date_visit_character, "-")
-mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
-df <- as.data.frame(mat)
-colnames(df) <- c("year", "month", "day")
-monthly<- cbind(monthly,df)
 
-lm(monthly$daily_h2o_percapita~monthly$water_access_group)
+
+
 
 #model 1, 1= tap,tank 2= tap,no tank, 3=handpump, tank, 4= handpump no tank, 5= bucket tank
 model1=lmer(daily_h2o_percapita ~ month*water_access_group + (1|uniqueID) +(1|asset_score), data=monthly)
