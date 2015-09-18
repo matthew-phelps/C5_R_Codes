@@ -9,7 +9,7 @@ ifelse(grepl("zrc340", getwd()),
        water.usage.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\monthly-water.Rdata",
        water.usage.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-water.Rdata")
 
-
+library(ggplot2)
 
 # LOAD DATA ---------------------------------------------------------------
 
@@ -45,18 +45,12 @@ xrange<-range(sub$year.month)
 yrange<-range(sub$daily_h2o_percapita)
 
 plot(daily_h2o_percapita~date_visit,data = sub, xlab="Month",ylab="Daily water consumption per capita" )
-colors<-rainbow(nuniqueid)
-linetype<- c(1:nuniqueid)
 
 
-#create lines
-for (i in 1:nuniqueid) { 
-  uniqueID <- subset(sub, nuniqueid==i) 
-  lines(sub$year.month, sub$daily_h2o_percapita, type="l",
-        lty=linetype[i]) 
-}
+# GGPLOT ------------------------------------------------------------------
 
-
-
+# Use ggplot function in the 'ggplot2' package 
+ggplot(data = sub, aes(x = date_visit, y = daily_h2o_percapita)) +
+  geom_line(aes( color = uniqueID))
 
 
