@@ -78,7 +78,7 @@ boxplot(households$pt_hh)
 # SUM ---------------------------------------------------------------------
 
 pt.days.phone <- sum(m5$pt)
-pt.years.phone <- pt.days / 365
+pt.years.phone <- pt.days.phone / 365
 
 pt.days.48hr <- sum(m48hr$pt48hr)
 pt.years.48hr <- pt.days.48hr / 365
