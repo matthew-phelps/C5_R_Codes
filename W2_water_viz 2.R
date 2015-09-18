@@ -29,21 +29,22 @@ boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group =
 
 
 
-#plot a subset of unique ids
+# Plot a subset of unique ids
 sub<-monthly[monthly$daily_h2o_percapita<250&monthly$daily_h2o_percapita>0,] #get rid of outliers 
 sub <- sub[sub$slno.1>100&sub$slno.1<250,]# assuming random assingment of numbers (which it was; there was no logical system to this)
-sub<-sub[order(sub$year.month),]
+
 
 #plotting based on month doesn't work because we started in 2014. Create year.month variable to get dates in the correct order
 sub$month<-formatC(sub$month,width=2,format='d', flag = 0)
 sub$year.month<-as.numeric(with(sub, ifelse(month=="09"|month=="10"|month=="11"|month=="12",paste("14.",month,sep=""),paste("15.",month,sep=""))))
+sub<-sub[order(sub$year.month),]
 
-
+head(sub$year.month)
 nuniqueid<-max(sub$slno.1) #create number of lines, slno is a unique number created during baseline phase to merge baselines and is numeric
 xrange<-range(sub$year.month)
 yrange<-range(sub$daily_h2o_percapita)
 
-plot(daily_h2o_percapita~year.month,data = monthly, xlab="Month",ylab="Daily water consumption per capita" )
+plot(daily_h2o_percapita~date_visit,data = sub, xlab="Month",ylab="Daily water consumption per capita" )
 colors<-rainbow(nuniqueid)
 linetype<- c(1:nuniqueid)
 
