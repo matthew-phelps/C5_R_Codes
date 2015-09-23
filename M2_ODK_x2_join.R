@@ -14,19 +14,19 @@ ifelse(grepl("zrc340", getwd()),
        x2.path <- "C:/Users/zrc340/Desktop/Dropbox/C5 data/C5 Field Operations data/X-2 Monthly visit tracking sheet",
        x2.path <-"C:\\Users\\wrz741\\Dropbox\\C5 Field Operations data\\X-2 Monthly visit tracking sheet")
 ifelse(grepl("zrc340", getwd()),
-       odk <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\month_all.Rdata",
+       odk <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\month_all.Rdata",
        odk <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\month_all.Rdata")
 ifelse(grepl("zrc340", getwd()),
-       data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata",
+       data.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata",
        data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-odk-x2-joined.Rdata")
 ifelse(grepl("zrc340", getwd()),
-       not.in.odk.csv.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\missing_from_ODK.csv",
+       not.in.odk.csv.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\missing_from_ODK.csv",
        not.in.odk.csv.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\missing_from_ODK.csv")
 ifelse(grepl("zrc340", getwd()),
-       not.in.X2.csv.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\Rdata\\missing_from_X-2.csv",
+       not.in.X2.csv.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\missing_from_X-2.csv",
        not.in.X2.csv.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\missing_from_X-2.csv")
 ifelse(grepl("zrc340", getwd()),
-       functions.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\c_5_functions_source_file.R",
+       functions.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\c_5_functions_source_file.R",
        functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
 
 # 1.) LOAD FILES ----------------------------------------------------------
