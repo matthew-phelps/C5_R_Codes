@@ -22,6 +22,15 @@ monthly<-m4[which(!(is.na(m4$FRA))),]
 monthly<-as.data.frame(monthly)
 monthly[is.na(monthly)]<-0
 
+#variables that will be used
+monthly$month1<-formatC(monthly$month,width=2,format='d', flag = 0)
+
+monthly$year.month<-as.numeric(with(monthly, ifelse(month1=="09"|month1=="10"|month1=="11"|month1=="12",paste("14.",month,sep=""),paste("15.",month,sep=""))))
+
+monthly$season<-with(monthly, ifelse(month=="01"|month=="02"|month=="03",1,
+                                     ifelse(month=="04"|month=="05"|month=="06",2,
+                                            ifelse(month=="07"|month=="08"|month=="09",3,4))))
+
 # Household size at baseline----------------------------------------------------------
 
 monthly$children<-monthly$children_U5+monthly$children_5_17
@@ -133,6 +142,8 @@ monthly$other_water_out.wash_clothes_out<-as.numeric(monthly$other_water_out.was
 #                           "other_water_in.wash_clothes_in","other_water_out.wash_clothes_out")])]<-0
 # 
 # order(is.na(MonthlyAll$cont1.cont1_size))
+
+
 
 #Checking data on activities done without a container
 monthly$bath_pc<-with(monthly,(other_water_in.adult_bathe_in+other_water_out.adult_bathe_out+other_water_in.child_bathe_in+other_water_out.child_bathe_out)/monthly$ppl)
@@ -329,14 +340,13 @@ table(monthly$q9_20_oth1)
 monthly$asset_score<-NA
 monthly$asset_score<- (monthly$q9_other_sum + 
                              as.numeric(monthly$q9_2) + as.numeric(monthly$q9_3) +
-                             as.numeric(monthly$q9_5) +  
-                             as.numeric(monthly$q9_7) + as.numeric(monthly$q9_8) +
-                             as.numeric(monthly$q9_9) + 
+                             as.numeric(monthly$q9_5) + as.numeric(monthly$q9_7) + 
+                             as.numeric(monthly$q9_8) + as.numeric(monthly$q9_9) + 
                              as.numeric(monthly$q9_16) + as.numeric(monthly$q9_18)+ 
                              ((as.numeric(monthly$q9_1) + as.numeric(monthly$q9_6) +
                                  as.numeric(monthly$q9_10) + (as.numeric(monthly$q9_11) + 
-                                                                    as.numeric(monthly$q9_12) + as.numeric(monthly$q9_14) + 
-                                                                    as.numeric(monthly$q9_15 + as.numeric(monthly$q9_17))*2) + 
+                                 as.numeric(monthly$q9_12) + as.numeric(monthly$q9_14) + 
+                                 as.numeric(monthly$q9_15 + as.numeric(monthly$q9_17))*2) + 
                                  ((as.numeric(monthly$q9_13) + as.numeric(monthly$q9_19) + 
                                      monthly$shared_facilities)*3))))
 
@@ -418,12 +428,6 @@ sub<-sub[order(sub$year.month),]
 sub$month<-formatC(sub$month,width=2,format='d', flag = 0)
 sub$year.month<-as.numeric(with(sub, ifelse(month=="09"|month=="10"|month=="11"|month=="12",paste("14.",month,sep=""),paste("15.",month,sep=""))))
 
-=======
-  nrow(monthly[monthly$water_access_group == 1, ])
-nrow(monthly[monthly$water_access_group == 2, ])
-nrow(monthly[monthly$water_access_group == 3, ])
-nrow(monthly[monthly$water_access_group == 5, ])
->>>>>>> origin/master
 
 nuniqueid<-max(sub$slno.1) #create number of lines, slno is a unique number created during baseline phase to merge baselines and is numeric
 xrange<-range(sub$year.month)
