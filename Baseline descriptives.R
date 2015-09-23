@@ -53,7 +53,30 @@ df <- as.data.frame(mat)
 colnames(df) <- c("year", "month", "day")
 monthly<- cbind(monthly,df)
 #for primary water source 
+# recode for this using monthly visit data
 
+#View(monthly[monthly$water_point1.wa_pt1==777&monthly$water_point1.wa_pt1_usebefore==2,c("water_point1.wa_pt1","water_point1.wa_source1","water_point1.wa_source1_other","water_point1.wa_tank1")])
+
+monthly$h2o_collect1<-with(monthly, ifelse(water_point1.wa_pt1==1|water_point1.wa_pt1==2,1, #tap/pipe
+                                ifelse(water_point1.wa_pt1==3|water_point1.wa_pt1==4,2, #handpump
+                                ifelse(water_point1.wa_pt1==5|water_point1.wa_pt1==777,3,4)))) #well, all 777 were checked, and reported bucket in tank category 
+
+monthly$h2o_source1<-with(monthly, ifelse(water_point1.wa_source1==1|water_point1.wa_source1==999,1, #WASA, only 999 was a handpump
+                                           ifelse(water_point1.wa_source1==2|water_point1.wa_source1==3|water_point1.wa_source1==6,2, #Deep tube well
+                                                  ifelse(water_point1.wa_source1==4|water_point1.wa_source1==5,3,0))))
+
+monthly$h2o_tank1<-ifelse(monthly$water_point1.wa_tank1>0,1,0)
+
+#### create script so that if the water collection point changes, subsequent visits change also
+# 
+ifelse(monthly$first_visit==2&monthly$water_point1.wa_pt1_usebefore==1,
+       monthly$h2o_collect1==&monthly$h2o_source1==&monthly$h2o_tank1==,STAYS THE SAME ) 
+ifelse(monthly$first_visit==2&monthly$water_point1.wa_pt1_usebefore==0, all subsequent visits where monthly$water_point1.wa_pt1_usebefore==1 should match this)
+
+#if monthly$water_point1.wa_pt1_usebefore==1, then use h2o_tank1, h2o_source1 and h2o_collect1 
+     #from most previous date when monthly$water_point1.wa_pt1_usebefore==0
+
+#View(monthly[monthly$water_point1.wa_source1==999&monthly$water_point1.wa_pt1_usebefore==2,c("water_point1.wa_pt1","water_point1.wa_source1","water_point1.wa_source1_other","water_point1.wa_tank1")])
 
 monthly$water_access_group_d<-with(monthly, ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1==0,1, #tap, tank inside home
                                                         ifelse(q14_recoded==1&q15_recoded==1&distance_to_source1>0&distance_to_source1<10,2, #tap, tank 0-9 meters
@@ -208,11 +231,12 @@ View(monthly[monthly$daily_h2o_percapita>200, c("cont1.cont1_size","cont1.cont1_
 monthly$h2o_percap_quintile<-as.integer(cut(monthly$daily_h2o_percapita,
                                             quantile(monthly$daily_h2o_percapita,probs=0:5/5,include.lowest=TRUE)))
 
-waterusebytank<-lm(monthly$h2o_percap_quintile~monthly$q15_recoded) #is there a tank present
+
+waterusebytank<-t.test(monthly$h2o_percap_quintile~monthly$q15_recoded) #is there a tank present
 summary(waterusebytank)         
-waterusebytap<-lm(monthly$h2o_percap_quintile~monthly$q14_recoded) #tap vs. handpump vs. bucket
+waterusebytap<-anova(monthly$h2o_percap_quintile~monthly$q14_recoded) #tap vs. handpump vs. bucket
 summary(waterusebytap)
-waterusebysource<-lm(monthly$h2o_percap_quintile~monthly$q14a_recoded) #WASA, DTW, STW
+waterusebysource<-anova(monthly$h2o_percap_quintile~monthly$q14a_recoded) #WASA, DTW, STW
 summary(waterusebysource)
 
 
@@ -266,8 +290,7 @@ monthly$monthly_income_percapita<-monthly$Monthly_income/(monthly$ppl)
 # View(monthly$monthly_income_percapita)
 #create column with income quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
 monthly$pc_income_quintile<-as.integer(cut(monthly$monthly_income_percapita, quantile(monthly$Monthly_income_percapita, 
-    
-                                                                                                                                                                                        probs=0:5/5, include.lowest=TRUE)))
+    probs=0:5/5, include.lowest=TRUE)))
 # Asset calculation -------------------------------------------------------
 #shared facilities (water q17, kitchen q31, latrines q35) 0=all shared, 1=2of3 shared, 2= 1of3 shared
 monthly$shared_facilities<- with(monthly, ifelse(q17==1& q31 >=1 & q35==1, 0, 
@@ -403,71 +426,29 @@ monthly$month<-formatC(monthly$month,width=2,format='d', flag = 0)
 
 monthly$year.month<-as.numeric(with(monthly, ifelse(month>8,paste("14.",month,sep=""),paste("15.",month,sep=""))))
 
-nuniqueid<-max(monthly$slno.1) #create number of lines
-xrange<-range(monthly$month)
-yrange<-range(monthly$daily_h2o_percapita)
 
-plot(xrange,yrange,type="n",xlab="Month",ylab="Daily water consumption per capita")
-colors<-rainbow(nuniqueid)
-linetype<- c(1:nuniqueid)
-
-
-#create lines
-for (i in 1:nuniqueid) { 
-  uniqueID <- subset(monthly, nuniqueid==i) 
-  lines(monthly$month, monthly$daily_h2o_percapita, type="b", lwd=1.5,
-        lty=linetype[i]) 
-}
-
-#plot a subset of unique ids
-sub<-monthly[monthly$daily_h2o_percapita<250&monthly$daily_h2o_percapita>0,] #get rid of outliers 
-sub <- sub[sub$slno.1>100&sub$slno.1<250,]# assuming random assingment of numbers (which it was; there was no logical system to this)
-sub<-sub[order(sub$year.month),]
-
-#plotting based on month doesn't work because we started in 2014. Create year.month variable to get dates in the correct order
-sub$month<-formatC(sub$month,width=2,format='d', flag = 0)
-sub$year.month<-as.numeric(with(sub, ifelse(month=="09"|month=="10"|month=="11"|month=="12",paste("14.",month,sep=""),paste("15.",month,sep=""))))
-
-
-nuniqueid<-max(sub$slno.1) #create number of lines, slno is a unique number created during baseline phase to merge baselines and is numeric
-xrange<-range(sub$year.month)
-yrange<-range(sub$daily_h2o_percapita)
-
-plot(daily_h2o_percapita~year.month,data = monthly, xlab="Month",ylab="Daily water consumption per capita" )
-colors<-rainbow(nuniqueid)
-linetype<- c(1:nuniqueid)
-
-
-#create lines
-for (i in 1:nuniqueid) { 
-  uniqueID <- subset(sub, nuniqueid==i) 
-  lines(sub$year.month, sub$daily_h2o_percapita, type="l",
-        lty=linetype[i]) 
-}
 
 #############
 boxplot(daily_h2o_percapita~month,data = sub)
 
-write.table(plot(daily_h2o_percapita~month, data=monthly)
-
 
 look for relationships between water consumption and different variables
-lmq15<-lm(daily_h2o_percapita~q15_recoded,monthly) # p=0.2319
-lmq14<-lm(daily_h2o_percapita~q14_recoded,monthly) # p=0.381
-lmq14a<-lm(daily_h2o_percapita~q14a_recoded,monthly)#p=0.5836
-monthly$h20_distance_coded<-with(monthly, ifelse(distance_to_source1==0,1,
+# lmq15<-lm(daily_h2o_percapita~q15_recoded,monthly) # p=0.2319
+# lmq14<-lm(daily_h2o_percapita~q14_recoded,monthly) # p=0.381
+# lmq14a<-lm(daily_h2o_percapita~q14a_recoded,monthly)#p=0.5836
+monthly$distance<-with(monthly, ifelse(distance_to_source1==0,1,
                                    ifelse(distance_to_source1>0&distance_to_source1<=10,2,
                                           ifelse(distance_to_source1>10&distance_to_source1<=20,3,4))))
 
-lm_watergroupd<-lm(daily_h2o_percapita~water_access_group_d,monthly)#p=0.3102
-lm_watergroupd2<-lm(daily_h2o_percapita~water_access_group_d2,monthly) #p=0.2393
+# watergroupd<-anova(daily_h2o_percapita~water_access_group_d,monthly)#p=0.3102
+# watergroupd2<-anova(daily_h2o_percapita~water_access_group_d2,monthly) #p=0.2393
+# 
+# watergroup1<-anova(daily_h2o_percapita~water_access_group,monthly) #p=0.03695 0.2928
+# watergroup2<-anova(daily_h2o_percapita~water_access_group2,monthly)#p=0.3109
 
-lm_watergroup1<-lm(daily_h2o_percapita~water_access_group,monthly) #p=0.03695 0.2928
-lm_watergroup2<-lm(daily_h2o_percapita~water_access_group2,monthly)#p=0.3109
-
-lm_dist<-lm(daily_h2o_percapita~h20_distance_coded,monthly)# p=0.8836
+#lm_dist<-anova(daily_h2o_percapita~h20_distance_coded,monthly)# p=0.8836
 monthly$h2o_inside_home<-with(monthly, ifelse(distance_to_source1==0,1,2))
-lm_h2oinsidehome<-lm(daily_h2o_percapita~h2o_inside_home,monthly)# p=0.4038
+#lm_h2oinsidehome<-anova(daily_h2o_percapita~h2o_inside_home,monthly)# p=0.4038
 summary(lm_watergroup1)
 
 with(monthly,table(q14a==2~q15_recoded))
@@ -479,41 +460,27 @@ summary(monthly[monthly$q14a_recoded==2&monthly$q15_recoded==1,])# 727
 ##col=c("white","lightgray"),politeness)
 # Linear models -----------------------------------------------------------
 
-
-
-
-
-
 #model 1, 1= tap,tank 2= tap,no tank, 3=handpump, tank, 4= handpump no tank, 5= bucket tank
-model1=lmer(daily_h2o_percapita ~ month*water_access_group + (1|uniqueID) +(1|asset_score), data=monthly)
+sub<-monthly[monthly$daily_h2o_percapita<150&monthly$daily_h2o_percapita>20,] #get rid of outliers
+multiplevisits<-duplicated(sub$uniqueID,incomparables = FALSE)
+sub1<-sub[duplicated(sub$uniqueID,incomparables = FALSE),]
+
+model1=lmer(daily_h2o_percapita ~ season +allday_h2o +  distance+ h2o_tank1 + h2o_collect1
+            + (1|slno.1) +(1|asset_quintile), data=sub1)
 summary(model1)
-model1.null=lmer(daily_h2o_percapita ~ water_access_group + (1|uniqueID)+(1|asset_score), data=monthly)
-summary(model.null)
 
-#model 2, 1= tap,tank 2= handpump, tank, 3= bucket tank 4= tap,no tank, 5= handpump no tank 
-model2=lmer(daily_h2o_percapita ~ month*water_access_group2 + (1|uniqueID), data=monthly)
-#summary(model2)
-model2.null=lmer(daily_h2o_percapita ~ water_access_group2 + (1|uniqueID), data=monthly)
-#summary(model2.null)
+model.null=lmer(daily_h2o_percapita ~ allday_h2o +  distance+ h2o_tank1 + h2o_collect1
+                + (1|slno.1) +(1|asset_quintile), data=sub1)
+summary(model1)
 
-model24.null=lmer(daily_h2o_percapita ~ allday_h2o + water_access_group2 + (1|uniqueID), data=monthly)
-model24=lmer(daily_h2o_percapita ~ month*allday_h2o + water_access_group2 + (1|uniqueID), data=monthly)
+anova(model1,model.null)
 
-model24.null=lmer(daily_h2o_percapita ~ allday_h2o + water_access_group + (1|uniqueID), data=monthly)
-model24=lmer(daily_h2o_percapita ~ month*allday_h2o + water_access_group + (1|uniqueID), data=monthly)
-
-modelq2.null=lmer(h2o_percap_quintile ~ allday_h2o + water_access_group2 + (1|uniqueID), data=monthly)
-modelq2=lmer(h2o_percap_quintile ~ month*allday_h2o + water_access_group2 + (1|uniqueID), data=monthly)
-
-modelq.null=lmer(h2o_percap_quintile ~ allday_h2o + water_access_group + (1|uniqueID), data=monthly)
-modelq=lmer(h2o_percap_quintile ~ month*allday_h2o + water_access_group + (1|uniqueID), data=monthly)
+model2=lmer(daily_h2o_percapita ~ season + allday_h2o + (1+distance|slno.1) (1+q15_recoded|slno.1) + (1+q14a_recoded|slno.1) 
+            +(1+asset_quintile|slno.1), data=sub1)
 
 
-#anova analysis to look for statistical significance 
-anova(model1,model1.null)
-anova(model2,model2.null)
-anova(model24,model24.null)
-anova(modelq,modelq.null)
-anova(modelq2,modelq2.null)
+model2.null=lmer(daily_h2o_percapita ~  allday_h2o + (1+distance|slno.1) (1+q15_recoded|slno.1) + 
+                   (1+q14a_recoded|slno.1)  +(1+asset_quintile|slno.1), data=sub1)
+
 
 
