@@ -184,10 +184,10 @@ water_useAll$q15_recoded<-as.numeric(ifelse(water_useAll$q15>=1,1,0))
 
 #is a bucket needed to withdraw water? 1=yes, 0=no
 water_useAll$use_bucket<-ifelse(water_useAll$q15==5|water_useAll$q14a==777|water_useAll$q14a==4,1,0)
-
+names(watersub)
 #combine baseline and water_use
 #Create new subset for primary water source
-watersub<-water_useAll[,c("slno","use_bucket", "q15_recoded","q14a_recoded","q14_recoded","q13","q17")]
+watersub<-water_useAll[,c("slno","use_bucket", "q15_recoded","q14a_recoded","q14_recoded","q13","q17","q17_1","q17_2")]
 source1<-data.frame(watersub[which(watersub$q13==1),])
 source2<-data.frame(watersub[which(watersub$q13==2),])
 source3<-data.frame(watersub[which(watersub$q13==3),])
@@ -202,8 +202,12 @@ names(source2)[5]<-paste("q14_recoded2")
 names(source3)[5]<-paste("q14_recoded3")
 names(source2)[6]<-paste("q13_2")
 names(source3)[6]<-paste("q13_3")
-names(source2)[7]<-paste("q17_2")
-names(source3)[7]<-paste("q17_3")
+names(source2)[7]<-paste("q17.2")
+names(source3)[7]<-paste("q17.3")
+names(source2)[8]<-paste("q17_2.2")
+names(source3)[8]<-paste("q17_2.3")
+names(source2)[9]<-paste("q17_3.2")
+names(source3)[9]<-paste("q17_3.3")
 #need same number of rows to cbind
 source2[321:518,]<-0
 source3[149:518,]<-0
