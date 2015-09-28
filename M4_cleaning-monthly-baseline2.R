@@ -33,6 +33,11 @@ late.visit <- m4[m4$date_visit > m4$with_date, ]
 
 
 # CLEAN DATA --------------------------------------------------------------
+
+
+# Clean water quantities --------------------------------------------------
+
+
 #look for anomalies in consumption in liters per capita per day 
 for (i in 1:14) {
   m4[is.na(m4[paste("cont",i,".cont",i,"_size",sep="")]),paste("cont",i,".cont",i,"_size",sep="")] <- 0  
@@ -59,6 +64,7 @@ m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size
 
 
 #create H20 per capita variable
+m4$ppl[is.na(m4$ppl)]<-0
 m4$ppl<-ifelse(m4$ppl==0,m4$total_HH_members,m4$ppl)
 m4$daily_h2o_percapita<-with(m4, daily_volume/ppl)
 
@@ -77,29 +83,55 @@ for (i in 1:length(unique(m4$uniqueID))) {
 names(range_list) <- c("uniqueID", "range_min", "range_max", "range_diff")
 
 m4 <- merge(m4, range_list, by="uniqueID")
-write.csv2(m4[(m4$diff>100),c("uniqueID","date_visit", "FRA","ppl","daily_h2o_per_capita","cont1.cont1_size",	
+
+#write table of data where water use = 0
+setwd("C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\Sent to bangladesh for clarification")
+sub<-m4[which(!(is.na(m4$FRA))),]
+
+write.csv2(sub[sub$daily_h2o_percapita==0,c("HHID", "date_visit", "FRA","ppl",
+                                            "daily_volume","daily_h2o_percapita")],file="No water use.csv")
+
+#delete the three entries with no info on water use
+m4<-m4[!(m4$daily_volume==0),]
+
+#create subset that are out of range without the ones I already checked
+sub<-m4[!(m4$uniqueID=="005_2014-09-12"|m4$uniqueID=="008_2014-12-09"|m4$uniqueID=="010_2014-06-02"|m4$uniqueID=="025_2014-09-17"|
+          m4$uniqueID=="083_2014-09-11"|m4$uniqueID=="094_2014-09-12"|m4$uniqueID=="108_2014-08-22"|
+          m4$uniqueID=="110_2014-10-23"|m4$uniqueID=="131_2014-08-29"|m4$uniqueID=="217_2014-10-31"|
+            m4$uniqueID=="218_2014-06-03"|m4$uniqueID=="249_2014-12-26"|m4$uniqueID=="293_2015-03-20"|
+            m4$uniqueID=="299_2014-08-22"|m4$uniqueID=="353_2014-07-14"|m4$uniqueID=="364_2014-08-08"|
+            m4$uniqueID=="369_2014-07-11"|m4$uniqueID=="388_2014-11-20"|m4$uniqueID=="396_2014-07-12"),]    
+    
+sub<-sub[!(is.na(sub$FRA)),]        
+write.csv2(sub[(sub$range_diff>100),c("uniqueID","date_visit","FRA","ppl","daily_h2o_percapita","cont1.cont1_size",
                    "cont1.cont1_times",	"cont2.cont2_size",	"cont2.cont2_times",	
                    "cont3.cont3_size",	"cont3.cont3_times","cont4.cont4_size",	"cont4.cont4_times",		
-                   "cont5.cont5_size","cont5.cont5_times",		"cont6.cont6_size",	"cont6.cont6_times",
+                   "cont5.cont5_size","cont5.cont5_times",	"cont6.cont6_size",	"cont6.cont6_times",
                    "cont7.cont7_size",	"cont7.cont7_times","cont8.cont8_size",	"cont8.cont8_times",	"cont9.cont9_size",
-                   "cont9.cont9_times",		"cont10.cont10_size",	"cont10.cont10_times","other_water_in.adult_bathe_in",
+                   "cont9.cont9_times",	"cont10.cont10_size",	"cont10.cont10_times","other_water_in.adult_bathe_in",
                    "other_water_out.adult_bathe_out","other_water_in.child_bathe_in","other_water_out.child_bathe_out")],file="Range over 100.csv")
 
 #verified visually, difference is because of a high or low wash day for uniqueIDs: 005_2014_09_12, 008_2014_12_09,
     #010_2014_06_02, 025_2014_09_17, 083_2014_09_11, 094_2014-09-12, 108_2014-08-22, 110_2014-10-23, 131_2014-08-29,
-    #217_2014-10-31, 218_2014-06-03,249_2014-12-26,293_2015-03-20,299_2014-08-22
+    #217_2014-10-31, 218_2014-06-03,249_2014-12-26,293_2015-03-20,299_2014-08-22, 353_2014-07-14, 364_2014-08-08,
+    #369_2014-07-11, 388_2014-11-20, 396_2014-07-12, 019_2014-06-01, 001_2014-09-14, 085_2014-08-28, 281_2014-09-24
 
+#doesn't meet criteria but was checked and verified by Bimal: 259_2014-10-20, 009_2014-06-02, 252_2014-06-01
 
+#View(m4[m4$cont1.cont1_size==6&m4$cont2.cont2_size==2&m4$cont3.cont3_size==2,])
+ #       &m4$cont2.cont2_size==22&m4$cont3.cont3_size==12&m4$cont4.cont4_size==14,])
 
-
+#Erase rows that have container information that doesn't match up anywhere
+m4<-m4[!(m4$uniqueID=="001_2014-09-14"&m4$date_visit==16-11-2014),]
+m4<-m4[!(m4$uniqueID=="028_2014-09-11"&m4$date_visit==18-11-2014),]
 
 
 
 m4$cont3.cont3_times[m4$cont3.cont3_times==20&m4$uniqueID=="138_2014-07-21"]<-2 #keystroke error, should be 2, not 20
+m4$cont3.cont3_times[m4$cont3.cont3_times==8&m4$uniqueID=="344_2014-11-10"]<-18 #keystroke error, all other container 3 are 18 liters
+m4$cont7.cont7_size[m4$cont7.cont7_size==212&m4$uniqueID=="219_2014-08-04"]<-21 #keystroke error, only entry missing a 21 liter container
+
 m4$ppl[m4$ppl==5&m4$uniqueID=="156_2014-08-06"]<-1 #all water use data is same but people is 5 instead of 1
-
-
-
 
 #Check data on activities done without a container
 m4$bath_pc<-with(m4,(other_water_in.adult_bathe_in+other_water_out.adult_bathe_out+other_water_in.child_bathe_in+other_water_out.child_bathe_out)/m4$ppl)
@@ -138,6 +170,27 @@ m4$other_water_out.wash_clothes_out[is.na(m4$other_water_out.wash_clothes_out)]<
 # range(m4[m4$clothes>0,c("clothes")])
 
 m4[which(m4$other_water_in.child_bathe_in==6&m4$uniqueID=="269_2015-02-17"),"other_water_in.child_bathe_in"]<-0
+
+# cleaning water source information ---------------------------------------
+#for primary water source from monthly visit data
+
+#View(monthly[monthly$water_point1.wa_pt1==777&monthly$water_point1.wa_pt1_usebefore==2,c("water_point1.wa_pt1","water_point1.wa_source1","water_point1.wa_source1_other","water_point1.wa_tank1")])
+
+monthly$h2o_collect1<-with(monthly, ifelse(water_point1.wa_pt1==1|water_point1.wa_pt1==2,1, #tap/pipe
+                                           ifelse(water_point1.wa_pt1==3|water_point1.wa_pt1==4,2, #handpump
+                                                  ifelse(water_point1.wa_pt1==5|water_point1.wa_pt1==777,3,4)))) #well, all 777 were checked, and reported bucket in tank category 
+
+monthly$h2o_source1<-with(monthly, ifelse(water_point1.wa_source1==1|water_point1.wa_source1==999,1, #WASA, only 999 was a handpump
+                                          ifelse(water_point1.wa_source1==2|water_point1.wa_source1==3|water_point1.wa_source1==6,2, #Deep tube well
+                                                 ifelse(water_point1.wa_source1==4|water_point1.wa_source1==5,3,0))))
+
+monthly$h2o_tank1<-ifelse(monthly$water_point1.wa_tank1>0,1,0)
+
+monthly$water_point1.wa_pt1_usebefore<-ifelse(monthly$first_visit==1,3,monthly$water_point1.wa_pt1_usebefore)
+
+
+monthly$base_source_change <- ifelse(monthly$first_visit==1 & monthly$q14_recoded==monthly$h2o_collect1 &
+                                       monthly$q14a_recoded == monthly$h2o_source1 & monthly$q15_recoded==monthly$h2o_tank1, "No", ifelse(monthly$first_visit!=1, NA, "Yes"))
 
 
 
