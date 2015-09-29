@@ -103,8 +103,8 @@ sub<-m4[!(m4$uniqueID=="005_2014-09-12"|m4$uniqueID=="008_2014-12-09"|m4$uniqueI
             m4$uniqueID=="369_2014-07-11"|m4$uniqueID=="388_2014-11-20"|m4$uniqueID=="396_2014-07-12"),]    
     
 sub<-sub[!(is.na(sub$FRA)),]        
-write.csv2(sub[(sub$range_diff>100),c("uniqueID","date_visit","FRA","ppl","daily_h2o_percapita","cont1.cont1_size",
-                   "cont1.cont1_times",	"cont2.cont2_size",	"cont2.cont2_times",	
+write.csv2(sub[(sub$range_diff>100),c("uniqueID","listing","date_visit","FRA","ppl","daily_h2o_percapita",
+                   "cont1.cont1_size","cont1.cont1_times",	"cont2.cont2_size",	"cont2.cont2_times",	
                    "cont3.cont3_size",	"cont3.cont3_times","cont4.cont4_size",	"cont4.cont4_times",		
                    "cont5.cont5_size","cont5.cont5_times",	"cont6.cont6_size",	"cont6.cont6_times",
                    "cont7.cont7_size",	"cont7.cont7_times","cont8.cont8_size",	"cont8.cont8_times",	"cont9.cont9_size",
@@ -174,26 +174,85 @@ m4[which(m4$other_water_in.child_bathe_in==6&m4$uniqueID=="269_2015-02-17"),"oth
 # cleaning water source information ---------------------------------------
 #for primary water source from monthly visit data
 
-#View(monthly[monthly$water_point1.wa_pt1==777&monthly$water_point1.wa_pt1_usebefore==2,c("water_point1.wa_pt1","water_point1.wa_source1","water_point1.wa_source1_other","water_point1.wa_tank1")])
+#View(m4[m4$water_point1.wa_pt1==777&m4$water_point1.wa_pt1_usebefore==2,c("water_point1.wa_pt1","water_point1.wa_source1","water_point1.wa_source1_other","water_point1.wa_tank1")])
 
-monthly$h2o_collect1<-with(monthly, ifelse(water_point1.wa_pt1==1|water_point1.wa_pt1==2,1, #tap/pipe
+m4$h2o_collect1<-with(m4, ifelse(water_point1.wa_pt1==1|water_point1.wa_pt1==2,1, #tap/pipe
                                            ifelse(water_point1.wa_pt1==3|water_point1.wa_pt1==4,2, #handpump
                                                   ifelse(water_point1.wa_pt1==5|water_point1.wa_pt1==777,3,4)))) #well, all 777 were checked, and reported bucket in tank category 
+m4$h2o_collect1[is.na(m4$h2o_collect1)]<-0 #set NAs to 0 for the loop
 
-monthly$h2o_source1<-with(monthly, ifelse(water_point1.wa_source1==1|water_point1.wa_source1==999,1, #WASA, only 999 was a handpump
+m4$h2o_source1<-with(m4, ifelse(water_point1.wa_source1==1|water_point1.wa_source1==999,1, #WASA, only 999 was a handpump
                                           ifelse(water_point1.wa_source1==2|water_point1.wa_source1==3|water_point1.wa_source1==6,2, #Deep tube well
                                                  ifelse(water_point1.wa_source1==4|water_point1.wa_source1==5,3,0))))
+m4$h2o_source1[is.na(m4$h2o_source1)]<-0 #set NAs to 0 for the loop
 
-monthly$h2o_tank1<-ifelse(monthly$water_point1.wa_tank1>0,1,0)
+m4$h2o_tank1<-ifelse(m4$water_point1.wa_tank1>0,1,2)
+m4$h2o_tank1[is.na(m4$h2o_tank1)]<-0 #set NAs to 0 for the loop
 
-monthly$water_point1.wa_pt1_usebefore<-ifelse(monthly$first_visit==1,3,monthly$water_point1.wa_pt1_usebefore)
-
-
-monthly$base_source_change <- ifelse(monthly$first_visit==1 & monthly$q14_recoded==monthly$h2o_collect1 &
-                                       monthly$q14a_recoded == monthly$h2o_source1 & monthly$q15_recoded==monthly$h2o_tank1, "No", ifelse(monthly$first_visit!=1, NA, "Yes"))
+m4$water_point1.wa_pt1_usebefore<-ifelse(m4$first_visit==1,3,m4$water_point1.wa_pt1_usebefore)
 
 
 
+m4$base_source_change <- ifelse(m4$first_visit==1 & m4$q14_recoded==m4$h2o_collect1 &
+                                       m4$q14a_recoded == m4$h2o_source1 & m4$q15_recoded==m4$h2o_tank1, "No", ifelse(m4$first_visit!=1, NA, "Yes"))
+
+m4<-m4[which(!(is.na(m4$FRA))),] #get rid of all x-2 entries that don't have corresponding monthly visit
+
+
+m4_subset<-data.frame()
+
+
+# loop to fill in values for primary water source info in subsequent visits 
+for (i in 1:length(unique(m4$uniqueID))) {
+  
+  m4_subset[i] <- m4[which(m4$uniqueID==unique(m4$uniqueID)[i]),]
+  m4_subset[i] <- m4_subset[order(m4_subset$date_visit),]
+  
+  clean <- function(x) {
+    
+    for (j in 1:(nrow(x)-1)) {
+      x[j+1, "h2o_collect1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
+                                       x[j, "h2o_collect1"],
+                                       x[j+1, "h2o_collect1"])
+      x[j+1, "h2o_source1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
+                                      x[j, "h2o_source1"],
+                                      x[j+1, "h2o_source1"])  
+      x[j+1, "h2o_tank1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
+                                    x[j, "h2o_tank1"],
+                                    x[j+1, "h2o_tank1"]) 
+    }
+    
+    return (as.data.frame(x))
+  }
+  
+  # condition 1: 3 & 1s (first visit with no following changes) or 3 & 2 (first visit followed by change)>>> control stcutures in R
+  
+  if (length(unique(m4_subset$water_point1.wa_pt1_usebefore)[i])==2 &
+      unique(m4_subset$water_point1.wa_pt1_usebefore)[1]==3 & 
+      unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==1){m4_subset[i] <- clean(m4_subset[i])}
+  else  # condition 2
+    {if(length(unique(m4_subset$water_point1.wa_pt1_usebefore))==2 &
+                  unique(m4_subset$water_point1.wa_pt1_usebefore)[1]==3 & 
+                  unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==2) {m4_subset <- clean(m4_subset)  }
+  
+  else {(m4_subset)}
+  }}
+
+m4_subset$h2o_tank1
+
+else  if    { (length(unique(m4_subset$water_point1.wa_pt1_usebefore))==3 &
+                     unique(m4_subset$water_point1.wa_pt1_usebefore)[1]==3 & 
+                     unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==1
+                     unique(m4_subset$water_point1.wa_pt1_usebefore)[3]==2) # condition 2
+    { }
+
+else  if    { (length(unique(m4_subset$water_point1.wa_pt1_usebefore))==3 &
+                 unique(m4_subset$water_point1.wa_pt1_usebefore)[1]==3 & 
+                 unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==2
+                 unique(m4_subset$water_point1.wa_pt1_usebefore)[3]==1) # condition 2
+{ }
+
+}}
 
 
 # RE-CHECK CLEAN DATA -----------------------------------------------------
