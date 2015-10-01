@@ -184,7 +184,7 @@ water_useAll$q15_recoded<-as.numeric(ifelse(water_useAll$q15>=1,1,0))
 
 #is a bucket needed to withdraw water? 1=yes, 0=no
 water_useAll$use_bucket<-ifelse(water_useAll$q15==5|water_useAll$q14a==777|water_useAll$q14a==4,1,0)
-names(watersub)
+#names(watersub)
 #combine baseline and water_use
 #Create new subset for primary water source
 watersub<-water_useAll[,c("slno","use_bucket", "q15_recoded","q14a_recoded","q14_recoded","q13","q17","q17_1","q17_2")]

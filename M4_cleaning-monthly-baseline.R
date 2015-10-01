@@ -77,13 +77,15 @@ for (i in 1:length(unique(m4$uniqueID))) {
 names(range_list) <- c("uniqueID", "range_min", "range_max", "range_diff")
 
 m4 <- merge(m4, range_list, by="uniqueID")
-write.csv2(m4[(m4$diff>100),c("uniqueID","date_visit", "FRA","ppl","daily_h2o_per_capita","cont1.cont1_size",	
-                   "cont1.cont1_times",	"cont2.cont2_size",	"cont2.cont2_times",	
-                   "cont3.cont3_size",	"cont3.cont3_times","cont4.cont4_size",	"cont4.cont4_times",		
-                   "cont5.cont5_size","cont5.cont5_times",		"cont6.cont6_size",	"cont6.cont6_times",
-                   "cont7.cont7_size",	"cont7.cont7_times","cont8.cont8_size",	"cont8.cont8_times",	"cont9.cont9_size",
-                   "cont9.cont9_times",		"cont10.cont10_size",	"cont10.cont10_times","other_water_in.adult_bathe_in",
-                   "other_water_out.adult_bathe_out","other_water_in.child_bathe_in","other_water_out.child_bathe_out")],file="Range over 100.csv")
+
+# Code does not work below so I commented it out (MP):
+# write.csv2(m4[(m4$diff>100),c("uniqueID","date_visit", "FRA","ppl","daily_h2o_per_capita","cont1.cont1_size",	
+#                    "cont1.cont1_times",	"cont2.cont2_size",	"cont2.cont2_times",	
+#                    "cont3.cont3_size",	"cont3.cont3_times","cont4.cont4_size",	"cont4.cont4_times",		
+#                    "cont5.cont5_size","cont5.cont5_times",		"cont6.cont6_size",	"cont6.cont6_times",
+#                    "cont7.cont7_size",	"cont7.cont7_times","cont8.cont8_size",	"cont8.cont8_times",	"cont9.cont9_size",
+#                    "cont9.cont9_times",		"cont10.cont10_size",	"cont10.cont10_times","other_water_in.adult_bathe_in",
+#                    "other_water_out.adult_bathe_out","other_water_in.child_bathe_in","other_water_out.child_bathe_out")],file="Range over 100.csv")
 
 #verified visually, difference is because of a high or low wash day for uniqueIDs: 005_2014_09_12, 008_2014_12_09,
     #010_2014_06_02, 025_2014_09_17, 083_2014_09_11, 094_2014-09-12, 108_2014-08-22, 110_2014-10-23, 131_2014-08-29,
