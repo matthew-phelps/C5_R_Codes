@@ -35,7 +35,6 @@ source(functions.path)
 
 # DATA PREPERATION -----------------------------------------------------
 
-m5$VistMonthYear <- floor_date(m5$date_visit, unit = "month")
 m5$phoneMonthYear <- floor_date(m5$phone.dist, unit = "month")
 m5$withMonthYear <- floor_date(m5$with_date, unit = "month")
 
@@ -52,8 +51,30 @@ uniqueHH <- uniqueHH[!x,]
 # Remove variables that don't make sense for the aggregated uniqueHH dataframe:
 uniqueHH$ppl <- uniqueHH$pt <- uniqueHH$date_visit <- uniqueHH$HHID <- NULL
 
-# NEW PHONES Per MONTH ----------------------------------------------------------
+
+# NEW PHONES PER MONTH ----------------------------------------------------------
 # Counting how many phones were distributed each month
 
-newPhones <- as.data.frame(table(uniqueHH$phoneMonthYear))
+monthly_summary <- as.data.frame(table(uniqueHH$phoneMonthYear))
+monthly_summary$Var1 <- as.Date(monthly_summary$Var1)
 
+
+# ACTIVE HH and PEOPLE EACH MONTH ------------------------------------------------
+x <- uniqueHH$withMonthYear - uniqueHH$phoneMonthYear
+uniqueHH$int <- as.interval(x, uniqueHH$phoneMonthYear)
+
+
+month.names <- strftime(monthly_summary$Var1, format = "%b-%Y")
+z <- data.frame(matrix(ncol=nrow(monthly_summary), nrow = nrow(uniqueHH)))
+zx <- data.frame(matrix(ncol=nrow(monthly_summary), nrow = nrow(uniqueHH)))
+names(z) <- month.names
+for (i in 1:nrow(monthly_summary)){
+  for (j in 1:nrow(uniqueHH)){
+   z[j, i] <-monthly_summary$Var1[i] %within% uniqueHH$int[j]
+   zx[j, i] <- round((monthly_summary$Var1[i] %within% uniqueHH$int[j]) * uniqueHH$active_ppl[j], digits = 0)
+  }
+}
+z1 <- colSums(z)
+zx1 <- colSums(zx)
+monthly_summary$active_hh <- z1
+monthly_summary$active_ppl <- zx1
