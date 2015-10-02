@@ -205,8 +205,8 @@ m4_subset<-data.frame()
 # loop to fill in values for primary water source info in subsequent visits 
 for (i in 1:length(unique(m4$uniqueID))) {
   
-  m4_subset[i] <- m4[which(m4$uniqueID==unique(m4$uniqueID)[i]),]
-  m4_subset[i] <- m4_subset[order(m4_subset$date_visit),]
+  m4_subset <- m4[which(m4$uniqueID==unique(m4$uniqueID)[i]),]
+  m4_subset <- m4_subset[order((m4_subset$date_visit)),]
   
   clean <- function(x) {
     
@@ -227,13 +227,17 @@ for (i in 1:length(unique(m4$uniqueID))) {
   
   # condition 1: 3 & 1s (first visit with no following changes) or 3 & 2 (first visit followed by change)>>> control stcutures in R
   
-  if (length(unique(m4_subset$water_point1.wa_pt1_usebefore)[i])==2 &
-      unique(m4_subset$water_point1.wa_pt1_usebefore)[1]==3 & 
-      unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==1){m4_subset[i] <- clean(m4_subset[i])}
-  else  # condition 2
+  if (length(unique(m4_subset$water_point1.wa_pt1_usebefore))==2 &
+      unique((m4_subset$water_point1.wa_pt1_usebefore))[1]==3 & 
+      unique((m4_subset$water_point1.wa_pt1_usebefore))[2]==1){m4_subset <- clean(m4_subset[i])}
+  
+  if(m4_subset$water_point1.wa_pt1_usebefore==1&m4_subset$h2o_source1[h]==m4_subset$h2o_source1[h-1]){}
+  
+  else  {m4_subset}}
+    # condition 2
     {if(length(unique(m4_subset$water_point1.wa_pt1_usebefore))==2 &
                   unique(m4_subset$water_point1.wa_pt1_usebefore)[1]==3 & 
-                  unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==2) {m4_subset <- clean(m4_subset)  }
+                  unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==2) {m4_subset <- clean(m4_subset[i])  }
   
   else {(m4_subset)}
   }}
