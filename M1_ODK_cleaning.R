@@ -284,7 +284,7 @@ tail(sort(mon7$visitdate))
 
 start.date <- as.Date("2015-06-07")
 end.date # created in Step 1.)
-early <- mon7$visitdate[mon7$visitdate < start.date]
+early <- mon7[mon7$visitdate < start.date, ]
 late <- mon7[mon7$visitdate > end.date, ]
 
 y <- mon7$hh_id[mon7$visitdate=="2014-07-06"]
@@ -309,7 +309,13 @@ MonthlyAll$visitdate[MonthlyAll$hh_id==y]
 # x2$date[x2$HHID==y]
 mon7$visitdate[mon7$visitdate == '2016-07-13'] <- as.Date('2015-07-13')
 
+y <- mon7$hh_id[mon7$visitdate=="2015-04-04"]
+MonthlyAll$visitdate[MonthlyAll$hh_id==y]
 
+# Re-check to see if any new entries need cleaning:
+boxplot(mon7$visitdate)
+head(sort(mon7$visitdate))
+tail(sort(mon7$visitdate))
 
 # 6.) MAKE CLEAN JOIN ----------------------------------------------------------
 
