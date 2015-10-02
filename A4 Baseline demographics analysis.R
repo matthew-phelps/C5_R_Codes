@@ -2,6 +2,7 @@
 
 library(chron)
 library(lme4)
+library(plyr)
 
 # Load data ---------------------------------------------------------------
 ifelse(grepl("zrc340", getwd()), 
@@ -20,11 +21,30 @@ load(Q11.path)
 #subset only data from monthly visits (gets ride of unmatched x-2 entries)
 monthly<-m4[which(!(is.na(m4$FRA))),]
 monthly<-as.data.frame(monthly)
-monthly[is.na(monthly)]<-0
+#monthly[is.na(monthly)]<-0
 
-monthly<-monthly[!duplicated(monthly$uniqueID),] #subset of unique household ids first visit
+#monthly<-monthly[!duplicated(monthly$uniqueID),] #subset of unique household ids first visit
 
-#variables that will be used
+
+# variables that will be used ---------------------------------------------
+
+Q11subset<-Q11_all[Q11_all$q11_4>=18,] #only adults
+Q11sub<- ddply(Q11subset, .(slno),
+                  summarize,
+                  literacy = sum(q11_7),
+                  slno= unique(slno))
+
+monthly$slno<-monthly$slno.1
+monthly<-merge(monthly, Q11sub, by="slno", all.x = T, all.y = F )
+
+             
+#create month variable
+monthly$date_visit_character<-as.character(monthly$date_visit)
+temp<-strsplit(monthly$date_visit_character, "-")
+mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
+df <- as.data.frame(mat)
+colnames(df) <- c("year", "month", "day")
+monthly<- cbind(monthly,df)
 monthly$month1<-formatC(monthly$month,width=2,format='d', flag = 0)
 
 monthly$year.month<-as.numeric(with(monthly, ifelse(month1=="09"|month1=="10"|month1=="11"|
@@ -34,16 +54,11 @@ monthly$season<-with(monthly, ifelse(month1=="01"|month1=="02"|month1=="03",1,
                                      ifelse(month1=="04"|month1=="05"|month1=="06",2,
                                             ifelse(month1=="07"|month1=="08"|month1=="09",3,4))))
 
+
+monthly$ppl[is.na(monthly$ppl)]<-0
 monthly$ppl<-ifelse(monthly$ppl==0,monthly$total_HH_members,monthly$ppl)
 monthly$daily_h2o_percapita<-with(monthly, daily_volume/ppl)
 
-#create month variable
-monthly$date_visit_character<-as.character(monthly$date_visit)
-temp<-strsplit(monthly$date_visit_character, "-")
-mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
-df <- as.data.frame(mat)
-colnames(df) <- c("year", "month", "day")
-monthly<- cbind(monthly,df)
 
 
 # Household size at baseline----------------------------------------------------------
@@ -81,6 +96,14 @@ monthly$nuclear_family<- with(monthly, ifelse(q10==1|q10==2|q10==4,1,0)) #is it 
 monthly<-monthly[!duplicated(monthly$uniqueID),]
 table(monthly$nuclear_family)
 
+
+# literacy ----------------------------------------------------------------
+monthly$literacy_coded <- ifelse(monthly$adults==monthly$literacy,3,
+                                 ifelse(monthly$literacy==0,1,2))
+
+monthlysub<-monthly[!duplicated(monthly$uniqueID),]
+table(monthlysub$literacy_coded)
+
 # Household monthly income ------------------------------------------------
 #monthly income = average monthly household income + monthly remittances received - monthly remittances sent + annual remittances received/12 - annual remittances sent/12 - monthly loan payment
 monthly$Monthly_income<- monthly$q12 + monthly$q12a2 - monthly$q12a1 + 
@@ -88,9 +111,10 @@ monthly$Monthly_income<- monthly$q12 + monthly$q12a2 - monthly$q12a1 +
 
 monthly$monthly_income_percapita<-monthly$Monthly_income/(monthly$ppl)
 
-mothly<-monthly[!duplicated(monthly$uniqueID),]
+monthlysub<-monthly[!duplicated(monthly$uniqueID),]
 
-mothly[mothly$monthly_income_percapita>16000,c("monthly_income_percapita","ppl")]
+monthlysub[monthlysub$monthly_income_percapita>20000,c("monthly_income_percapita","ppl")]
+
 
 # View(monthly$monthly_income_percapita)
 #create column with income quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
