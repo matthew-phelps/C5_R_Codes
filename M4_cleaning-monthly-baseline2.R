@@ -259,6 +259,76 @@ else  if    { (length(unique(m4_subset$water_point1.wa_pt1_usebefore))==3 &
 }}
 
 
+# Clean hours per day that water is flowing from source -------------------
+
+monthly$water_flow1_end1<- times(monthly$water_point1.wa_flow1.wa_time1.aE)
+monthly$water_flow1_start1<-times(monthly$water_point1.wa_flow1.wa_time1.aS)
+monthly$water_flow2_end2<- times(monthly$water_point1.wa_flow1.wa_time1.bE)
+monthly$water_flow2_start2<-times(monthly$water_point1.wa_flow1.wa_time1.bS)
+monthly$water_flow3_end3<- times(monthly$water_point1.wa_flow1.wa_time1.cE)
+monthly$water_flow3_start3<-times(monthly$water_point1.wa_flow1.wa_time1.cS)
+
+
+monthly$water_flow_1<- monthly$water_flow1_end1-monthly$water_flow1_start1
+monthly$water_flow_1<-monthly$water_flow_1*24
+monthly$water_flow_1<-ifelse((monthly$water_flow1_end1==times("17:59:00")&monthly$water_flow1_start1==times("18:00:00")) # time ending in 1 minute less than start time indicates 24 hours. is different because of tablet settings and daylight savings time
+                             |(monthly$water_flow1_end1==times("15:59:00")&monthly$water_flow1_start1==times("16:00:00")),24,
+                             monthly$water_flow_1)
+
+monthly$water_flow_1<-ifelse(monthly$water_flow_1<0,monthly$water_flow_1+24,monthly$water_flow_1)
+
+
+monthly$water_flow_2<- monthly$water_flow2_end2-monthly$water_flow2_start2
+monthly$water_flow_2<-monthly$water_flow_2*24
+monthly$water_flow_2<-ifelse((monthly$water_flow2_end2==times("17:59:00")&monthly$water_flow2_start2==times("18:00:00")) # time ending in 1 minute less than start time indicates 24 hours. is different because of tablet settings
+                             |(monthly$water_flow2_end2==times("15:59:00")&monthly$water_flow2_start2==times("16:00:00")),24,
+                             monthly$water_flow_2)
+monthly$water_flow_2<-ifelse(monthly$water_flow_2<0,monthly$water_flow_2+24,monthly$water_flow_2)
+
+monthly$water_flow_3<- monthly$water_flow3_end3-monthly$water_flow3_start3
+monthly$water_flow_3<-monthly$water_flow_3*24
+monthly$water_flow_3<-ifelse((monthly$water_flow3_end3==times("17:59:00")&monthly$water_flow3_start3==times("18:00:00")) # time ending in 1 minute less than start time indicates 24 hours. is different because of tablet settings 
+                             |(monthly$water_flow3_end3==times("15:59:00")&monthly$water_flow3_start3==times("16:00:00")),24,
+                             monthly$water_flow_3)
+monthly$water_flow_3<-ifelse(monthly$water_flow_3<0,monthly$water_flow_3+24,monthly$water_flow_3)
+
+monthly$round<-round(monthly$water_flow_1,3) #need to round decimal points or replacement doesn't work
+monthly$round2<-round(monthly$water_flow_2,3)
+monthly$round3<-round(monthly$water_flow_3,3)
+
+
+
+#correct obvious typos, data collectors were instructed to round to 15 minute intervals when applicable
+monthly$water_flow_1[which(monthly$round==23.600)]<-0
+monthly$water_flow_1[which(monthly$round==23.933)]<-24
+monthly$water_flow_1[which(monthly$round==23.483)]<-24
+monthly$water_flow_1[which(monthly$round==23.150)]<-24
+monthly$water_flow_1[which(monthly$round==23.850)]<-24
+monthly$water_flow_1[which(monthly$round==23.967)]<-24
+monthly$water_flow_1[which(monthly$round==23.483)]<-24
+monthly$water_flow_1[which(monthly$round==15.983)]<-24
+monthly$water_flow_1[which(monthly$round==13.983)]<-24
+
+monthly$water_flow_2[which(monthly$round>23.9)]<-0
+monthly$water_flow_3[which(monthly$round>23.9)]<-0
+
+# View(monthly[monthly$water_flow_1>23&monthly$water_flow_1<24,c("water_flow_1","round",
+#                       "water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE",
+#                       "water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE")])
+
+monthly$checkwater<-monthly$water_flow_1+monthly$water_flow_2+monthly$water_flow_3
+
+# write.csv2(monthly[monthly$checkwater>24,c("uniqueID","Listing.number.x","date_visit",
+#"water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
+#"water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
+#"water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3","checkwater")], file="too many hours of water use.csv")
+
+write.csv2(monthly[monthly$round2==0.017|monthly$round==0.667|monthly$round==16.517,c("uniqueID","FRA","Listing.number.x","date_visit",
+                                                                                      "water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
+                                                                                      "water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
+                                                                                      "water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3","checkwater")], file="water flow recheck.csv")
+
+
 # RE-CHECK CLEAN DATA -----------------------------------------------------
 
 
