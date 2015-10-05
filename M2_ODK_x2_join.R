@@ -199,6 +199,37 @@ MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-19' & MonthlyAll$hh_id == 
 
 MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-21' & MonthlyAll$hh_id == 76] <- '2015-11-24'
 MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-10' & MonthlyAll$hh_id == 95] <- '2014-11-13'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-06-19' & MonthlyAll$hh_id == 101] <- '2015-06-22'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-10' & MonthlyAll$hh_id == 132] <- '2014-11-7'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-30' & MonthlyAll$hh_id == 152] <- '2014-11-07'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-26' & MonthlyAll$hh_id == 152] <- '2015-01-02'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-05-01' & MonthlyAll$hh_id == 152] <- '2015-05-08'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-31' & MonthlyAll$hh_id == 160] <- '2014-11-26'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-19' & MonthlyAll$hh_id == 164] <- '2014-12-26'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-06-19' & MonthlyAll$hh_id == 175] <- '2015-06-22'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-21' & MonthlyAll$hh_id == 180] <- '2014-11-28'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-05' & MonthlyAll$hh_id == 181] <- '2014-12-08'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-08' & MonthlyAll$hh_id == 185] <- '2014-12-17'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-02-03' & MonthlyAll$hh_id == 185] <- '2015-03-03'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-04-13' & MonthlyAll$hh_id == 185] <- '2015-04-10'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-06-26' & MonthlyAll$hh_id == 186] <- '2015-06-29'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-05-22' & MonthlyAll$hh_id == 192] <- '2015-05-26'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-06-19' & MonthlyAll$hh_id == 201] <- '2015-06-22'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-12-19' & MonthlyAll$hh_id == 209] <- '2015-12-22'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-10' & MonthlyAll$hh_id == 212] <- '2014-11-28'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-02-07' & MonthlyAll$hh_id == 230] <- '2015-02-13'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-03-29' & MonthlyAll$hh_id == 232] <- '2015-04-01'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-28' & MonthlyAll$hh_id == 247] <- '2015-12-03'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-04-10' & MonthlyAll$hh_id == 249] <- '2015-04-13'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-12' & MonthlyAll$hh_id == 251] <- '2014-12-15'
+
+
 
 # Deletions to ODK
 MonthlyAll <- MonthlyAll[!(MonthlyAll$visitdate == '2014-09-15' & MonthlyAll$hh_id == 156), ]
