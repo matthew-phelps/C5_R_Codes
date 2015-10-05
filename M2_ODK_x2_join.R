@@ -229,7 +229,29 @@ MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-28' & MonthlyAll$hh_id == 
 MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-04-10' & MonthlyAll$hh_id == 249] <- '2015-04-13'
 MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-12' & MonthlyAll$hh_id == 251] <- '2014-12-15'
 
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-17' & MonthlyAll$hh_id == 254] <- '2014-11-14'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-30' & MonthlyAll$hh_id == 255] <- '2015-01-02'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-28' & MonthlyAll$hh_id == 263] <- '2014-12-02'
 
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-04-04' & MonthlyAll$hh_id == 269] <- '2015-05-04'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-15' & MonthlyAll$hh_id == 278] <- '2014-12-19'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-04-10' & MonthlyAll$hh_id == 278] <- '2015-04-13'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-11' & MonthlyAll$hh_id == 280] <- '2014-12-17'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-08' & MonthlyAll$hh_id == 282] <- '2014-12-12'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-16' & MonthlyAll$hh_id == 297] <- '2014-11-14'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-07-03' & MonthlyAll$hh_id == 297] <- '2015-07-06'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-19' & MonthlyAll$hh_id == 314] <- '2014-12-22'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-11' & MonthlyAll$hh_id == 341] <- '2014-11-10'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-11' & MonthlyAll$hh_id == 360] <- '2014-11-14'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-09' & MonthlyAll$hh_id == 366] <- '2014-11-13'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-10' & MonthlyAll$hh_id == 368] <- '2014-11-28'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-29' & MonthlyAll$hh_id == 378] <- '2014-11-25'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-09-20' & MonthlyAll$hh_id == 382] <- '2014-09-24'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-21' & MonthlyAll$hh_id == 396] <- '2014-11-26'  
 
 # Deletions to ODK
 MonthlyAll <- MonthlyAll[!(MonthlyAll$visitdate == '2014-09-15' & MonthlyAll$hh_id == 156), ]
