@@ -130,22 +130,25 @@ system.time({x <- lapply(x, dateReplace)})
 system.time({x <- lapply(x, mergeRows)})
 
 # Convert back to df
-temp2 <- do.call(rbind.data.frame, x)
-
+temp1 <- do.call(rbind.data.frame, x)
+row.names(temp1) <- NULL
 # Delete duplicates
-z <- duplicated(temp2[, 1:3])
-sum(z)
-temp2 <- temp2[z == F,  ]
-rm(temp.x2.odk.merge, z, x)
+z <- duplicated(temp1[, 1:3])
+temp2 <- temp1[z == F | !is.na(temp1$FRA),  ]
+z <- duplicated(temp2[, 1:3], fromLast = T)
+temp3 <- temp2[z == F | !is.na(temp2$FRA),  ]
+z <- duplicated(temp3[, 1:3])
+temp4 <- temp3[z == F, ]
+rm(temp.x2.odk.merge, z, x, temp1, temp2, temp3)
 
 
 # Check missing records ---------------------------------------------------
 
-not.in.x2 <- temp2[is.na(temp2$Listing.number), c("HHID", 'date_visit', 'FRA', 'Listing.number')]
+not.in.x2 <- temp4[is.na(temp4$Listing.number), c("HHID", 'date_visit', 'FRA', 'Listing.number')]
 not.in.x2 <- not.in.x2[order(not.in.x2$HHID, not.in.x2$date_visit), ]
 row.names(not.in.x2) <- NULL
 
-not.in.odk <- temp2[is.na(temp2$FRA), c("HHID", 'date_visit', 'ppl', "Listing.number")]
+not.in.odk <- temp4[is.na(temp4$FRA), c("HHID", 'date_visit', 'ppl', "Listing.number")]
 not.in.odk <- not.in.odk[order(not.in.odk$HHID, not.in.odk$date_visit), ]
 row.names(not.in.odk) <- NULL
 
@@ -175,6 +178,27 @@ MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-24' & MonthlyAll$hh_id == 
 MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-24' & MonthlyAll$hh_id == 282] <- '2014-10-28'
 MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-24' & MonthlyAll$hh_id == 336] <- '2014-10-28'
 MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-23' & MonthlyAll$hh_id == 35] <- '2014-10-27'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-22' & MonthlyAll$hh_id == 14] <- '2014-09-18'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-28' & MonthlyAll$hh_id == 15] <- '2014-12-02'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-23' & MonthlyAll$hh_id == 35] <- '2014-10-27'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-23' & MonthlyAll$hh_id == 35] <- '2014-10-27'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-28' & MonthlyAll$hh_id == 23] <- '2014-12-01'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-18' & MonthlyAll$hh_id == 24] <- '2014-11-24'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-13' & MonthlyAll$hh_id == 26] <- '2014-10-13'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-30' & MonthlyAll$hh_id == 26] <- '2014-12-26'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-09-20' & MonthlyAll$hh_id == 53] <- '2014-09-30'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-02-07' & MonthlyAll$hh_id == 54] <- '2015-02-15'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-05' & MonthlyAll$hh_id == 55] <- '2014-12-17'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-04-10' & MonthlyAll$hh_id == 55] <- '2015-04-13'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-30' & MonthlyAll$hh_id == 56] <- '2014-12-26'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-10-24' & MonthlyAll$hh_id == 59] <- '2014-10-31'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2015-02-04' & MonthlyAll$hh_id == 62] <- '2015-03-04'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-12-19' & MonthlyAll$hh_id == 68] <- '2014-12-22'
+
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-21' & MonthlyAll$hh_id == 76] <- '2015-11-24'
+MonthlyAll$visitdate[MonthlyAll$visitdate == '2014-11-10' & MonthlyAll$hh_id == 95] <- '2014-11-13'
 
 # Deletions to ODK
 MonthlyAll <- MonthlyAll[!(MonthlyAll$visitdate == '2014-09-15' & MonthlyAll$hh_id == 156), ]
@@ -190,6 +214,7 @@ x2$date_visit[x2$date_visit == '2015-04-06' & x2$HHID == 77] <- '2015-04-03'
 x2$date_visit[x2$date_visit == '2014-09-11' & x2$HHID == 232] <- '2014-09-15'
 x2$date_visit[x2$date_visit == '2014-10-20' & x2$HHID == 367] <- '2014-10-17'
 x2$date_visit[x2$date_visit == '2015-04-13' & x2$HHID == 240] <- '2015-04-10'
+x2$date_visit[x2$date_visit == '2014-11-26' & x2$HHID == 6] <- '2014-11-21'
 
 # Deletions to X2
 x2$date_visit[x2$date_visit == '2014-09-15' & x2$HHID == 156]
@@ -201,14 +226,19 @@ x <- split(temp.x3.odk.merge, temp.x3.odk.merge$HHID)
 
 x <- lapply(x, dateReplace)
 x <- lapply(x, mergeRows)
-temp3 <- do.call(rbind.data.frame, x)
+temp1 <- do.call(rbind.data.frame, x)
+row.names(temp1) <- NULL
 
-
-# Check duplicates
+# Delete duplicates
+z <- duplicated(temp1[, 1:3])
+temp2 <- temp1[z == F | !is.na(temp1$FRA),  ]
+z <- duplicated(temp2[, 1:3], fromLast = T)
+temp3 <- temp2[z == F | !is.na(temp2$FRA),  ]
 z <- duplicated(temp3[, 1:3])
-sum(z)
-visits.month <- temp3[z == F,  ]
-rm(temp.x3.odk.merge, z, x, temp3)
+temp4 <- temp3[z == F, ]
+rm(temp.x2.odk.merge, z, x, temp1, temp2, temp3)
+
+visits.month <- temp4
 
 # Check missing records
 not.in.x2 <- visits.month[is.na(visits.month$Listing.number), c("HHID", 'date_visit', 'FRA', 'Listing.number', "visit_num", "survey_round")]
