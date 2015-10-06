@@ -267,7 +267,7 @@ x2$date_visit[x2$date_visit == '2015-04-06' & x2$HHID == 77] <- '2015-04-03'
 x2$date_visit[x2$date_visit == '2014-09-11' & x2$HHID == 232] <- '2014-09-15'
 x2$date_visit[x2$date_visit == '2014-10-20' & x2$HHID == 367] <- '2014-10-17'
 x2$date_visit[x2$date_visit == '2015-04-13' & x2$HHID == 240] <- '2015-04-10'
-x2$date_visit[x2$date_visit == '2014-11-26' & x2$HHID == 6] <- '2014-11-21'
+#x2$date_visit[x2$date_visit == '2014-11-26' & x2$HHID == 6] <- '2014-11-21'
 
 # Deletions to X2
 x2$date_visit[x2$date_visit == '2014-09-15' & x2$HHID == 156]
