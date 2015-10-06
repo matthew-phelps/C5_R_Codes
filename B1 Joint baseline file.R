@@ -137,10 +137,12 @@ Q11subset <- ddply(Q11_all, .(slno),
                    summarize,
                    adults = sum(adult),
                    children_U5 = sum(child_U5),
-                   children_5_17 = sum(child_5_17))
+                   children_5_17 = sum(child_5_17),
+                   ppl_all = sum(adult) + sum(child_U5) + sum(child_5_17))
 
 #merge age group subset with baseline data 
 baselineAll<-merge(baselineAll,Q11subset,by="slno")
+
 
 #View(baseline$children_U5)
 
