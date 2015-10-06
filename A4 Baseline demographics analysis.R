@@ -23,7 +23,7 @@ monthly<-m4[which(!(is.na(m4$FRA))),]
 monthly<-as.data.frame(monthly)
 #monthly[is.na(monthly)]<-0
 
-#monthly<-monthly[!duplicated(monthly$uniqueID),] #subset of unique household ids first visit
+#monthlysub<-monthly[!duplicated(monthly$uniqueID),] #subset of unique household ids first visit
 
 
 # variables that will be used ---------------------------------------------
@@ -93,8 +93,8 @@ monthly[grep("^ONLY", monthly$q10oth),"q10"]<-1 #two sisters living together
 
 monthly$nuclear_family<- with(monthly, ifelse(q10==1|q10==2|q10==4,1,0)) #is it one or more nuclear families (1) or primarily unrelated people (0)?
 
-monthly<-monthly[!duplicated(monthly$uniqueID),]
-table(monthly$nuclear_family)
+monthlysub<-monthly[!duplicated(monthly$uniqueID),]
+table(monthlysub$nuclear_family)
 
 
 # literacy ----------------------------------------------------------------
@@ -106,6 +106,14 @@ table(monthlysub$literacy_coded)
 
 # Household monthly income ------------------------------------------------
 #monthly income = average monthly household income + monthly remittances received - monthly remittances sent + annual remittances received/12 - annual remittances sent/12 - monthly loan payment
+
+monthly$q12[is.na(monthly$q12)]<-0 #set NAs to 0 for income questions 
+monthly$q12a2[is.na(monthly$q12a2)]<-0 #
+monthly$q12a1[is.na(monthly$q12a1)]<-0 #
+monthly$q12a3[is.na(monthly$q12a3)]<-0 #
+monthly$q12a4[is.na(monthly$q12a4)]<-0 #
+monthly$q12d[is.na(monthly$q12d)]<-0
+
 monthly$Monthly_income<- monthly$q12 + monthly$q12a2 - monthly$q12a1 + 
   (monthly$q12a3/12)-(monthly$q12a4/12)- monthly$q12d
 
@@ -113,7 +121,10 @@ monthly$monthly_income_percapita<-monthly$Monthly_income/(monthly$ppl)
 
 monthlysub<-monthly[!duplicated(monthly$uniqueID),]
 
-monthlysub[monthlysub$monthly_income_percapita>20000,c("monthly_income_percapita","ppl")]
+#View(monthly[monthly$monthly_income_percapita>20000,c("monthly_income_percapita","ppl",
+                                                            "asset_score","shared_facilities")])
+
+
 
 
 # View(monthly$monthly_income_percapita)
@@ -211,7 +222,7 @@ monthly$asset_score<- (monthly$q9_other_sum +
 #create column with asset quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
 monthly$asset_score[is.na(monthly$asset_score)]<-0
 
-mothly<-monthly[!duplicated(monthly$uniqueID),]
+monthlysub<-monthly[!duplicated(monthly$uniqueID),]
 
 ApplyQuintiles2 <- function(x) {
   cut(x, breaks=c(quantile(monthly$asset_score, probs = seq(0, 1, by = 0.20))), 
@@ -262,3 +273,8 @@ table(monthly$distance)
 table(monthly$q13_3) # 3= 3 or more sources
 table(monthly$q13_2) # 2 - value from above = 2 sources
 table(monthly$q13) # 1 - (value 2-value 3) = only 1 source
+
+#hours per day that water is flowing from primary source
+mean(monthly$checkwater)
+range(monthly$checkwater)
+table(monthly$checkwater)
