@@ -94,7 +94,7 @@ ptPerHHID <- function(x, end.date) {
   # before end.date, but the 1st monthly-visit occurs after end.date
   if (x$phone.dist[1] <=end.date && x$date_visit[1] > end.date) {
     x <- x[1,]
-    x$pt[1] <- x$ppl[1] * as.numeric(end.date - x$phone.dist[1])
+    x$pt[1] <- x$ppl_all[1] * as.numeric(end.date - x$phone.dist[1])
   } else {
     x <- x[x$date_visit <= end.date, ]
   }
@@ -102,16 +102,16 @@ ptPerHHID <- function(x, end.date) {
   # on which was most recent.
   for (i in 1:nrow(x)) {
     if (i == 1 && x$date_visit[i] >= x$phone.dist[i] && nrow(x) > 1) {
-      x$pt[i] <- x$ppl[i] * as.numeric(x$date_visit[i] - x$phone.dist[i])
+      x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - x$phone.dist[i])
     } else if (i == 1 && x$date_visit[i] < x$phone.dist[i] && nrow(x) > 1) {
       x$pt[i] <- 0
     } else if (nrow(x) == 1) {
-      x$pt[i] <- x$ppl[i] * (x$with_date[i] - x$phone.dist[i])
+      x$pt[i] <- x$ppl_all[i] * (x$with_date[i] - x$phone.dist[i])
     } else if (i > 1 && i < nrow(x)) {
-      x$pt[i] <- x$ppl[i] * as.numeric(x$date_visit[i] - (max(c(x$date_visit[i-1], x$phone.dist[i]))))
+      x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - (max(c(x$date_visit[i-1], x$phone.dist[i]))))
     } else if (i > 1 && i == nrow(x)) {
-      x$pt[i] <- x$ppl[i] *  as.numeric(x$date_visit[i] - max(c(x$date_visit[i-1], x$phone.dist[i]))) +
-        x$ppl[i] * (x$with_date[i] - x$date_visit[i])
+      x$pt[i] <- x$ppl_all[i] *  as.numeric(x$date_visit[i] - max(c(x$date_visit[i-1], x$phone.dist[i]))) +
+        x$ppl_all[i] * (x$with_date[i] - x$date_visit[i])
     }
   } 
   return(x)
@@ -139,7 +139,7 @@ pt48hr <- function(x, end.date) {
   x <- x[(x$phone.dist <= end.date & x$date_visit <= end.date), ]
   x$with_date[x$with_date > end.date] <- end.date 
   x1 <- x[complete.cases(x[, 1:7]), ]
-  x1$pt48hr <- 2 * x1$ppl
+  x1$pt48hr <- 2 * x1$ppl_all
   x1
 }
 

@@ -30,7 +30,7 @@ library(data.table)
 source(functions.path)
 
 # GLOBAL VARIABLES  & FUNCTIONS--------------------------------------------------------
-# endDate <- as.Date('31-12-14', "%d-%m-%y")
+
 endDate <- Sys.Date()
 
 
@@ -40,9 +40,22 @@ load(clean_monthly_basebase.path)
 
 
 # SUBSET VARIABLES --------------------------------------------------------
-m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date', 'phone.dist', 'with_date' )]
+m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date', 'phone.dist', 'with_date', "ppl_all", "new_per", "old_per_out" )]
 
 
+# UPDATE NO. PPL IN HH ----------------------------------------------------
+pplCalc <- function (x){
+  if (nrow(x) > 1){
+    for (i in 2:nrow(x)){
+      x$ppl_all[i] <- x$ppl_all[i-1] + x$new_per[i] - x$old_per_out[i] 
+    }
+  }
+  return(x)
+}
+x.temp <- split(m4, f = m4$uniqueID)
+
+m4.temp <- lapply(x.temp, pplCalc )
+m4 <- do.call(rbind.data.frame, m4.temp)
 
 
 # PERSONE TIME for each household during each time-frame

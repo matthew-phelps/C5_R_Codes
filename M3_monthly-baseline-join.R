@@ -54,7 +54,7 @@ rm(x, y)
 
 
 # RECORD & REMOVE RECORDS WITHOUT BASELINE --------------------------------
-# these should be fixed upstream.
+# these should be fixed in B2 file
 
 noBaseline <- z[is.na(z$base_date), ] 
 

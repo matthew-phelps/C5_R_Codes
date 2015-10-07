@@ -27,15 +27,13 @@ source(functions.path)
 
 # GLOBAL VARIABLES  & FUNCTIONS--------------------------------------------------------
 endDate <- as.Date('31-12-14', "%d-%m-%y")
-#endDate <- Sys.Date()
+endDate <- Sys.Date()
 
 
 # LOAD DATA ---------------------------------------------------------------
 
 load(pt)
 rm(pt)
-
-
 
 
 # RESTRICT DATE -----------------------------------------------------------
