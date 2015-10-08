@@ -34,6 +34,19 @@ late.visit <- m4[m4$date_visit > m4$with_date, ]
 
 # CLEAN DATA --------------------------------------------------------------
 
+#delete practice cases (identified by Char and confirmed by Bimal)
+m4<-m4[!(m4$uniqueID=="015_2014-08-29"&m4$date_visit=="2014-11-10"),]
+m4<-m4[!(m4$uniqueID=="001_2014-09-14"&m4$date_visit=="2014-11-16"),]
+m4<-m4[!(m4$uniqueID=="123_2014-07-22"&m4$FRA==123),]
+m4<-m4[!(m4$uniqueID=="400_2014-07-15"&m4$FRA==0),]
+
+
+#methods for identifying mislabeled HHIDs in monthly visits
+#View(m4[is.na(m4$ppl)|is.na(m4$FRA),]) # look at unmatched visits
+#View(m4[m4$date_visit=="2015-01-14",]) #Look at date of unmatched monthly visit to see if there is a corresponding X-2 date with a different ID
+#View(m4[(m4$uniqueID=="327_2014-07-12"|m4$uniqueID=="372_2014-12-05"),]) #if yes, view both IDs and compare containers
+#View(m4[m4$uniqueID=="395_2014-07-17",]) #if a HHID has a missing X-2 and monthly visit, check dates
+
 
 # Clean water quantities --------------------------------------------------
 
