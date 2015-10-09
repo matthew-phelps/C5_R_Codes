@@ -355,6 +355,33 @@ rm(x, y)
 MonthlyAll <- MonthlyAll[order(MonthlyAll$hh_id, MonthlyAll$visitdate), ]
 row.names(MonthlyAll) <- NULL
 
+# Clean misentered HHIDs and dates  ---------------------------------------
+
+MonthlyAll[MonthlyAll$hh_id==241&MonthlyAll$visitdate=="2015-04-27","hh_id"]<-247
+MonthlyAll[MonthlyAll$hh_id==266&MonthlyAll$visitdate=="2015-01-03","hh_id"]<-191
+MonthlyAll[MonthlyAll$hh_id==283&MonthlyAll$visitdate=="2014-11-10","hh_id"]<-243
+MonthlyAll[MonthlyAll$hh_id==018&MonthlyAll$visitdate=="2015-08-05","hh_id"]<-038
+MonthlyAll[MonthlyAll$hh_id==058&MonthlyAll$visitdate=="2015-03-23","hh_id"]<-054
+MonthlyAll[MonthlyAll$hh_id==064&MonthlyAll$visitdate=="2015-08-19","hh_id"]<-074
+MonthlyAll[MonthlyAll$hh_id==078&MonthlyAll$visitdate=="2014-10-28","hh_id"]<-074
+MonthlyAll[MonthlyAll$hh_id==146&MonthlyAll$visitdate=="2015-08-10","hh_id"]<-136
+MonthlyAll[MonthlyAll$hh_id==227&MonthlyAll$visitdate=="2015-03-20","hh_id"]<-272
+MonthlyAll[MonthlyAll$hh_id==258&MonthlyAll$visitdate=="2014-12-11","hh_id"]<-285
+MonthlyAll[MonthlyAll$hh_id==290&MonthlyAll$visitdate=="2015-03-19","hh_id"]<-204
+MonthlyAll[MonthlyAll$hh_id==317&MonthlyAll$visitdate=="2014-10-31","hh_id"]<-337
+MonthlyAll[MonthlyAll$hh_id==327&MonthlyAll$visitdate=="2015-02-13","hh_id"]<-372
+
+MonthlyAll[MonthlyAll$hh_id==337&MonthlyAll$visitdate=="2014-10-31","visitdate"]<-as.Date("2014-11-01")
+MonthlyAll[MonthlyAll$hh_id==209&MonthlyAll$visitdate=="2014-12-19","visitdate"]<-as.Date("2014-12-22")
+MonthlyAll[MonthlyAll$hh_id==222&MonthlyAll$visitdate=="2015-09-04","visitdate"]<-as.Date("2015-09-07")
+MonthlyAll[MonthlyAll$hh_id==270&MonthlyAll$visitdate=="2014-11-21","visitdate"]<-as.Date("2014-12-17")
+MonthlyAll[MonthlyAll$hh_id==297&MonthlyAll$visitdate=="2014-11-16","visitdate"]<-as.Date("2014-11-21")
+MonthlyAll[MonthlyAll$hh_id==395&MonthlyAll$visitdate=="2014-10-09","visitdate"]<-as.Date("2014-11-10")
+
+
+#MonthlyAll[MonthlyAll$hh_id==337&MonthlyAll$visitdate=="2014-10-31","visitdate"] # check that entry exists as written
+#MonthlyAll[MonthlyAll$hh_id==297&MonthlyAll$visitdate=="2015-04-27",]
+
 # SAVE DATA TO DISK -------------------------------------------------------
 
 save(MonthlyAll, file = data.path)
