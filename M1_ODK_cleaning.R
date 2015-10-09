@@ -377,6 +377,8 @@ MonthlyAll[MonthlyAll$hh_id==222&MonthlyAll$visitdate=="2015-09-04","visitdate"]
 MonthlyAll[MonthlyAll$hh_id==270&MonthlyAll$visitdate=="2014-11-21","visitdate"]<-as.Date("2014-12-17")
 MonthlyAll[MonthlyAll$hh_id==297&MonthlyAll$visitdate=="2014-11-16","visitdate"]<-as.Date("2014-11-21")
 MonthlyAll[MonthlyAll$hh_id==395&MonthlyAll$visitdate=="2014-10-09","visitdate"]<-as.Date("2014-11-10")
+MonthlyAll<-MonthlyAll[!(MonthlyAll$hh_id==028&MonthlyAll$visitdate=="2014-10-20"),]
+MonthlyAll$hh_id[MonthlyAll$hh_id==024&MonthlyAll$visitdate=="2014-11-18"]<-028
 
 
 #MonthlyAll[MonthlyAll$hh_id==337&MonthlyAll$visitdate=="2014-10-31","visitdate"] # check that entry exists as written
