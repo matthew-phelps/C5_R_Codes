@@ -40,11 +40,15 @@ load(clean_monthly_basebase.path)
 
 
 # SUBSET VARIABLES --------------------------------------------------------
-m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'ppl', 'base_date', 'phone.dist', 'with_date', "ppl_all", "new_per", "old_per_out" )]
+m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'base_date', 'phone.dist', 'with_date', "ppl_all", "new_per", "old_per_out" )]
 
 
 # UPDATE NO. PPL IN HH ----------------------------------------------------
 pplCalc <- function (x){
+  # adds or substracts ppl from HH count of ppl based on No. ppl entering or leaving
+  # If NA is recorded in ppl entering and leaving, then 0 ppl are counted
+  ifelse (is.na(x$new_per), x$new_per <- 0, x$new_per)
+  ifelse (is.na(x$old_per_out), x$old_per_out <- 0, x$old_per_out)
   if (nrow(x) > 1){
     for (i in 2:nrow(x)){
       x$ppl_all[i] <- x$ppl_all[i-1] + x$new_per[i] - x$old_per_out[i] 
@@ -56,6 +60,7 @@ x.temp <- split(m4, f = m4$uniqueID)
 
 m4.temp <- lapply(x.temp, pplCalc )
 m4 <- do.call(rbind.data.frame, m4.temp)
+row.names(m4) <- NULL
 
 
 # PERSONE TIME for each household during each time-frame
