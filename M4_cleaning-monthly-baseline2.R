@@ -103,7 +103,7 @@ m4 <- merge(m4, range_list, by="uniqueID")
 #sub<-m4[which(!(is.na(m4$FRA))),]
 
 #write.csv2(sub[sub$daily_h2o_percapita==0,c("HHID", "date_visit", "FRA","ppl",
-                                            "daily_volume","daily_h2o_percapita")],file="No water use.csv")
+                                          #  "daily_volume","daily_h2o_percapita")],file="No water use.csv")
 
 #delete the three entries with no info on water use
 m4<-m4[!(m4$daily_volume==0),]
@@ -154,7 +154,7 @@ m4$cont3.cont3_times[m4$uniqueID=="156_2014-08-06"&m4$date_visit=="2014-09-16"]<
 m4$cont3.cont3_times[m4$uniqueID=="156_2014-08-06"&m4$date_visit=="2014-09-16"]<-2
 m4$other_water_in.adult_bathe_in[m4$uniqueID=="156_2014-08-06"&m4$date_visit=="2014-09-16"]<-0
 m4$cont2.cont2_times[m4$uniqueID=="257_2014-09-28"&m4$date_visit=="2014-12-23"]<-4
-
+m4$other_water_out.adult_bathe_out[m4$uniqueID=="360_2014-07-16"&m4$date_visit=="2014-11-14"]<-0
 
 #Check data on activities done without a container
 m4$bath_pc<-with(m4,(other_water_in.adult_bathe_in+other_water_out.adult_bathe_out+other_water_in.child_bathe_in+other_water_out.child_bathe_out)/m4$ppl)
@@ -263,7 +263,7 @@ for (i in 1:length(unique(m4$uniqueID))) {
                   unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==2) {m4_subset <- clean(m4_subset[i])  }
   
   else {(m4_subset)}
-  }}
+  }
 
 m4_subset$h2o_tank1
 
