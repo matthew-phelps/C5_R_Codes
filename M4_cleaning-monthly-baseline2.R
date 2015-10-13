@@ -24,7 +24,7 @@ rm(monthly_basebase.path)
 
 
 
-
+m4$q9_20
 # INDEX PROBLEM RECORDS ---------------------------------------------------
 
 early.visit <- m4[m4$date_visit < m4$phone.dist - 2, ]
@@ -351,6 +351,17 @@ m4$checkwater<-m4$water_flow_1+m4$water_flow_2+m4$water_flow_3
 #                                                                                       "water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
 #                                                                                       "water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3","checkwater")], file="water flow recheck.csv")
 
+#after cleaning water use info, recaculate daily volume and per capita use
+
+m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
+                        (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
+                      +(cont6.cont6_size*cont6.cont6_times)+(cont7.cont7_size*cont7.cont7_times)+(cont8.cont8_size*cont8.cont8_times)
+                      +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
+                      +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times)
+                      +((other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)*37)  #will probably change once more detailed information is received from Rebeca
+                      +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*14))
+
+m4$daily_h2o_percapita<-with(m4, daily_volume/ppl)
 
 # RE-CHECK CLEAN DATA -----------------------------------------------------
 
