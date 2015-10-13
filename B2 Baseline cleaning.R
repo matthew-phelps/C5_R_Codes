@@ -10,23 +10,23 @@
 # If user == Char, do nothing. If else, prepare Matthew's workingspace
 rm(list = ls())
 ifelse(grepl("zrc340", getwd()), 
-       B1.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\baselineAll.Rdata",
+       B1.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\baselineAll.Rdata",
        B1.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baselineAll.Rdata")
 
 ifelse(grepl("zrc340", getwd()), 
-       B2.base.merge.output.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata",
+       B2.base.merge.output.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata",
        B2.base.merge.output.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata")
 ifelse(grepl("zrc340", getwd()), 
-       not.in.x1.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\Missing_from_X1.csv",
+       not.in.x1.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\Missing_from_X1.csv",
        not.in.x1.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_X1.csv")
 ifelse(grepl("zrc340", getwd()), 
-       not.in.baseline.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\Missing_from_baseline.csv",
+       not.in.baseline.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\Missing_from_baseline.csv",
        not.in.baseline.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Missing_from_baseline.csv")
 ifelse(grepl("zrc340", getwd()), 
-       overlap.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\Overlap.csv",
+       overlap.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\Overlap.csv",
        overlap.path <- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Overlap.csv")
 ifelse(grepl("zrc340", getwd()),
-       functions.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\c_5_functions_source_file.R",
+       functions.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\c_5_functions_source_file.R",
        functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
 
 ifelse(grepl("zrc340", getwd()), 
