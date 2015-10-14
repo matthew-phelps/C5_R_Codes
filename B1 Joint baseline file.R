@@ -62,13 +62,31 @@ distance<-data.frame(distance)
 distance69<-data.frame(distance69)
 distance47<-data.frame(distance47)
 
-#combine main baseline data sets
+
+# FACTORS TO STRINGS: ---------------------------------------------------
+# Replace all variables that are class: factors with variabels tha 
+
+# see: http://stackoverflow.com/questions/2851015/convert-data-frame-columns-from-factors-to-characters/2853231#2853231
+main1 <- rapply(main, as.character, classes="factor", how="replace")
+main <- as.data.frame(main1, stringsAsFactors = F) # get back to nice df
+
+main2 <- rapply(main47, as.character, classes="factor", how="replace")
+main47 <- as.data.frame(main2, stringsAsFactors = F) 
+
+main3 <- rapply(main69, as.character, classes="factor", how="replace")
+main69 <- as.data.frame(main3, stringsAsFactors = F) 
+
+  
+# COMBINE DATASETS --------------------------------------------------------
+
 #first add missing columns
 names1<-names(main)
 names47<-names(main47)
 names69<-names(main69)
 names1[!(names1 %in% names47)]
 names69[!(names69 %in% names47)] #nothing needs to be added to main47
+
+
 
 
 names47[!(names47 %in% names1)]
