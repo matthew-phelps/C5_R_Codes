@@ -42,11 +42,11 @@ m4<-m4[!(m4$uniqueID=="400_2014-07-15"&m4$FRA==0),]
 
 
 #methods for identifying mislabeled HHIDs in monthly visits
-View(m4[is.na(m4$ppl)|is.na(m4$FRA),]) # look at unmatched visits
-View(m4[m4$date_visit=="2014-11-18",]) #Look at date of unmatched monthly visit to see if there is a corresponding X-2 date with a different ID
+#View(m4[is.na(m4$ppl)|is.na(m4$FRA),]) # look at unmatched visits
+#View(m4[m4$date_visit=="2014-11-18",]) #Look at date of unmatched monthly visit to see if there is a corresponding X-2 date with a different ID
 #View(m4[(m4$uniqueID=="327_2014-07-12"|m4$uniqueID=="372_2014-12-05"),]) #if yes, view both IDs and compare containers
 #View(m4[m4$uniqueID=="395_2014-07-17",]) #if a HHID has a missing X-2 and monthly visit, check dates
-View(m4[m4$cont4.cont4_size==15&m4$cont1.cont1_size==2.5,])
+#View(m4[m4$cont4.cont4_size==15&m4$cont1.cont1_size==2.5,])
 m4<-m4[!(is.na(m4$uniqueID)),]
 
 # Clean water quantities --------------------------------------------------
@@ -73,9 +73,20 @@ m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size
                            +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times)
                            +((other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)*37)  #will probably change once more detailed information is received from Rebeca
                            +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*14))
+
+
+m4$dishes<-m4$other_water_in.wash_plate_in+m4$other_water_out.wash_plate_out
+m4$clothes<-m4$other_water_in.wash_clothes_in+m4$other_water_out.wash_clothes_out
 #average water consumption per activity in liters: adult bath= 37, child bath = 14, wash dishes = 25, wash clothes =43
 
-
+#create month variable
+#month variable
+m4$date_visit_character<-as.character(m4$date_visit)
+temp<-strsplit(m4$date_visit_character, "-")
+mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
+df <- as.data.frame(mat)
+colnames(df) <- c("year", "month", "day")
+m4<- cbind(m4,df)
 
 #create H20 per capita variable
 m4$ppl[is.na(m4$ppl)]<-0
