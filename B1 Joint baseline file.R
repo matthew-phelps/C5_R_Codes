@@ -76,6 +76,7 @@ main47 <- as.data.frame(main2, stringsAsFactors = F)
 main3 <- rapply(main69, as.character, classes="factor", how="replace")
 main69 <- as.data.frame(main3, stringsAsFactors = F) 
 
+rm(main1, main2, main3)
   
 # COMBINE DATASETS --------------------------------------------------------
 
