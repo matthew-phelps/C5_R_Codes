@@ -12,10 +12,12 @@
 
 library(dplyr)
 library(lubridate)
+library(ggplot2)
 #detach("package:plyr", unload=TRUE) # disrupts the dplyr package
 
 # Prepare workspace: if user == CHAR prepare Char's path, else: MAtthew's path
 rm(list = ls())
+
 ifelse(grepl("zrc340", getwd()),
        baseline.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata",
        baseline.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\baseline_x1_merge.Rdata")
@@ -25,9 +27,23 @@ ifelse(grepl("zrc340", getwd()),
 ifelse(grepl("zrc340", getwd()),
        functions.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\c_5_functions_source_file.R",
        functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
+ifelse(grepl("zrc340", getwd()),
+       output.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\monthly_summary.csv",
+       output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly_summary.csv")
 
 
-
+ifelse(grepl("zrc340", getwd()),
+       plot1.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\plot1.pdf",
+       plot1.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\plot1.pdf")
+ifelse(grepl("zrc340", getwd()),
+       plot2.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\plot2.pdf",
+       plot2.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\plot2.pdf")
+ifelse(grepl("zrc340", getwd()),
+       plot3.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\plot3.pdf",
+       plot3.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\plot3.pdf")
+ifelse(grepl("zrc340", getwd()),
+       plot4.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\plot4.pdf",
+       plot4.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\plot4.pdf")
 
 # LOAD DATA ---------------------------------------------------------------
 
@@ -61,7 +77,7 @@ uniqueHH <- uniqueHH[!x,]
 
 monthly_summary <- as.data.frame(table(uniqueHH$phoneMonthYear))
 monthly_summary$Var1 <- as.Date(monthly_summary$Var1)
-monthly_summary <- rename(monthly_summary, new.phones = Freq)
+monthly_summary <- rename(monthly_summary, new_phones = Freq)
 
 
 # ACTIVE HH & DROPOUT HH ------------------------------------------------
@@ -152,3 +168,47 @@ month.temp <- colSums(cv)
 monthly_summary <- cbind(monthly_summary, month.temp)
 monthly_summary <- rename(monthly_summary, active_ppl = month.temp)
 rm(vf, cv, month.temp)
+
+
+# NUMBER OF MONTHLY VISITS ------------------------------------------------
+
+x <- as.data.frame(table(m5$date_visit_month))
+x$Var1 <- as.Date(x$Var1)
+monthly_summary <- left_join(monthly_summary, x, by = "Var1")
+monthly_summary <- rename(monthly_summary, number_visits = Freq, date = Var1)
+
+
+
+# PLOTS -------------------------------------------------------------------
+graphics.off()
+plot1 <- ggplot(data = monthly_summary, aes(x = date, y = new_phones)) +
+  geom_bar(stat = "identity") +
+  ggtitle("New phones") +
+  theme(plot.title = element_text(size = 20, face="bold"))
+plot1
+
+plot2 <-ggplot(data = monthly_summary, aes(x = date, y = active_hh)) +
+  geom_bar(stat = "identity", fill = "darkblue", alpha = 0.8) +
+  ggtitle("Active households") +
+  theme(plot.title = element_text(size = 20, face="bold"))
+plot2
+
+plot3 <- ggplot(data = monthly_summary, aes(x = date, y = number_visits)) +
+  geom_bar(stat = "identity", fill = "darkred", alpha = 0.8) +
+  ggtitle("Number of monthly visits")+
+  theme(plot.title = element_text(size = 20, face="bold"))
+plot3
+
+plot4 <- ggplot(data = monthly_summary, aes(x = date, y = dropout_individuals)) +
+  geom_bar(stat = "identity", fill = "darkgreen", alpha = 0.7) +
+  ggtitle("Number of individual dropouts\nfrom active households")+
+  theme(plot.title = element_text(size = 20, face="bold"))
+plot4
+# WRITE OUTPUT ------------------------------------------------------------
+
+write.csv(monthly_summary, file = output.path)
+ggsave(filename = plot1.path, plot = plot1, width = 10, height = 10)
+ggsave(filename = plot2.path, plot = plot2, width = 10, height = 10)
+ggsave(filename = plot3.path, plot = plot3, width = 10, height = 10)
+ggsave(filename = plot4.path, plot = plot4, width = 10, height = 10)
+
