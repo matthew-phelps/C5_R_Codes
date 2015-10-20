@@ -37,6 +37,7 @@ late.visit <- m4[m4$date_visit > m4$with_date, ]
 #delete practice cases (identified by Char and confirmed by Bimal)
 m4<-m4[!(m4$uniqueID=="015_2014-08-29"&m4$date_visit=="2014-11-10"),]
 m4<-m4[!(m4$uniqueID=="001_2014-09-14"&m4$date_visit=="2014-11-16"),]
+m4<-m4[!(m4$uniqueID=="062_2014-10-14"&m4$date_visit=="04-02-2015"),]
 m4<-m4[!(m4$uniqueID=="123_2014-07-22"&m4$FRA==123),]
 m4<-m4[!(m4$uniqueID=="400_2014-07-15"&m4$FRA==0),]
 
@@ -113,21 +114,15 @@ m4 <- merge(m4, range_list, by="uniqueID")
 #setwd("C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\Sent to bangladesh for clarification")
 #sub<-m4[which(!(is.na(m4$FRA))),]
 
-#write.csv2(sub[sub$daily_h2o_percapita==0,c("HHID", "date_visit", "FRA","ppl",
-                                          #  "daily_volume","daily_h2o_percapita")],file="No water use.csv")
-
-#delete the three entries with no info on water use
-m4<-m4[!(m4$daily_volume==0),]
-
 #create subset that are out of range without the ones I already checked
-sub<-m4[!(m4$uniqueID=="005_2014-09-12"|m4$uniqueID=="008_2014-12-09"|m4$uniqueID=="010_2014-06-02"|m4$uniqueID=="025_2014-09-17"|
-          m4$uniqueID=="083_2014-09-11"|m4$uniqueID=="094_2014-09-12"|m4$uniqueID=="108_2014-08-22"|
-          m4$uniqueID=="110_2014-10-23"|m4$uniqueID=="131_2014-08-29"|m4$uniqueID=="217_2014-10-31"|
-            m4$uniqueID=="218_2014-06-03"|m4$uniqueID=="249_2014-12-26"|m4$uniqueID=="293_2015-03-20"|
-            m4$uniqueID=="299_2014-08-22"|m4$uniqueID=="353_2014-07-14"|m4$uniqueID=="364_2014-08-08"|
-            m4$uniqueID=="369_2014-07-11"|m4$uniqueID=="388_2014-11-20"|m4$uniqueID=="396_2014-07-12"),]    
-    
-sub<-sub[!(is.na(sub$FRA)),]        
+# sub<-m4[!(m4$uniqueID=="005_2014-09-12"|m4$uniqueID=="008_2014-12-09"|m4$uniqueID=="010_2014-06-02"|m4$uniqueID=="025_2014-09-17"|
+#           m4$uniqueID=="083_2014-09-11"|m4$uniqueID=="094_2014-09-12"|m4$uniqueID=="108_2014-08-22"|
+#           m4$uniqueID=="110_2014-10-23"|m4$uniqueID=="131_2014-08-29"|m4$uniqueID=="217_2014-10-31"|
+#             m4$uniqueID=="218_2014-06-03"|m4$uniqueID=="249_2014-12-26"|m4$uniqueID=="293_2015-03-20"|
+#             m4$uniqueID=="299_2014-08-22"|m4$uniqueID=="353_2014-07-14"|m4$uniqueID=="364_2014-08-08"|
+#             m4$uniqueID=="369_2014-07-11"|m4$uniqueID=="388_2014-11-20"|m4$uniqueID=="396_2014-07-12"),]    
+#     
+# sub<-sub[!(is.na(sub$FRA)),]        
 #write.csv2(sub[(sub$range_diff>100),c("uniqueID","listing","date_visit","FRA","ppl","daily_h2o_percapita",
 #                    "cont1.cont1_size","cont1.cont1_times",	"cont2.cont2_size",	"cont2.cont2_times",	
 #                    "cont3.cont3_size",	"cont3.cont3_times","cont4.cont4_size",	"cont4.cont4_times",		
@@ -202,6 +197,13 @@ m4$other_water_out.wash_clothes_out[is.na(m4$other_water_out.wash_clothes_out)]<
 #                                        "other_water_out.wash_clothes_out","wash_clothes_total")],file="Too many clothes.csv")
 
 # range(m4[m4$clothes>0,c("clothes")])
+
+#water use = 0, only three entries once printed
+#write.csv2(sub[sub$daily_h2o_percapita==0,c("HHID", "date_visit", "FRA","ppl",
+#  "daily_volume","daily_h2o_percapita")],file="No water use.csv")
+
+# delete the three entries where water use = 0
+m4<-m4[!(m4$daily_h2o_percapita==0),]
 
 m4[which(m4$other_water_in.child_bathe_in==6&m4$uniqueID=="269_2015-02-17"),"other_water_in.child_bathe_in"]<-0
 
@@ -352,10 +354,24 @@ m4$water_flow_3[which(m4$round>23.9)]<-0
 
 m4$checkwater<-m4$water_flow_1+m4$water_flow_2+m4$water_flow_3
 
-# write.csv2(m4[m4$checkwater>24,c("uniqueID","Listing.number.x","date_visit",
-#"water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
-#"water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
-#"water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3","checkwater")], file="too many hours of water use.csv")
+#write file to send to bangladesh where water use is more than 24 hours in a day
+# write.csv2(m4[m4$checkwater>24,c("uniqueID","Listing.number.x","date_visit","FRA"
+# "water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
+# "water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
+# "water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3","checkwater")], file="too many hours of water use.csv")
+
+#write file to send to bangladesh from FRA 9446 that appears to have messed up several entries
+# write.csv2(m4[m4$FRA==9446,c("uniqueID","Listing.number.x","date_visit","FRA",
+# "water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
+# "water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
+# "water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3","checkwater")], file="FRA 9446.csv")
+# 
+#write file to send to bangladesh where water use is 0
+# write.csv2(m4[m4$daily_volume==0,c("uniqueID","Listing.number.x","date_visit","FRA",
+#                                    "water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
+#                                    "water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
+#                                    "water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3","checkwater")], file="No water use.csv")
+# 
 
 #write.csv2(m4[m4$round2==0.017|m4$round==0.667|m4$round==16.517,c("uniqueID","FRA","Listing.number.x","date_visit",
 #                                                                                       "water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
@@ -373,6 +389,34 @@ m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size
                       +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*14))
 
 m4$daily_h2o_percapita<-with(m4, daily_volume/ppl)
+
+
+# fix data on  hours that water is available based on Bimal's changes on 20-10-15
+m4[m4$uniqueID=="020_2014-10-17"&m4$date_visit=="2015-02-20",c("checkwater")]<-6.5
+m4[m4$uniqueID=="041_2015-05-20"&m4$date_visit=="2015-07-10",c("checkwater")]<-9
+m4[m4$uniqueID=="061_2015-03-04"&m4$date_visit=="2015-04-20",c("checkwater")]<-NA
+m4[m4$uniqueID=="233_2014-07-21",c("checkwater")]<-24
+m4[m4$uniqueID=="400_2014-07-15"&m4$date_visit=="2015-05-08",c("checkwater")]<-24
+
+
+sub<-m4[m4$date_visit<"2015-10-01",]
+table(sub$checkwater)
+m4[m4$water_point1.wa_flow1.wa_time1.aS=="16:00:00"&m4$water_point1.wa_flow1.wa_time1.aE=="16:00:00"&m4$water_point1.wa_flow1.wa_time1.bS=="15:59:00",c("checkwater")]<-24 #FRA 9446 has entered 24 water use incorrectly
+m4[m4$water_point1.wa_flow1.wa_time1.aS=="18:00:00"&m4$water_point1.wa_flow1.wa_time1.aE=="18:00:00"&m4$water_point1.wa_flow1.wa_time1.bS=="17:59:00"&m4$checkwater<1,c("checkwater")]<-24 #FRA 9446 has entered 24 water use incorrectly
+
+
+# View(m4[m4$uniqueID=="130_2014-11-18",c("uniqueID","Listing.number.x","date_visit","FRA",
+#                                         "water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
+#                                         "water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
+#                                         "water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3",
+#                                         "q15_recoded","checkwater")])
+
+
+
+#check entries with strange FRA IDs    
+# table(m4$FRA)
+# View(m4[m4$FRA==1333,])
+# View(m4[m4$uniqueID=="157_2014-07-13",]) #### All are OK
 
 # RE-CHECK CLEAN DATA -----------------------------------------------------
 
