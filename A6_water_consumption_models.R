@@ -142,6 +142,10 @@ monthly$year.month<-as.numeric(with(monthly, ifelse(month=="09"|month=="10"|mont
 monthly$season<-with(monthly, ifelse(month=="01"|month=="02"|month=="03","ld",
                                      ifelse(month=="04"|month=="05"|month=="06","pm",
                                             ifelse(month=="07"|month=="08"|month=="09","m","ed"))))
+monthly$season2<-with(monthly, ifelse(month=="01"|month=="02"|month=="11"|month=="12","dry_cold",
+                                      ifelse(month=="04"|month=="05","spring",
+                                             ifelse(month=="07"|month=="08"|month=="09"|month=="06","m","oct"))))
+
 #set categorical variables as characters for models
 monthly$asset_quintile<-as.character(monthly$asset_quintile)
 monthly$distance<-as.character(monthly$distance)
@@ -171,7 +175,7 @@ monthly$handwash<-(monthly$other_water_in.wash_hands_in+monthly$other_water_out.
 #              + ppl + (1|slno.1) +(1|listing), data=monthly)
 # anova(modela,modelb) # p=.6, no difference, keep infrastructure and assets separate
   
-##  
+##  model 1 daily h2o consumption over seasons Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec
 model1=lmer(daily_h2o_percapita ~ season*water_flow_1  +  distance   + infrastructure + day + asset_quintile
             + ppl + (1|slno.1) +(1|listing), data=monthly)
 summary(model1)
@@ -182,7 +186,20 @@ summary(model1)
 
 anova(model1,model.null)
 
-coef(lmer(daily_h2o_percapita ~ season  +  distance +  water_flow_1 + infrastructure + day + asset_quintile
+coef(lmer(daily_h2o_percapita ~ season*water_flow_1  +  distance +   + infrastructure + day + asset_quintile
+          + ppl + (1|slno.1) +(1|listing), data=monthly))
+
+### model 2 daily consumption with different seasons
+model2=lmer(daily_h2o_percapita ~ season2*water_flow_1  +  distance   + infrastructure + day + asset_quintile
+            + ppl + (1|slno.1) +(1|listing), data=monthly)
+summary(model1)
+
+model2.null=lmer(daily_h2o_percapita ~   distance +  water_flow_1 + infrastructure  + day + asset_quintile
+                + ppl + (1|slno.1) +(1|listing), data=monthly)
+
+anova(model2,model2.null)
+
+coef(lmer(daily_h2o_percapita ~ season2*water_flow_1  +  distance + infrastructure + day + asset_quintile
           + ppl + (1|slno.1) +(1|listing), data=monthly))
 
 #handwashing over the seasons
@@ -206,12 +223,6 @@ modelhand2null<-lmer(handwash ~ daily_h2o_percapita + (1|slno.1) +(1|listing), d
 
 anova(modelhand2, modelhand2null) # p<.001
 coef(modelhand2)
-
-#
-
-monthly$dishes<-monthly$other_water_in.wash_plate_in+monthly$other_water_out.wash_plate_out
-monthly$clothes<-monthly$other_water_in.wash_clothes_in+monthly$other_water_out.wash_clothes_out
-monthly$clothes<-as.numeric(monthly$clothes)
 
 ###
 clothesmodel<-lmer(clothes~season*water_flow_1 + distance + infrastructure + asset_quintile
