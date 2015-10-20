@@ -12,7 +12,7 @@ ifelse(grepl("zrc340", getwd()),
        Q11.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\Q11_all.Rdata",
        Q11.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Q11_all.Rdata")
 ifelse(grepl("zrc340", getwd()), 
-       m4.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\clean-monthly-baseline.Rdata",
+       m4.path<- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline.Rdata",
        m4.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata")
 ifelse(grepl("zrc340", getwd()), 
        data.out.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\monthly-water.Rdata",
@@ -156,33 +156,33 @@ monthly$infrastructure<-ifelse(monthly$q14_recoded==1,"tap",
 #handwashing variable
 monthly$other_water_in.wash_hands_in[is.na(monthly$other_water_in.wash_hands_in)]<-0
 monthly$other_water_out.wash_hands_out[is.na(monthly$other_water_out.wash_hands_out)]<-0
-monthly$handwash<-(monthly$other_water_in.wash_hands_in+monthly$other_water_out.wash_hands_out)/monthly$ppl
+monthly$handwash_per_capita<-(monthly$other_water_in.wash_hands_in+monthly$other_water_out.wash_hands_out)/monthly$ppl
 
 #table(monthly$daily_h2o_percapita)
 # Linear mixed models -----------------------------------------------------
 
-# modelx<-lmer(daily_h2o_percapita ~ season  +  distance +  water_flow_1 + infrastructure + day + asset_quintile
+# modelx<-lmer(daily_h2o_percapita ~ season  +  distance +  checkwater + infrastructure + day + asset_quintile
 #              + ppl + (1|slno.1) +(1|listing), data=monthly)
 # 
-# modely<-lmer(daily_h2o_percapita ~ season*water_flow_1 +  distance +   infrastructure + day + asset_quintile
+# modely<-lmer(daily_h2o_percapita ~ season*checkwater +  distance +   infrastructure + day + asset_quintile
 #              + ppl + (1|slno.1) +(1|listing), data=monthly)
 # anova(modely,modelx) # significant difference (p=.007) indicates that we should use season*water_flow_1
 
 ##
-# modela<-lmer(daily_h2o_percapita ~ season*water_flow_1 +  distance +  infrastructure + day + asset_quintile
+# modela<-lmer(daily_h2o_percapita ~ season*checkwater +  distance +  infrastructure + day + asset_quintile
 #              + ppl + (1|slno.1) +(1|listing), data=monthly)
-# modelb<-lmer(daily_h2o_percapita ~ season*water_flow_1 +  distance +  infrastructure*asset_quintile + day 
+# modelb<-lmer(daily_h2o_percapita ~ season*checkwater +  distance +  infrastructure*asset_quintile + day 
 #              + ppl + (1|slno.1) +(1|listing), data=monthly)
 # anova(modela,modelb) # p=.6, no difference, keep infrastructure and assets separate
   
 ##  model 1 daily h2o consumption over seasons Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec
-model1=lmer(daily_h2o_percapita ~ season*water_flow_1  +  distance   + infrastructure + day + asset_quintile
+model1=lmer(daily_h2o_percapita ~ season*checkwater  +  distance   + infrastructure + day + asset_quintile
             + ppl + (1|slno.1) +(1|listing), data=monthly)
 summary(model1)
 
-model.null=lmer(daily_h2o_percapita ~   distance +  water_flow_1 + infrastructure  + day + asset_quintile
+model.null=lmer(daily_h2o_percapita ~   distance +  checkwater + infrastructure  + day + asset_quintile
                 + ppl + (1|slno.1) +(1|listing), data=monthly)
-summary(model1)
+summary(model.null)
 
 anova(model1,model.null)
 
@@ -204,38 +204,42 @@ coef(lmer(daily_h2o_percapita ~ season2*water_flow_1  +  distance + infrastructu
 
 #handwashing over the seasons
 
-modelhand=lmer( handwash ~ season*water_flow_1 +   distance + infrastructure + asset_quintile
+modelhand=lmer( handwash_per_capita ~ season*water_flow_1 +   distance + infrastructure + asset_quintile
             + ppl + (1|slno.1) +(1|listing), data=monthly)
 summary(modelhand)
 
-modelhand.null=lmer(handwash ~  distance +  water_flow_1 + infrastructure  + asset_quintile
+modelhand.null=lmer(handwash_per_capita ~  distance +  water_flow_1 + infrastructure  + asset_quintile
                 + ppl + (1|slno.1) +(1|listing), data=monthly)
 
-summary(modelhand.null)
+summary(modelhand)
 
 anova(modelhand,modelhand.null)
 
-coef(lmer(handwash ~ season*water_flow_1  +    distance + infrastructure + asset_quintile
+coef(lmer(handwash_per_capita ~ season*checkwater  +    distance + infrastructure + asset_quintile
           + ppl + (1|slno.1) +(1|listing), data=monthly))
 
-modelhand2<-lmer(handwash ~ season*daily_h2o_percapita + (1|slno.1) +(1|listing), data=monthly)
-modelhand2null<-lmer(handwash ~ daily_h2o_percapita + (1|slno.1) +(1|listing), data = monthly)
+modelhand2<-lmer(handwash_per_capita ~ season*daily_h2o_percapita + (1|slno.1) +(1|listing), data=monthly)
+modelhand2null<-lmer(handwash_per_capita ~ daily_h2o_percapita + (1|slno.1) +(1|listing), data = monthly)
 
 anova(modelhand2, modelhand2null) # p<.001
-coef(modelhand2)
+summary(modelhand2)
 
 ###
-clothesmodel<-lmer(clothes~season*water_flow_1 + distance + infrastructure + asset_quintile
+clothesmodel<-lmer(clothes~season*checkwater + distance + infrastructure + asset_quintile
                    + ppl + (1|slno.1) +(1|listing), data=monthly)
-clothesmodelnull<-lmer(clothes~water_flow_1 + distance + infrastructure + asset_quintile
+summary(clothesmodel)
+clothesmodelnull<-lmer(clothes~checkwater + distance + infrastructure + asset_quintile
                        + ppl + (1|slno.1) +(1|listing), data=monthly)
 
 anova(clothesmodelnull,clothesmodel)
 coef(clothesmodel)
 ##
-dishmodel<-lmer(dishes~season*water_flow_1 + distance + infrastructure + asset_quintile
+dishmodel<-lmer(dishes~season*checkwater + distance + infrastructure + asset_quintile
                 + ppl + (1|slno.1) +(1|listing), data=monthly)
-dishmodelnull<-lmer(dishes~water_flow_1 + distance + infrastructure + asset_quintile
+
+summary(dishmodel)
+
+dishmodelnull<-lmer(dishes~checkwater + distance + infrastructure + asset_quintile
                        + ppl + (1|slno.1) +(1|listing), data=monthly)
 
 anova(dishmodel,dishmodelnull)
