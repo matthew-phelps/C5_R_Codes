@@ -161,6 +161,11 @@ m4$cont3.cont3_times[m4$uniqueID=="156_2014-08-06"&m4$date_visit=="2014-09-16"]<
 m4$other_water_in.adult_bathe_in[m4$uniqueID=="156_2014-08-06"&m4$date_visit=="2014-09-16"]<-0
 m4$cont2.cont2_times[m4$uniqueID=="257_2014-09-28"&m4$date_visit=="2014-12-23"]<-4
 m4$other_water_out.adult_bathe_out[m4$uniqueID=="360_2014-07-16"&m4$date_visit=="2014-11-14"]<-0
+#correction from Bimal from sheet "too many clothes"
+m4[m4$HHID==143&m4$date_visit=="2015-06-02",c("clothes")]<-2
+m4[m4$HHID==327&m4$date_visit=="2015-04-07",c("clothes")]<-3
+m4[m4$HHID==400&m4$date_visit=="2015-05-08",c("clothes")]<-0
+
 
 #Check data on activities done without a container
 m4$bath_pc<-with(m4,(other_water_in.adult_bathe_in+other_water_out.adult_bathe_out+other_water_in.child_bathe_in+other_water_out.child_bathe_out)/m4$ppl)
@@ -391,13 +396,28 @@ m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size
 m4$daily_h2o_percapita<-with(m4, daily_volume/ppl)
 
 
-# fix data on  hours that water is available based on Bimal's changes on 20-10-15
+# fix data on  hours that water is available based on Bimal's changes to "water flow recheck" on 20-10-15
 m4[m4$uniqueID=="020_2014-10-17"&m4$date_visit=="2015-02-20",c("checkwater")]<-6.5
 m4[m4$uniqueID=="041_2015-05-20"&m4$date_visit=="2015-07-10",c("checkwater")]<-9
-m4[m4$uniqueID=="061_2015-03-04"&m4$date_visit=="2015-04-20",c("checkwater")]<-NA
 m4[m4$uniqueID=="233_2014-07-21",c("checkwater")]<-24
 m4[m4$uniqueID=="400_2014-07-15"&m4$date_visit=="2015-05-08",c("checkwater")]<-24
+m4[m4$uniqueID=="130_2014-11-18"&m4$date_visit=="2015-06-29",c("checkwater")]<-6.5
+m4[m4$uniqueID=="134_2014-11-14"&m4$date_visit=="2015-05-25",c("checkwater")]<-6.5
+m4[m4$uniqueID=="134_2014-11-14"&m4$date_visit=="2015-07-09",c("checkwater")]<-6.5
+m4[m4$uniqueID=="218_2014-06-03"&m4$date_visit=="2015-02-27",c("checkwater")]<-6.5
+m4[m4$uniqueID=="276_2014-08-22"&m4$date_visit=="2015-03-22",c("checkwater")]<-6.5
+m4[m4$uniqueID=="279_2014-08-08"&m4$date_visit=="2015-07-24",c("checkwater")]<-6.5
+m4[m4$uniqueID=="362_2014-07-14"&m4$date_visit=="2015-03-11",c("checkwater")]<-6.5
+# from too many hours of water sheet
+m4[m4$uniqueID=="026_2014-06-12"&m4$date_visit=="2015-03-06",c("checkwater")]<-24
+m4[m4$uniqueID=="124_2014-12-15"&m4$date_visit=="2015-02-15",c("checkwater")]<-24
+m4[m4$uniqueID=="074_2014-09-05"&m4$date_visit=="2014-10-28",c("checkwater")]<-NA
+m4[m4$uniqueID=="187_2014-10-28"&m4$date_visit=="2015-08-27",c("checkwater")]<-NA
+m4[m4$uniqueID=="200_2014-08-18"&m4$date_visit=="2014-11-09",c("checkwater")]<-NA
+m4[m4$uniqueID=="263_2014-08-04"&m4$date_visit=="2014-10-23",c("checkwater")]<-NA
+m4[m4$uniqueID=="391_2014-11-14"&m4$date_visit=="2015-07-09",c("checkwater")]<-NA
 
+###data up until this point is cleaned on routine visits through 2015-10-01 #####
 
 sub<-m4[m4$date_visit<"2015-10-01",]
 table(sub$checkwater)
@@ -405,7 +425,7 @@ m4[m4$water_point1.wa_flow1.wa_time1.aS=="16:00:00"&m4$water_point1.wa_flow1.wa_
 m4[m4$water_point1.wa_flow1.wa_time1.aS=="18:00:00"&m4$water_point1.wa_flow1.wa_time1.aE=="18:00:00"&m4$water_point1.wa_flow1.wa_time1.bS=="17:59:00"&m4$checkwater<1,c("checkwater")]<-24 #FRA 9446 has entered 24 water use incorrectly
 
 
-# View(m4[m4$uniqueID=="130_2014-11-18",c("uniqueID","Listing.number.x","date_visit","FRA",
+# View(m4[m4$uniqueID=="078_2014-06-01",c("uniqueID","Listing.number.x","date_visit","FRA",
 #                                         "water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
 #                                         "water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
 #                                         "water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3",
