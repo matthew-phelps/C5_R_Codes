@@ -260,6 +260,25 @@ anova(dishmodel,dishmodelnull)
 coef(dishmodel)
 
 
+
+# statistical significance of variables -----------------------------------
+
+#hours water was running (checkwater)
+
+#distance to source
+
+#infrastructure
+
+#assets
+
+#day of the week
+
+#ppl
+
+
+
+
+
 # Visualizing models ------------------------------------------------------
 
 #Visualize random effects (uniqueID and listing number)
