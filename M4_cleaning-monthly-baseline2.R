@@ -23,8 +23,6 @@ load(monthly_basebase.path)
 rm(monthly_basebase.path)
 
 
-
-m4$q9_20
 # INDEX PROBLEM RECORDS ---------------------------------------------------
 
 early.visit <- m4[m4$date_visit < m4$phone.dist - 2, ]

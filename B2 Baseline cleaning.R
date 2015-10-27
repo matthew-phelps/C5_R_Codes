@@ -50,6 +50,9 @@ source(functions.path)
 cut.date <- as.Date("2015-05-20")
 
 
+# LOAD DATA ---------------------------------------------------------------
+
+
 # 1.) Load most recent X-1 version:
 
 fileNames.df <- file.info(list.files(path = getwd(),
@@ -80,10 +83,16 @@ x1_data$HHID <- as.numeric(x1_data$HHID)
 x1_data <- x1_data[!is.na(x1_data$HHID), ]
 x1_data <- x1_data[x1_data$base_date <= cut.date, ]
 
+# Will change phone dist date for HHS that move in order to calculate pt correctly
+# So need new variable to track originally recorded phone.dist date
+x1_data$phone.dist.original <- x1_data$phone.dist
+
+
 
 
 # Create unique IDs for x1
 x1_data$HHID <- formatC(x1_data$HHID, width = 3, format = 'd', flag = 0)
+x1_data$HHID_character <- formatC(x1_data$HHID, width = 3, format = 'd', flag = 0)
 x1_data$uniqueID <- paste(x1_data$HHID, "_", x1_data$base_date, sep="")
 
 # Return HHID to numeric format
@@ -424,6 +433,15 @@ write.csv2(e1[, c(8, 1:5)],
 # Change phone.dist date for houses that moved but stayed in study.
 
 x1 <- moveDates(x = x1, factor = x1$HHID)
+row.names(x1) <- NULL
+
+
+
+# HH KEY ------------------------------------------------------------------
+
+# HH_key is given by "date of phone dist" + "HHID"
+x1$phone.dist.original.nice <- format(x1$phone.dist.original, format = "%d-%b-%Y")
+x1$HH_key <- paste(x1$phone.dist.original.nice, x1$HHID_character, sep="_")
 
 
 

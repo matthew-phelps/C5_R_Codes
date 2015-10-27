@@ -113,11 +113,22 @@ temp <- m5 %>%
 z1 <- colSums(z)
 zy1 <- colSums(zy)
 monthly_summary$active_hh <- z1
-monthly_summary$dropout_HHs <- zy1
+monthly_summary$potential_dropout_HHs <- zy1
 monthly_summary <- left_join(monthly_summary, temp, by = c("Var1" = "date_visit_month"))
 
 rm(z, zy, temp, z1, zy1, x, m5.path, i, j, baseline.path)
 
+
+
+# VALIDATE DROPOUTS -------------------------------------------------------
+z <- data.frame(0)
+for (i in 1:nrow(monthly_summary)){
+  if(i == 1) {z[i] <- 0} else{
+  z[i] <- monthly_summary$new_phones[i] + monthly_summary$active_hh[i - 1] - monthly_summary$active_hh[i]
+}}
+xz <- as.data.frame(t(z))
+monthly_summary <- cbind(monthly_summary, xz)
+#monthly_summary$HH_dropout_validated <- xz
 
 # ACTIVE PPL --------------------------------------------------------------
 
@@ -199,14 +210,21 @@ plot3 <- ggplot(data = monthly_summary, aes(x = date, y = number_visits)) +
   theme(plot.title = element_text(size = 20, face="bold"))
 plot3
 
-plot4 <- ggplot(data = monthly_summary, aes(x = date, y = dropout_individuals)) +
+plot4 <- ggplot(data = monthly_summary, aes(x = date, y = dropout_individuals/active_ppl)) +
   geom_bar(stat = "identity", fill = "darkgreen", alpha = 0.7) +
-  ggtitle("Number of individual dropouts\nfrom active households")+
+  ggtitle("Individuals dropping out from active households\n as % of active paricipants")+
   theme(plot.title = element_text(size = 20, face="bold"))
 plot4
+
+plot5 <- ggplot(data = monthly_summary, aes( x= date, y = potential_dropout_HHs/active_hh)) +
+  geom_bar (stat = "identity", fill = "purple", alpha = 0.8) +
+  ggtitle ("Household dropouts as % of active households") +
+  theme(plot.title = element_text(size = 20, face = "bold"))
+plot5
 # WRITE OUTPUT ------------------------------------------------------------
 
 write.csv(monthly_summary, file = output.path)
+
 ggsave(filename = plot1.path, plot = plot1, width = 10, height = 10)
 ggsave(filename = plot2.path, plot = plot2, width = 10, height = 10)
 ggsave(filename = plot3.path, plot = plot3, width = 10, height = 10)

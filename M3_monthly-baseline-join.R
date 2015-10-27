@@ -1,5 +1,6 @@
 # Author: Matthew Phelps and Char Tamason
-# Desc:    Merge ODK and X-2 files
+# Desc:    Merge ODK and X-2 files. Also adds HH_key to allow for tracking of
+# HHs longitudinaly when they move compounds but remain in study.
 # output: Cleaned monthly visits
 # DEPENDENCIES: Requires M1, M2, & B1, B2 to have been run
 

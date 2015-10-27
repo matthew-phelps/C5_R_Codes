@@ -115,7 +115,7 @@ rm(x, y, duplicates.x2)
 
 
 
-# Check for typos in entry ------------------------------------------------
+# MERGE ------------------------------------------------
 
 # We assume that if there is a 1 - 2 day differene between ODK and X2, we use
 # ODK dates
