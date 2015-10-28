@@ -14,7 +14,7 @@ ifelse(grepl("zrc340", getwd()),
        Q11.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\Q11_all.Rdata",
        Q11.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Q11_all.Rdata")
 ifelse(grepl("zrc340", getwd()), 
-       m4.path<- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline.Rdata",
+       m4.path<- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata",
        m4.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata")
 ifelse(grepl("zrc340", getwd()), 
        data.out.path<- "C:\\Users\\zrc340\\Desktop\\Dropbox\\Cholera PhD\\5C\\Analysis\\C5_R_Codes\\C5_R_Codes\\Rdata\\monthly-water.Rdata",
@@ -174,87 +174,87 @@ monthly$infrastructure_routine<-with(monthly,ifelse(water_point1.wa_pt1==1|water
 # Linear mixed models -----------------------------------------------------
 
 # modelx<-lmer(daily_h2o_percapita ~ season  +  checkwater +  distance  + water_point1.wa_source1 + day + asset_quintile
-#              + ppl + (1|uniqueID) +(1|listing), data=monthly)
+#              + ppl + (1|HH_key) +(1|listing), data=monthly)
 # 
 # modely<-lmer(daily_h2o_percapita ~ season + checkwater*distance +   infrastructure + day + asset_quintile
-#              + ppl + (1|uniqueID) +(1|listing), data=monthly)
+#              + ppl + (1|HH_key) +(1|listing), data=monthly)
 # anova(modely,modelx) # significant difference (p=.24) indicates that we shouldn't use checkwater*distance
 
-
+monthly$HH_key
 ## check if tank is interdependent with season
 modela<-lmer(daily_h2o_percapita ~ season*h2o_tank1 + checkwater +  distance +  infrastructure + day + asset_quintile
-             + ppl + (1|uniqueID) +(1|listing), data=monthly)
+             + ppl + (1|HH_key) +(1|listing), data=monthly)
 modelb<-lmer(daily_h2o_percapita ~ season + h2o_tank1 + checkwater +  distance +  infrastructure + asset_quintile + day 
-             + ppl + (1|uniqueID) +(1|listing), data=monthly)
+             + ppl + (1|HH_key) +(1|listing), data=monthly)
 anova(modela,modelb) 
   
 ##  model 1 daily h2o consumption over seasons Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec
 model1=lmer(daily_h2o_percapita ~ season + checkwater  +  in_home_water   + infrastructure_routine + day + asset_quintile
-            + ppl + (1|uniqueID)+(1|Listing.number.x), data=monthly)
+            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 summary(model1)
 
 
 model.null=lmer(daily_h2o_percapita ~ checkwater + in_home_water + infrastructure_routine  + day + asset_quintile
-                + ppl + (1|uniqueID) +(1|Listing.number.x), data=monthly)
+                + ppl + (1|HH_key) +(1|Listing.number.x), data=monthly)
 summary(model.null)
 
 anova(model1,model.null)
 
 coef(lmer(daily_h2o_percapita ~ season + water_flow_1  +  distance +   + infrastructure + day + asset_quintile
-          + ppl + (1|uniqueID) +(1|listing), data=monthly))
+          + ppl + (1|HH_key) +(1|listing), data=monthly))
 
 ### model 2 daily consumption with different seasons
 model2=lmer(daily_h2o_percapita ~ season2*water_flow_1  +  distance   + infrastructure + day + asset_quintile
-            + ppl + (1|uniqueID) +(1|listing), data=monthly)
+            + ppl + (1|HH_key) +(1|listing), data=monthly)
 summary(model1)
 
 model2.null=lmer(daily_h2o_percapita ~   distance +  water_flow_1 + infrastructure  + day + asset_quintile
-                + ppl + (1|uniqueID) +(1|listing), data=monthly)
+                + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 anova(model2,model2.null)
 
 coef(lmer(daily_h2o_percapita ~ season2*water_flow_1  +  distance + infrastructure + day + asset_quintile
-          + ppl + (1|uniqueID) +(1|listing), data=monthly))
+          + ppl + (1|HH_key) +(1|listing), data=monthly))
 
 #handwashing over the seasons
 
 modelhand=lmer( handwash_per_capita ~ season*water_flow_1 +   distance + infrastructure + asset_quintile
-            + ppl + (1|uniqueID) +(1|listing), data=monthly)
+            + ppl + (1|HH_key) +(1|listing), data=monthly)
 summary(modelhand)
 
 modelhand.null=lmer(handwash_per_capita ~  distance +  water_flow_1 + infrastructure  + asset_quintile
-                + ppl + (1|uniqueID) +(1|listing), data=monthly)
+                + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 summary(modelhand)
 
 anova(modelhand,modelhand.null)
 
 coef(lmer(handwash_per_capita ~ season + checkwater  +    distance + infrastructure + asset_quintile
-          + ppl + (1|uniqueID) +(1|listing), data=monthly))
+          + ppl + (1|HH_key) +(1|listing), data=monthly))
 
-modelhand2<-lmer(handwash_per_capita ~ season + daily_h2o_percapita + (1|uniqueID) +(1|listing), data=monthly)
-modelhand2null<-lmer(handwash_per_capita ~ daily_h2o_percapita + (1|uniqueID) +(1|listing), data = monthly)
+modelhand2<-lmer(handwash_per_capita ~ season + daily_h2o_percapita + (1|HH_key) +(1|listing), data=monthly)
+modelhand2null<-lmer(handwash_per_capita ~ daily_h2o_percapita + (1|HH_key) +(1|listing), data = monthly)
 
 anova(modelhand2, modelhand2null) # p<.001
 summary(modelhand2)
 
 ###
 clothesmodel<-lmer(clothes_pc~season + checkwater + distance + infrastructure + asset_quintile
-                   + ppl + (1|uniqueID) +(1|listing), data=monthly)
+                   + ppl + (1|HH_key) +(1|listing), data=monthly)
 summary(clothesmodel)
 clothesmodelnull<-lmer(clothes_pc~checkwater + distance + infrastructure + asset_quintile
-                       + ppl + (1|uniqueID) +(1|listing), data=monthly)
+                       + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 anova(clothesmodelnull,clothesmodel)
 
 ##
 dishmodel<-lmer(dishes~season*checkwater + distance + infrastructure + asset_quintile
-                + ppl + (1|uniqueID) +(1|listing), data=monthly)
+                + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 summary(dishmodel)
 
 dishmodelnull<-lmer(dishes~checkwater + distance + infrastructure + asset_quintile
-                       + ppl + (1|uniqueID) +(1|listing), data=monthly)
+                       + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 anova(dishmodel,dishmodelnull)
 coef(dishmodel)
@@ -281,7 +281,7 @@ coef(dishmodel)
 
 # Visualizing models ------------------------------------------------------
 
-#Visualize random effects (uniqueID and listing number)
+#Visualize random effects (HH_key and listing number)
 dotplot(ranef(model1, condVar = TRUE))
 qqmath(ranef(model1, condVar=TRUE))
 
