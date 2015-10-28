@@ -318,7 +318,7 @@ for (i in 1:length(unique(m4$uniqueID))) {
         
 }
 
-View(m4_subset[,c("uniqueID", "water_point1.wa_pt1_usebefore", "h2o_collect1", "h2o_source1", "h2o_tank1")])
+View(m4[,c("uniqueID", "water_point1.wa_pt1_usebefore", "h2o_collect1", "h2o_source1", "h2o_tank1")])
 # Clean hours per day that water is flowing from source -------------------
 
 m4$water_flow1_end1<- times(m4$water_point1.wa_flow1.wa_time1.aE)
