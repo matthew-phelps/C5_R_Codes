@@ -9,7 +9,7 @@ ifelse(grepl("zrc340", getwd()),
        Q11.path<- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\Q11_all.Rdata",
        Q11.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\Q11_all.Rdata")
 ifelse(grepl("zrc340", getwd()), 
-       m4.path<- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline.Rdata",
+       m4.path<- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata",
        m4.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata")
 ifelse(grepl("zrc340", getwd()), 
        data.out.path<- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\monthly-water.Rdata",
@@ -278,3 +278,8 @@ table(monthly$q13) # 1 - (value 2-value 3) = only 1 source
 mean(monthly$checkwater)
 range(monthly$checkwater)
 table(monthly$checkwater)
+
+monthly$water_flow_range<-with(monthly, ifelse(checkwater<6,1,
+                                               ifelse(checkwater>=6&checkwater<15,2,
+                                                      ifelse(checkwater>15&checkwater<24,3,4))))
+table(monthly$water_flow_range)
