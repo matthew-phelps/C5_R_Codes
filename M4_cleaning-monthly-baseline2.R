@@ -14,7 +14,7 @@ ifelse(grepl("zrc340", getwd()),
        monthly_basebase.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata",
        monthly_basebase.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata")
 ifelse(grepl("zrc340", getwd()),
-       data.output.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline.Rdata",
+       data.output.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata",
        data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata")
 
 # LOAD FILES --------------------------------------------------------------
@@ -241,63 +241,84 @@ m4<-m4[which(!(is.na(m4$FRA))),] #get rid of all x-2 entries that don't have cor
 m4_subset<-data.frame()
 
 
+# Fill in values for water source that does not change  -------------------
+# in routine/monthly visits, water source that does not change does not have info filled out
+
+# ------------------------- FUNCTION 1 for entries that have no changes over time
+clean <- function(x) {
+  
+  for (j in 1:(nrow(x)-1)) {
+    x[j+1, "h2o_collect1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
+                                     x[j, "h2o_collect1"],
+                                     x[j+1, "h2o_collect1"])
+    x[j+1, "h2o_source1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
+                                    x[j, "h2o_source1"],
+                                    x[j+1, "h2o_source1"])  
+    x[j+1, "h2o_tank1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
+                                  x[j, "h2o_tank1"],
+                                  x[j+1, "h2o_tank1"]) 
+  }
+  
+  return (as.data.frame(x))
+}
+
+
+# ------------------------- FUNCTION 2 for entries that have changes over time
+
+clean_alt <- function(x) {
+  
+  for (j in 1:(nrow(x)-1)) {
+    
+    if((x[j+1, "water_point1.wa_pt1_usebefore"]==1) &
+       (x[j+1, "h2o_collect1"] == x[which(m4_subset$water_point1.wa_pt1_usebefore==3), "h2o_collect1"]))
+      
+    {
+      x[j+1, "h2o_collect1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==3), "h2o_collect1"]     
+      x[j+1, "h2o_source1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==3), "h2o_source1"]
+      x[j+1, "h2o_tank1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==3), "h2o_tank1"]
+    }
+    
+    else { if ((x[j+1, "water_point1.wa_pt1_usebefore"]==1) &
+               (x[j+1, "h2o_collect1"] == x[which(m4_subset$water_point1.wa_pt1_usebefore==2), "h2o_collect1"])) 
+      
+    {
+      x[j+1, "h2o_collect1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==2), "h2o_collect1"]     
+      x[j+1, "h2o_source1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==2), "h2o_source1"]
+      x[j+1, "h2o_tank1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==2), "h2o_tank1"]
+    }  
+      
+    }
+  }
+  
+  return (as.data.frame(x))
+}
+
+
+
+# ------------------------- 
+
+
 # loop to fill in values for primary water source info in subsequent visits 
 for (i in 1:length(unique(m4$uniqueID))) {
   
   m4_subset <- m4[which(m4$uniqueID==unique(m4$uniqueID)[i]),]
   m4_subset <- m4_subset[order((m4_subset$date_visit)),]
   
-  clean <- function(x) {
-    
-    for (j in 1:(nrow(x)-1)) {
-      x[j+1, "h2o_collect1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
-                                       x[j, "h2o_collect1"],
-                                       x[j+1, "h2o_collect1"])
-      x[j+1, "h2o_source1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
-                                      x[j, "h2o_source1"],
-                                      x[j+1, "h2o_source1"])  
-      x[j+1, "h2o_tank1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
-                                    x[j, "h2o_tank1"],
-                                    x[j+1, "h2o_tank1"]) 
-    }
-    
-    return (as.data.frame(x))
-  }
+  # condition 1: 3 & 1s (first visit with no following changes) or 3 & 2 (first visit followed by change)
   
-  # condition 1: 3 & 1s (first visit with no following changes) or 3 & 2 (first visit followed by change)>>> control stcutures in R
+  if  ((length(unique(m4_subset$water_point1.wa_pt1_usebefore))==2) &
+       (unique((m4_subset$water_point1.wa_pt1_usebefore))[1]==3) &
+       (unique((m4_subset$water_point1.wa_pt1_usebefore))[2]==1 | unique((m4_subset$water_point1.wa_pt1_usebefore))[2]==2))      
+  {m4_subset <- clean(m4_subset)}
   
-  if (length(unique(m4_subset$water_point1.wa_pt1_usebefore))==2 &
-      unique((m4_subset$water_point1.wa_pt1_usebefore))[1]==3 & 
-      unique((m4_subset$water_point1.wa_pt1_usebefore))[2]==1){m4_subset <- clean(m4_subset[i])}
-  
-  if(m4_subset$water_point1.wa_pt1_usebefore==1&m4_subset$h2o_source1[h]==m4_subset$h2o_source1[h-1]){}
-  
-  else  {m4_subset}}
-    # condition 2
-    {if(length(unique(m4_subset$water_point1.wa_pt1_usebefore))==2 &
-                  unique(m4_subset$water_point1.wa_pt1_usebefore)[1]==3 & 
-                  unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==2) {m4_subset <- clean(m4_subset[i])  }
-  
-  else {(m4_subset)}
-  }
+  else if ((length(unique(m4_subset$water_point1.wa_pt1_usebefore))==3)&
+          (unique((m4_subset$water_point1.wa_pt1_usebefore))[1]==3))
+        
+        {m4_subset <- clean_alt(m4_subset)}
+        
+}
 
-m4_subset$h2o_tank1
-
-else  if    { (length(unique(m4_subset$water_point1.wa_pt1_usebefore))==3 &
-                     unique(m4_subset$water_point1.wa_pt1_usebefore)[1]==3 & 
-                     unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==1
-                     unique(m4_subset$water_point1.wa_pt1_usebefore)[3]==2) # condition 2
-    { }
-
-else  if    { (length(unique(m4_subset$water_point1.wa_pt1_usebefore))==3 &
-                 unique(m4_subset$water_point1.wa_pt1_usebefore)[1]==3 & 
-                 unique(m4_subset$water_point1.wa_pt1_usebefore)[2]==2
-                 unique(m4_subset$water_point1.wa_pt1_usebefore)[3]==1) # condition 2
-{ }
-
-}}
-
-
+View(m4_subset[,c("uniqueID", "water_point1.wa_pt1_usebefore", "h2o_collect1", "h2o_source1", "h2o_tank1")])
 # Clean hours per day that water is flowing from source -------------------
 
 m4$water_flow1_end1<- times(m4$water_point1.wa_flow1.wa_time1.aE)
