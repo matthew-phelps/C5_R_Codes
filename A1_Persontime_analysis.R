@@ -27,7 +27,7 @@ source(functions.path)
 
 # GLOBAL VARIABLES  & FUNCTIONS--------------------------------------------------------
 endDate <- as.Date('31-12-14', "%d-%m-%y")
-endDate <- Sys.Date()
+#endDate <- Sys.Date()
 
 
 # LOAD DATA ---------------------------------------------------------------
@@ -40,7 +40,7 @@ rm(pt)
 
 a1 <- m5[m5$phone.dist <= endDate, ]
 
-# Set withdraw data as end date for any records where true with draw is after end date
+# Set withdraw data as end date for any records where true withdraw is after end date
 a1$with_date[a1$with_date > endDate] <- endDate
 
 min(a1$with_date)

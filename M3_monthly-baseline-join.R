@@ -36,8 +36,9 @@ source(functions.path)
 
 # 1.) MERGE Baseline and monthly: KEEP all records ------------------------------------------
 
+# Merge monthly visits with baseline. This drops any baseline records that don't
+# have a monthly visit. 
 z <- merge(visits.month, base_merge, by.x = "HHID", by.y = "HHID", all = T)
-
 
 
 # Order rows and columns for easy reading ---------------------------------
@@ -47,8 +48,9 @@ z <- z[order(z$HHID, z$base_date.x, z$date_visit), ]
 
 # Columns
 y <- match(c('uniqueID'), names(z))
-x <- 1:ncol(base_merge)
+x <- 1:ncol(z)
 x <- x[-c(y)]
+#z <- z[, c(y, x)]
 rm(x, y)
 
 
@@ -77,6 +79,40 @@ x <- 1:ncol(m3)
 x <- x[-c(y)]
 m4<- m3[, c(y, x)]
 rm(x, y, m3)
+
+# There are still two columns for listing number, I'm not sure which column is correct
+m4$base_date.x <- NULL
+
+
+# BASELINES WITHOUT MONTHLY VISITS ----------------------------------------
+
+# Find all baselines that do not have a monthly visit
+base_without_monthly_index <- !(base_merge$uniqueID %in% m4$uniqueID)
+base_without_monthly <- base_merge[base_without_monthly_index, ]
+
+# Make sure the number of columns and the order of colums is the same to allow
+# rbind() to take place.
+target.df <- data.frame(matrix(nrow = nrow(base_without_monthly), ncol = ncol(m4)))
+names(target.df) <- names(m4)
+names.vect <- match(names(target.df), names(base_without_monthly))
+
+for (i in 1:length(names.vect)){
+  if(!is.na(names.vect[i])){
+  target.df[, i] <- base_without_monthly[, names.vect[i]]
+  }
+}
+
+target.df$base_date <- as.Date(target.df$base_date, origin = "1970-01-01")
+target.df$date_visit <- as.Date(target.df$date_visit, origin = "1970-01-01")
+
+m4.1 <- rbind.data.frame(target.df, m4 )
+
+
+y <- match(names(target), names(z1))
+z2 <-z1[,]
+
+
+
 # SAVE DATA ---------------------------------------------------------------
 save(m4, file = data.output.path)
 
