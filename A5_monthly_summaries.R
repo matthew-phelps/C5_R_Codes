@@ -9,10 +9,10 @@
 
 
 # Intro -------------------------------------------------------------------
-
+library(ggplot2)
 library(dplyr)
 library(lubridate)
-library(ggplot2)
+
 #detach("package:plyr", unload=TRUE) # disrupts the dplyr package
 
 # Prepare workspace: if user == CHAR prepare Char's path, else: MAtthew's path
@@ -54,53 +54,71 @@ source(functions.path)
 
 # DATA PREPERATION -----------------------------------------------------
 
+# Round dates to 1st of month for easier calculations
 base_merge$phoneMonthYear <- floor_date(base_merge$phone.dist, unit = "month")
 base_merge$withMonthYear <- floor_date(base_merge$with_date, unit = "month")
 m5$date_visit_month <- floor_date(m5$date_visit, unit = "month")
 
-# uniqueHH <- base_merge %>%
-#   group_by(uniqueID) %>%
-#   summarise(
-#     active_ppl = mean(ppl)
-#   )
-# 
-uniqueHH <- select(base_merge, uniqueID, base_date.x, with_date, phone.dist, phoneMonthYear, withMonthYear)
-x <- duplicated(uniqueHH[, 1])
-uniqueHH <- uniqueHH[!x,]
+# Remove un-used variables:
+uniqueHH <- dplyr::select(base_merge, uniqueID, HH_key, HHID, base_date.x, with_date, phone.dist, phone.dist.original, phoneMonthYear, withMonthYear)
+rm(base_merge)
 
-# Remove variables that don't make sense for the aggregated uniqueHH dataframe:
-#uniqueHH$ppl <- uniqueHH$pt <- uniqueHH$date_visit <- uniqueHH$HHID <- NULL
+# Check for duplicates - if duplicates founds, check problem upstream
+x <- duplicated(uniqueHH[, 1])
+sum(x)
+
+
+# df of unique HH_keys. A HH that moves should only appear once in this df
+unique_hh_key <- split(uniqueHH, f = uniqueHH$HH_key)
+
+mergeHH_key <- function(x){
+  if (nrow(x) > 1){
+    # Take the min phone dist. and the max withdraw date of the HHs through
+    # their moves
+    x$base_date.x[1] <- min(x$base_date.x)
+    x$with_date[1] <- max(x$with_date)
+    x$phone.dist[1] <- min(x$phone.dist)
+    x$phoneMonthYear[1] <- min(x$phoneMonthYear)
+    x$withMonthYear[1] <- max(x$withMonthYear)
+  }
+  # Return only first record
+  x <- x[1,]
+  
+  # uniqueID no longer makes sense, since many IDs merged to 1 HH_key
+  x <- dplyr::select(x, -uniqueID)
+  x
+}
+
+unique_hh_key <- lapply(unique_hh_key, mergeHH_key)
+unique_hh_key <- do.call(rbind.data.frame, unique_hh_key)
+row.names(unique_hh_key) <- NULL
+
 
 
 # NEW PHONES PER MONTH ----------------------------------------------------------
 # Counting how many phones were distributed each month
 
-monthly_summary <- as.data.frame(table(uniqueHH$phoneMonthYear))
+monthly_summary <- as.data.frame(table(unique_hh_key$phoneMonthYear))
 monthly_summary$Var1 <- as.Date(monthly_summary$Var1)
-monthly_summary <- rename(monthly_summary, new_phones = Freq)
+monthly_summary <- dplyr::rename(monthly_summary, new_phones = Freq)
 
 
 # ACTIVE HH & DROPOUT HH ------------------------------------------------
 
-# Create interval object. Use the date of phone distribution as the start of
-# interval reference time
-x <- uniqueHH$withMonthYear - uniqueHH$phoneMonthYear
-uniqueHH$int <- as.interval(x, uniqueHH$phoneMonthYear)
-x
+# Interval for households, ignoring moves. If HH moves, it remains active until 
+# formal withdraw
+unique_hh_key$active_interval <- new_interval(unique_hh_key$phoneMonthYear, unique_hh_key$withMonthYear)
 
 month.names <- strftime(monthly_summary$Var1, format = "%b-%Y")
-z <- data.frame(matrix(ncol=nrow(monthly_summary), nrow = nrow(uniqueHH)))
-zy <- data.frame(matrix(ncol=nrow(monthly_summary), nrow = nrow(uniqueHH)))
+z <- data.frame(matrix(ncol=nrow(monthly_summary), nrow = nrow(unique_hh_key)))
 names(z) <- month.names
-names(zy) <- month.names
 
 # Check if each month, during range of study period, is within the "active interval"
 # for each household.
 for (i in 1:nrow(monthly_summary)){
-  for (j in 1:nrow(uniqueHH)){
-    z[j, i] <- monthly_summary$Var1[i] %within% uniqueHH$int[j]
+  for (j in 1:nrow(unique_hh_key)){
+    z[j, i] <- monthly_summary$Var1[i] %within% unique_hh_key$active_interval [j]
     # Number of HHs dropping out or moving 
-    zy[j, i] <- monthly_summary$Var1[i] == uniqueHH$withMonthYear[j]
   }
 }
 
@@ -111,39 +129,37 @@ temp <- m5 %>%
 
 # Merge into summary data.frame
 z1 <- colSums(z)
-zy1 <- colSums(zy)
 monthly_summary$active_hh <- z1
-monthly_summary$potential_dropout_HHs <- zy1
 monthly_summary <- left_join(monthly_summary, temp, by = c("Var1" = "date_visit_month"))
 
 rm(z, zy, temp, z1, zy1, x, m5.path, i, j, baseline.path)
 
 
 
-# VALIDATE DROPOUTS -------------------------------------------------------
-z <- data.frame(0)
-for (i in 1:nrow(monthly_summary)){
-  if(i == 1) {z[i] <- 0} else{
-  z[i] <- monthly_summary$new_phones[i] + monthly_summary$active_hh[i - 1] - monthly_summary$active_hh[i]
-}}
-xz <- as.data.frame(t(z))
-monthly_summary <- cbind(monthly_summary, xz)
-#monthly_summary$HH_dropout_validated <- xz
+
+# DROPOUTS ----------------------------------------------------------------
+
+dropout <- as.data.frame(table(unique_hh_key$withMonthYear))
+dropout$Var1 <- as.Date(dropout$Var1)
+dropout <- dplyr::rename(dropout, dropout_HH = Freq)
+monthly_summary <- left_join(monthly_summary, dropout, by = "Var1")
+sum(dropout$dropout_HH[1:(nrow(dropout) - 1)])
 
 # ACTIVE PPL --------------------------------------------------------------
 
-t <- split(m5, f = m5$uniqueID)
+
+month_visit_ls <- split(m5, f = m5$HH_key)
 t.temp <- t[[2]]
 activePeople <- function(t.temp) {
   
   # Create time interval b/w visits
   g <- NA
-  x <- new_interval(t.temp[1,11], t.temp[1,11]) 
+  x <- new_interval(t.temp$date_visit_month[1], t.temp$date_visit_month[1]) 
   # If there is >1 monthly visit:
   if (nrow(t.temp)> 1){
     for (i in 1:nrow(t.temp)-1){
-      g[i] <- t.temp[i+1,11] - t.temp[i,11]
-      x[i] <- as.interval(g[i], t.temp[i,11])
+      g[i] <- t.temp$date_visit_month[i+1] - t.temp$date_visit_month[i]
+      x[i] <- as.interval(g[i], t.temp$date_visit_month[i])
     }
   x[nrow(t.temp),] <- as.interval(t.temp$with_date[nrow(t.temp)] - t.temp$date_visit_month[nrow(t.temp)-1], t.temp$date_visit_month[nrow(t.temp)-1])
   
@@ -173,7 +189,7 @@ activePeople <- function(t.temp) {
   return(h1)
 }
 
-vf <- lapply(t, activePeople)
+vf <- lapply(month_visit_ls, activePeople)
 cv <- do.call(rbind.data.frame, vf)
 month.temp <- colSums(cv)
 monthly_summary <- cbind(monthly_summary, month.temp)
@@ -216,7 +232,7 @@ plot4 <- ggplot(data = monthly_summary, aes(x = date, y = dropout_individuals/ac
   theme(plot.title = element_text(size = 20, face="bold"))
 plot4
 
-plot5 <- ggplot(data = monthly_summary, aes( x= date, y = potential_dropout_HHs/active_hh)) +
+plot5 <- ggplot(data = monthly_summary, aes( x= date, y = dropout_HH/active_hh)) +
   geom_bar (stat = "identity", fill = "purple", alpha = 0.8) +
   ggtitle ("Household dropouts as % of active households") +
   theme(plot.title = element_text(size = 20, face = "bold"))

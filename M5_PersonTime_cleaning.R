@@ -40,7 +40,7 @@ load(clean_monthly_basebase.path)
 
 
 # SUBSET VARIABLES --------------------------------------------------------
-m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'base_date', 'phone.dist', 'with_date', "ppl_all", "new_per", "old_per_out" )]
+m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'base_date', 'phone.dist', 'with_date', "ppl_all", "new_per", "old_per_out", "HH_key")]
 
 
 # UPDATE NO. PPL IN HH ----------------------------------------------------
