@@ -18,7 +18,9 @@ ifelse(grepl("zrc340", getwd()),
 ifelse(grepl("zrc340", getwd()),
        functions.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\c_5_functions_source_file.R",
        functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
-
+ifelse(grepl("zrc340", getwd()),
+       pt_data.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\pt_data.Rdata",
+       pt_data.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\pt_data.Rdata")
 
 library(dplyr)
 library(data.table)
@@ -35,12 +37,12 @@ endDate <- Sys.Date()
 
 
 # LOAD DATA ---------------------------------------------------------------
-
+load(pt_data.path)
 load(clean_monthly_basebase.path)
 
 
 # SUBSET VARIABLES --------------------------------------------------------
-m4 <- m4[, c("uniqueID", 'HHID', 'date_visit', 'base_date', 'phone.dist', 'with_date', "ppl_all", "new_per", "old_per_out", "HH_key")]
+m4 <- pt_data[, c("uniqueID", 'HHID', 'date_visit', 'base_date', 'phone.dist', 'with_date', "ppl_all", "new_per", "old_per_out", "HH_key")]
 
 
 # UPDATE NO. PPL IN HH ----------------------------------------------------

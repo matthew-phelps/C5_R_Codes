@@ -48,7 +48,11 @@ max(a1$with_date)
 
 
 # CALCULATE PT BASED ON CUSTOM END DATE ------------------------------------------------------------------
-a1 <- ptCalc(a1)
+a1 <- ptCalc(a1, end.date = endDate)
+pt48.df <- pt48hr(a1, end.date = endDate)
 
 pt.days <- sum(a1$pt)
 pt.years <- pt.days/365
+
+pt48.days <- sum(pt48.df$pt48hr)
+pt48.years <- pt48.days/365

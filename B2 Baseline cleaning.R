@@ -112,112 +112,6 @@ x1_data$interval_check <- NA
 
 not.in.baseline <- (x1_data[!(x1_data$uniqueID %in% baselineAll$uniqueID), ])
 
-
-# Create list comparing x1 and baseline:
-# hhid <- sort(not.in.baseline$HHID)
-# missing.ls <- vector("list", length(hhid))
-# for (i in 1:length(hhid)) {
-#   missing.ls[[i]]$baseUniqueID <-  (baselineAll[baselineAll$hhid == hhid[i],c("uniqueID")])
-#   missing.ls[[i]]$x1UniqueID <- (x1_data[x1_data$HHID == hhid[i],c("uniqueID")])
-# }
-# 
-# missing.ls[[1]]
-# print(missing.ls)
-
-# Based on the HHIDs of the unique IDs that are not in baseline, check difference
-# # with x1
-# baselineAll$uniqueID[baselineAll$hhid==50]
-# x1_data$uniqueID[x1_data$HHID==50]
-# baselineAll$uniqueID[baselineAll$hhid==60]
-# x1_data$uniqueID[x1_data$HHID==60]
-# baselineAll$uniqueID[baselineAll$hhid==67]
-# x1_data$uniqueID[x1_data$HHID==67]
-# baselineAll$uniqueID[baselineAll$hhid==78]
-# x1_data$uniqueID[x1_data$HHID==78]
-# baselineAll$uniqueID[baselineAll$hhid==83]
-# x1_data$uniqueID[x1_data$HHID==83]
-# baselineAll$uniqueID[baselineAll$hhid==85]
-# x1_data$uniqueID[x1_data$HHID==85]
-# baselineAll$uniqueID[baselineAll$hhid==90]
-# x1_data$uniqueID[x1_data$HHID==90]
-# baselineAll$uniqueID[baselineAll$hhid==100]
-# x1_data$uniqueID[x1_data$HHID==100]
-# baselineAll$uniqueID[baselineAll$hhid==109]
-# x1_data$uniqueID[x1_data$HHID==109]
-# baselineAll$uniqueID[baselineAll$hhid==118]
-# x1_data$uniqueID[x1_data$HHID==118]
-# baselineAll$uniqueID[baselineAll$hhid==126]
-# x1_data$uniqueID[x1_data$HHID==126]
-# baselineAll$uniqueID[baselineAll$hhid==129]
-# x1_data$uniqueID[x1_data$HHID==129]
-# baselineAll$uniqueID[baselineAll$hhid==144]
-# x1_data$uniqueID[x1_data$HHID==144]
-# baselineAll$uniqueID[baselineAll$hhid==16]
-# x1_data$uniqueID[x1_data$HHID==16]
-# baselineAll$uniqueID[baselineAll$hhid==168]
-# x1_data$uniqueID[x1_data$HHID==168]
-# baselineAll$uniqueID[baselineAll$hhid==171]
-# x1_data$uniqueID[x1_data$HHID==171]
-# baselineAll$uniqueID[baselineAll$hhid==186]
-# x1_data$uniqueID[x1_data$HHID==186]
-# baselineAll$uniqueID[baselineAll$hhid==199]
-# x1_data$uniqueID[x1_data$HHID==199]
-# baselineAll$uniqueID[baselineAll$hhid==214]
-# x1_data$uniqueID[x1_data$HHID==214]
-# baselineAll$uniqueID[baselineAll$hhid==217]
-# x1_data$uniqueID[x1_data$HHID==217]
-# baselineAll$uniqueID[baselineAll$hhid==220]
-# x1_data$uniqueID[x1_data$HHID==220]
-# baselineAll$uniqueID[baselineAll$hhid==223]
-# x1_data$uniqueID[x1_data$HHID==223]
-# baselineAll$uniqueID[baselineAll$hhid==225]
-# x1_data$uniqueID[x1_data$HHID==225]
-# baselineAll$uniqueID[baselineAll$hhid==230]
-# x1_data$uniqueID[x1_data$HHID==230]
-# baselineAll$uniqueID[baselineAll$hhid==235]
-# x1_data$uniqueID[x1_data$HHID==235]
-# baselineAll$uniqueID[baselineAll$hhid==248]
-# x1_data$uniqueID[x1_data$HHID==248]
-# baselineAll$uniqueID[baselineAll$hhid==251]
-# x1_data$uniqueID[x1_data$HHID==251]
-# #------------ trying to convert monthly visit autodates into separate variables to form actual date (too many misentries) #autodate didn't work
-# baselineAll$uniqueID[baselineAll$hhid==252] 
-# x1_data$uniqueID[x1_data$HHID==252]
-# baselineAll$uniqueID[baselineAll$hhid==253]
-# x1_data$uniqueID[x1_data$HHID==253]
-# baselineAll$uniqueID[baselineAll$hhid==254]
-# x1_data$uniqueID[x1_data$HHID==254]
-# baselineAll$uniqueID[baselineAll$hhid==257]
-# x1_data$uniqueID[x1_data$HHID==257]
-# baselineAll$uniqueID[baselineAll$hhid==270]
-# x1_data$uniqueID[x1_data$HHID==270]
-# baselineAll$uniqueID[baselineAll$hhid==28]
-# x1_data$uniqueID[x1_data$HHID==28]
-# baselineAll$uniqueID[baselineAll$hhid==280]
-# x1_data$uniqueID[x1_data$HHID==280]
-# baselineAll$uniqueID[baselineAll$hhid==295]
-# x1_data$uniqueID[x1_data$HHID==295]
-# baselineAll$uniqueID[baselineAll$hhid==300]
-# x1_data$uniqueID[x1_data$HHID==300]
-# baselineAll$uniqueID[baselineAll$hhid==322]
-# x1_data$uniqueID[x1_data$HHID==322]
-# baselineAll$uniqueID[baselineAll$hhid==330]
-# x1_data$uniqueID[x1_data$HHID==330]
-# #MonthlyAll$base_date[MonthlyAll$hh_id==330]
-# baselineAll$uniqueID[baselineAll$hhid==332]
-# x1_data$uniqueID[x1_data$HHID==332]
-# baselineAll$uniqueID[baselineAll$hhid==333]
-# x1_data$uniqueID[x1_data$HHID==333]
-# baselineAll$uniqueID[baselineAll$hhid==333]
-# x1_data$uniqueID[x1_data$HHID==333]
-# baselineAll$uniqueID[baselineAll$hhid==35]
-# x1_data$uniqueID[x1_data$HHID==35]
-# baselineAll$uniqueID[baselineAll$hhid==388]
-# x1_data$uniqueID[x1_data$HHID==388]
-# baselineAll$uniqueID[baselineAll$hhid==391]
-# x1_data$uniqueID[x1_data$HHID==391]
-
-
 # 3.) Perform Cleaning ----------------------------------------------------
 
 # Change dates in X-1 that are off by a keystroke to match baseline
@@ -338,17 +232,6 @@ x1_data <- x1_data[order(x1_data$HHID), ]
 
 not_in_X1<-as.data.frame(baselineAll[!(baselineAll$uniqueID %in% x1_data$uniqueID), c("uniqueID", "hhid", "base_date")])
 
-
-
-# make list object of missing X1 records to make manual cleaning easier:
-# missing.ls <- vector("list", length(not_in_X1$hhid))
-# for (i in 1:length(not_in_X1$hhid)) {
-#   missing.ls[[i]]$baseUniqueID <-  (baselineAll[baselineAll$hhid == not_in_X1$hhid[i], c("uniqueID")])
-#   missing.ls[[i]]$x1UniqueID <- (x1_data[x1_data$HHID == not_in_X1$hhid[i] ,c("uniqueID")])
-# }
-# 
-# missing.ls[[1]]
-# print(missing.ls)
 
 
 # Checked for typos. None found.

@@ -7,6 +7,7 @@
 
 # Intro -------------------------------------------------------------------
 
+library(plyr) # for rbind.fill function that works when rbind was producing errors
 
 # Prepare workspace: if user == CHAR prepare Char's path, else: MAtthew's path
 
@@ -23,6 +24,9 @@ ifelse(grepl("zrc340", getwd()),
 ifelse(grepl("zrc340", getwd()),
        functions.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\c_5_functions_source_file.R",
        functions.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\c_5_functions_source_file.R")
+ifelse(grepl("zrc340", getwd()),
+       pt_data.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\pt_data.Rdata",
+       pt_data.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\pt_data.Rdata")
 # LOAD FILES --------------------------------------------------------------
 
 # Monthly data
@@ -105,14 +109,16 @@ for (i in 1:length(names.vect)){
 target.df$base_date <- as.Date(target.df$base_date, origin = "1970-01-01")
 target.df$date_visit <- as.Date(target.df$date_visit, origin = "1970-01-01")
 
-m4.1 <- rbind.data.frame(target.df, m4 )
 
+class(target.df[,2])
+class_vector <- as.data.frame(sapply(m4, class))
+row.names(class_vector) <- NULL
+class_vector[class_vector=="Date"]
 
-y <- match(names(target), names(z1))
-z2 <-z1[,]
+m4.1 <- plyr::rbind.fill(m4, target.df)
 
-
-
+m4 <- m4.1
+pt_data <- m4
 # SAVE DATA ---------------------------------------------------------------
 save(m4, file = data.output.path)
-
+save(pt_data, file = pt_data.path)
