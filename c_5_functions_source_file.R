@@ -91,30 +91,68 @@ hhCleanup <- function(data, dateVisit, baseDate, withdrawDate, phoneDate) {
 # A1 Functions -----------------------------------------------------------
 
 ptPerHHID <- function(x, end.date) {
-  # First section calculates person-time for HH where the phone was distributed
-  # before end.date, but the 1st monthly-visit occurs after end.date
-  if (x$phone.dist[1] <=end.date && x$date_visit[1] > end.date) {
-    x <- x[1,]
-    x$pt[1] <- x$ppl_all[1] * as.numeric(end.date - x$phone.dist[1])
-  } else {
-    x <- x[x$date_visit <= end.date, ]
+  
+  # Set phone dist.date for HH that moved to be the original phone.dist date
+  x$phone.dist <- min(x$phone.dist)
+  
+  # If there are no monthly visits, pt will be from phone dist. to withdraw
+  # (occurs when HH gets phone but withdraws before 1st monthly visit)
+  if(nrow(x) == 1 && is.na(x$date_visit[1])) {
+    x$pt[1] <- x$ppl_all[1] * as.numeric(x$with_date[1] - x$phone.dist[1])
   }
+  
+  # If the first record is NA, but there are subsequent monthly visits:
+  # (this occurs when HH gets phone, but moves locations before having monthly visit)
+  else if (nrow(x) != 1 && is.na(x$date_visit[1])){
+    for (i in 1:nrow(x)){
+      
+      if (i == 1){ # 1st record - make fake 'date_visit" equal to date of phone dist
+        x$date_visit[i] <- x$phone.dist[i]
+        x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - x$phone.dist[i])
+      }
+      else if (i > 1 && i < nrow(x)) {
+        x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - (max(c(x$date_visit[i-1], x$phone.dist[i]))))
+      } 
+      else if (i > 1 && i == nrow(x)) {
+        x$pt[i] <- x$ppl_all[i] *  as.numeric(x$date_visit[i] - max(c(x$date_visit[i-1], x$phone.dist[i]))) +
+          x$ppl_all[i] * (x$with_date[i] - x$date_visit[i])
+      }    
+    }
+  }
+  
+  # If Na is not in 1st record then there are data problems
+  else if (nrow(x) != 1 && is.na(x$date_visit)){
+    stop('Data error: date_visit is NA, but there are monthly visits
+         recorded before the NA entry - check data!')
+  }
+  
   # Caluclates person-time since either last monthly visit or phone.dis - depending
   # on which was most recent.
-  for (i in 1:nrow(x)) {
-    if (i == 1 && x$date_visit[i] >= x$phone.dist[i] && nrow(x) > 1) {
-      x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - x$phone.dist[i])
-    } else if (i == 1 && x$date_visit[i] < x$phone.dist[i] && nrow(x) > 1) {
-      x$pt[i] <- 0
-    } else if (nrow(x) == 1) {
-      x$pt[i] <- x$ppl_all[i] * (x$with_date[i] - x$phone.dist[i])
-    } else if (i > 1 && i < nrow(x)) {
-      x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - (max(c(x$date_visit[i-1], x$phone.dist[i]))))
-    } else if (i > 1 && i == nrow(x)) {
-      x$pt[i] <- x$ppl_all[i] *  as.numeric(x$date_visit[i] - max(c(x$date_visit[i-1], x$phone.dist[i]))) +
-        x$ppl_all[i] * (x$with_date[i] - x$date_visit[i])
+  else {
+    # If phone was distributed before end.date, 
+    # but the 1st monthly-visit occurs after end.date
+    if (x$phone.dist[1] <=end.date && x$date_visit[1] > end.date) {
+      x <- x[1,]
+      x$pt[1] <- x$ppl_all[1] * as.numeric(end.date - x$phone.dist[1])
+    } else {
+      x <- x[x$date_visit <= end.date, ]
     }
-  } 
+    
+    for (i in 1:nrow(x)) {
+      if (i == 1 && x$date_visit[i] >= x$phone.dist[i] && nrow(x) > 1) {
+        x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - x$phone.dist[i])
+      } else if (i == 1 && x$date_visit[i] < x$phone.dist[i] && nrow(x) > 1) {
+        x$pt[i] <- 0
+      } else if (nrow(x) == 1) {
+        x$pt[i] <- x$ppl_all[i] * (x$with_date[i] - x$phone.dist[i])
+      } else if (i > 1 && i < nrow(x)) {
+        x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - (max(c(x$date_visit[i-1], x$phone.dist[i]))))
+      } else if (i > 1 && i == nrow(x)) {
+        x$pt[i] <- x$ppl_all[i] *  as.numeric(x$date_visit[i] - max(c(x$date_visit[i-1], x$phone.dist[i]))) +
+          x$ppl_all[i] * (x$with_date[i] - x$date_visit[i])
+      }
+    }
+  }
   return(x)
 }
 
@@ -126,7 +164,7 @@ ptCalc <- function(x, end.date) {
   x <- x[x$phone.dist <= end.date, ]
   x$with_date[x$with_date > end.date] <- end.date 
   x$pt <- NA
-  x1 <- x[complete.cases(x[, 1:7]), ]
+  x1 <- x[complete.cases(x$uniqueID), ]
   x1 <- split(x1, f = x1$HH_key)
   z <- lapply(x1, ptPerHHID, end.date = end.date)
   z <- do.call(rbind.data.frame, z)

@@ -38,9 +38,10 @@ rm(pt)
 
 # RESTRICT DATE -----------------------------------------------------------
 
+# Remove records where phone was distributed after the specified endDate
 a1 <- m5[m5$phone.dist <= endDate, ]
 
-# Set withdraw data as end date for any records where true withdraw is after end date
+# Set withdraw date as end date for any records where true withdraw is after end date
 a1$with_date[a1$with_date > endDate] <- endDate
 
 min(a1$with_date)
@@ -48,10 +49,10 @@ max(a1$with_date)
 
 
 # CALCULATE PT BASED ON CUSTOM END DATE ------------------------------------------------------------------
-a1 <- ptCalc(a1, end.date = endDate)
+a2 <- ptCalc(a1, end.date = endDate)
 pt48.df <- pt48hr(a1, end.date = endDate)
 
-pt.days <- sum(a1$pt)
+pt.days <- sum(a2$pt)
 pt.years <- pt.days/365
 
 pt48.days <- sum(pt48.df$pt48hr)

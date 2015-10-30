@@ -43,7 +43,7 @@ load(clean_monthly_basebase.path)
 
 # SUBSET VARIABLES --------------------------------------------------------
 m4 <- pt_data[, c("uniqueID", 'HHID', 'date_visit', 'base_date', 'phone.dist', 'with_date', "ppl_all", "new_per", "old_per_out", "HH_key")]
-
+rm(pt_data)
 
 # UPDATE NO. PPL IN HH ----------------------------------------------------
 pplCalc <- function (x){
@@ -61,47 +61,47 @@ pplCalc <- function (x){
 x.temp <- split(m4, f = m4$uniqueID)
 
 m4.temp <- lapply(x.temp, pplCalc )
-m4 <- do.call(rbind.data.frame, m4.temp)
-row.names(m4) <- NULL
+m5 <- do.call(rbind.data.frame, m4.temp)
+row.names(m5) <- NULL
+rm(m4)
+# 
+# # PERSONE TIME for each household during each time-frame
+# # PERSON TIME 48-hr visits
+# m48hr <- pt48hr(m4, end.date = endDate)
+# m5.pt <- ptCalc(m4, end.date = endDate)
+# 
 
-
-# PERSONE TIME for each household during each time-frame
-# PERSON TIME 48-hr visits
-m48hr <- pt48hr(m4, end.date = endDate)
-m5 <- ptCalc(m4, end.date = endDate)
-
-
-
-# ERROR CHECKING ----------------------------------------------------------
-
-# Check individual entries for errors.
-min(m5$pt, na.rm=T)
-max(m5$pt)
-which.max(m5$pt)
-boxplot(m5$pt)
-
-
-# Check households aggregated for errors.
-# summarize pt by uniqueID:
-households <- m5 %>%
-  group_by(uniqueID) %>%
-  summarise(
-    pt_hh = sum(pt, na.rm = T)
-  )
-
-# Check outliers:
-boxplot(households$pt_hh)
-
-
-
-
-# SUM ---------------------------------------------------------------------
-
-pt.days.phone <- sum(m5$pt)
-pt.years.phone <- pt.days.phone / 365
-
-pt.days.48hr <- sum(m48hr$pt48hr)
-pt.years.48hr <- pt.days.48hr / 365
+# 
+# # ERROR CHECKING ----------------------------------------------------------
+# 
+# # Check individual entries for errors.
+# min(m5$pt, na.rm=T)
+# max(m5$pt)
+# which.max(m5$pt)
+# boxplot(m5$pt)
+# 
+# 
+# # Check households aggregated for errors.
+# # summarize pt by uniqueID:
+# households <- m5 %>%
+#   group_by(uniqueID) %>%
+#   summarise(
+#     pt_hh = sum(pt, na.rm = T)
+#   )
+# 
+# # Check outliers:
+# boxplot(households$pt_hh)
+# 
+# 
+# 
+# 
+# # SUM ---------------------------------------------------------------------
+# 
+# pt.days.phone <- sum(m5$pt)
+# pt.years.phone <- pt.days.phone / 365
+# 
+# pt.days.48hr <- sum(m48hr$pt48hr)
+# pt.years.48hr <- pt.days.48hr / 365
 
 # WRITE TO FILE -----------------------------------------------------------
 
