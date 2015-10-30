@@ -76,12 +76,13 @@ source('M5_PersonTime_cleaning.R')
 
 rm(list = ls())
 ifelse(grepl("zrc340", getwd()),
-       packages.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\list_of_r_packages.csv",
-       packages.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\list_of_r_packages.csv")
+       packages.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\list_of_r_packages.Rdata",
+       packages.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\list_of_r_packages.Rdata")
 
 ip <- as.data.frame(installed.packages()[,c(1,3:4)])
 rownames(ip) <- NULL
 ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
-if (nrow(ip) > 3){ # Don't overwrite when we first get to a new enviro
-  write.csv(ip[,1], file = packages.path, row.names = F)
+if (nrow(ip) > 30){ # Don't overwrite when we first get to a new enviro
+  package_list <- as.character(ip$Package)
+  save(package_list, file = packages.path)
 }

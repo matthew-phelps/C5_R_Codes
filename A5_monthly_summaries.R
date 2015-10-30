@@ -54,6 +54,34 @@ source(functions.path)
 
 # DATA PREPERATION -----------------------------------------------------
 
+# For entries with no monthly visits, make fake visit at date of phone dist.
+internal_fixNA <- function(x){
+  for (i in 1:nrow(x)){
+    # If 1st entry date_visit == NA, change it to phone.dist date
+    if (is.na(x$date_visit[1])){
+      x$date_visit[1] <- x$phone.dist[1]
+    }
+    else if (i == nrow(x) && is.na(x$date_visit[i])){
+      x$date_visit[i] <- x$phone.dist[i]
+    }
+    else if (i != 1 && i != nrow(x) && is.na(x$date_visit[i])){
+      browser()      
+      stop("Data error: the data_visit is NA and the record is not the
+           first record for the HH - check data!")
+    }
+  }
+  x
+}
+
+
+fix_monthlyNAs <- function(x){
+  x.ls <- split(x, f = x$HH_key)
+  x2 <- lapply(x.ls, internal_fixNA)
+  x3 <- do.call(rbind.data.frame, x2)
+  return (x3)
+}
+m5<- fix_monthlyNAs(m5)
+
 # Round dates to 1st of month for easier calculations
 base_merge$phoneMonthYear <- floor_date(base_merge$phone.dist, unit = "month")
 base_merge$withMonthYear <- floor_date(base_merge$with_date, unit = "month")
@@ -132,7 +160,7 @@ z1 <- colSums(z)
 monthly_summary$active_hh <- z1
 monthly_summary <- left_join(monthly_summary, temp, by = c("Var1" = "date_visit_month"))
 
-rm(z, zy, temp, z1, zy1, x, m5.path, i, j, baseline.path)
+rm(z, zy, temp, z1, x)
 
 
 
@@ -161,10 +189,10 @@ activePeople <- function(t.temp) {
       g[i] <- t.temp$date_visit_month[i+1] - t.temp$date_visit_month[i]
       x[i] <- as.interval(g[i], t.temp$date_visit_month[i])
     }
-  x[nrow(t.temp),] <- as.interval(t.temp$with_date[nrow(t.temp)] - t.temp$date_visit_month[nrow(t.temp)-1], t.temp$date_visit_month[nrow(t.temp)-1])
-  
-  # first interval - measure from phone.dist date to date of second monthly visit
-  x[1,] <- as.interval(t.temp$date_visit_month[2] - floor_date(t.temp$phone.dist[1], unit = "month"), floor_date(t.temp$phone.dist[1], unit = "month"))
+    x[nrow(t.temp),] <- as.interval(t.temp$with_date[nrow(t.temp)] - t.temp$date_visit_month[nrow(t.temp)-1], t.temp$date_visit_month[nrow(t.temp)-1])
+    
+    # first interval - measure from phone.dist date to date of second monthly visit
+    x[1,] <- as.interval(t.temp$date_visit_month[2] - floor_date(t.temp$phone.dist[1], unit = "month"), floor_date(t.temp$phone.dist[1], unit = "month"))
   } else { # if there is only 1 monthly visit, use interval from phone.dist to withdraw
     x <- as.interval((t.temp$with_date - t.temp$phone.dist), t.temp$phone.dist)
   }
@@ -207,6 +235,10 @@ monthly_summary <- rename(monthly_summary, number_visits = Freq, date = Var1)
 
 
 # PLOTS -------------------------------------------------------------------
+monthly_summary <- monthly_summary[order(monthly_summary$date), ]
+
+
+
 graphics.off()
 plot1 <- ggplot(data = monthly_summary, aes(x = date, y = new_phones)) +
   geom_bar(stat = "identity") +
@@ -238,11 +270,10 @@ plot5 <- ggplot(data = monthly_summary, aes( x= date, y = dropout_HH/active_hh))
   theme(plot.title = element_text(size = 20, face = "bold"))
 plot5
 # WRITE OUTPUT ------------------------------------------------------------
-
-write.csv(monthly_summary, file = output.path)
+monthly_summary$date<- format(monthly_summary$date, format = "%b-%Y")
+write.csv(monthly_summary, file = output.path, row.names = F)
 
 ggsave(filename = plot1.path, plot = plot1, width = 10, height = 10)
 ggsave(filename = plot2.path, plot = plot2, width = 10, height = 10)
 ggsave(filename = plot3.path, plot = plot3, width = 10, height = 10)
 ggsave(filename = plot4.path, plot = plot4, width = 10, height = 10)
-
