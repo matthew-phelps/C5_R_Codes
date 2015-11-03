@@ -14,6 +14,9 @@ ifelse(grepl("zrc340", getwd()),
        monthly_basebase.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata",
        monthly_basebase.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\dirty-monthly-baseline_join.Rdata")
 ifelse(grepl("zrc340", getwd()),
+       qualitative.path <- "C:\\Users\\zrc340\\Desktop\\Dropbox\\C5 data\\C5 Monthly Visits data\\Water use observations from Rebeca",
+       qualitative.path <-"C:\\Users\\wrz741\\Dropbox\\C5 data\\C5 Monthly Visits data\\Water use observations from Rebeca")
+ifelse(grepl("zrc340", getwd()),
        data.output.path <- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata",
        data.output.path <-"C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata")
 
@@ -22,6 +25,8 @@ ifelse(grepl("zrc340", getwd()),
 load(monthly_basebase.path)
 rm(monthly_basebase.path)
 
+setwd(qualitative.path)
+Qual<-read.csv2("Rebeca's qualitative data to import.csv")
 
 # INDEX PROBLEM RECORDS ---------------------------------------------------
 
@@ -64,6 +69,17 @@ m4$other_water_in.adult_bathe_in[is.na(m4$other_water_in.adult_bathe_in)]<-0
 m4$other_water_out.adult_bathe_out[is.na(m4$other_water_out.adult_bathe_out)]<-0
 m4$other_water_out.child_bathe_out[is.na(m4$other_water_out.child_bathe_out)]<-0
 m4$other_water_in.child_bathe_in[is.na(m4$other_water_in.child_bathe_in)]<-0
+
+m4$Listing.number.x
+Qual$Listing.number.x<-Qual$Listing.ID
+merged<-merge(Qual,m4,by="Listing.number.x") # either HHID 013 or 241 needs to be deleted after Rebeca writes back
+merged<-merged[!duplicated(merged$uniqueID),]
+merged$water_use_pc<-merged$total_water_use/merged$ppl.x
+merged$adults_baths<-merged$water_quant_per_adult_bath
+merged$water_quant_per_adult_bath<-merged$water_quant_per_adult_bath/merged$ppl.x
+merged[merged$q14_recoded==1,c("water_quant_per_adult_bath")]
+merged[merged$q14_recoded==2,c("water_quant_per_adult_bath")]
+merged<-merged[unique(merged$uniqueID),]
 
 m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
                              (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
