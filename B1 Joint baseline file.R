@@ -248,11 +248,19 @@ dall<-rbind(distance,distance47,distance69)
 dall$q45<-as.numeric(dall$q45)
 dall$q46_1[is.na(dall$q46_1)]<-21 #all NAs were GPS locations, taken because distance was more than 20 meters
 
-distance_to_source1<-dall$q46_1[dall$q45==1]
-distance_to_source1<-as.data.frame(distance_to_source1)
 
-baselineAll<-cbind(baselineAll,distance_to_source1)
-baselineAll$distance_to_source1
+distance_to_source1<-dall[dall$q45==1, c("q46_1","slno")]
+distance_to_source1<-as.data.frame(distance_to_source1)
+distance_to_source2<-dall[dall$q45==2,c("q46_1","slno")]
+distance_to_source2<-as.data.frame(distance_to_source2)
+
+distance<-merge(distance_to_source1,distance_to_source2,by="slno",all=T)
+colnames(distance)[2]<-"distance_to_source1"
+colnames(distance)[3]<-"distance_to_source2"
+
+
+baselineAll<-cbind(baselineAll,distance[,c("distance_to_source1","distance_to_source2")])
+
 
 # Move Unique ID to front column -------------------------
 y <- match(c('uniqueID', 'hhid'), names(baselineAll))
