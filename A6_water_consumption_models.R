@@ -180,56 +180,56 @@ monthly$infrastructure_routine<-with(monthly,ifelse(water_point1.wa_pt1==1|water
 #              + ppl + (1|HH_key) +(1|listing), data=monthly)
 # anova(modely,modelx) # significant difference (p=.24) indicates that we shouldn't use checkwater*distance
 
-monthly$HH_key
+
 ## check if tank is interdependent with season
-modela<-lmer(daily_h2o_percapita ~ season*h2o_tank1 + checkwater +  distance +  infrastructure + day + asset_quintile
+modela<-lmer(daily_h2o_percapita ~ season*h2o_tank1 + checkwater +  h2o_distance1 +  h2o_collect1 + day + asset_quintile
              + ppl + (1|HH_key) +(1|listing), data=monthly)
-modelb<-lmer(daily_h2o_percapita ~ season + h2o_tank1 + checkwater +  distance +  infrastructure + asset_quintile + day 
+modelb<-lmer(daily_h2o_percapita ~ season + h2o_tank1 + checkwater +  h2o_distance1 +  h2o_collect1 + asset_quintile + day 
              + ppl + (1|HH_key) +(1|listing), data=monthly)
-anova(modela,modelb) 
+anova(modela,modelb) #p=0.5, independent
   
 ##  model 1 daily h2o consumption over seasons Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec
-model1=lmer(daily_h2o_percapita ~ season + checkwater  +  in_home_water   + infrastructure_routine + day + asset_quintile
+model1=lmer(daily_h2o_percapita ~ season + checkwater  +  in_home_water   + h2o_collect1 + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 summary(model1)
 
 
-model.null=lmer(daily_h2o_percapita ~ checkwater + in_home_water + infrastructure_routine  + day + asset_quintile
+model.null=lmer(daily_h2o_percapita ~ checkwater + in_home_water + h2o_collect1  + day + asset_quintile
                 + ppl + (1|HH_key) +(1|Listing.number.x), data=monthly)
 summary(model.null)
 
 anova(model1,model.null)
 
-coef(lmer(daily_h2o_percapita ~ season + water_flow_1  +  distance +   + infrastructure + day + asset_quintile
+coef(lmer(daily_h2o_percapita ~ season + checkwater  +  h2o_distance1 +   + h2o_collect1 + day + asset_quintile
           + ppl + (1|HH_key) +(1|listing), data=monthly))
 
 ### model 2 daily consumption with different seasons
-model2=lmer(daily_h2o_percapita ~ season2*water_flow_1  +  distance   + infrastructure + day + asset_quintile
+model2=lmer(daily_h2o_percapita ~ season2 + checkwater  +  h2o_distance1   + h2o_collect1 + day + asset_quintile
             + ppl + (1|HH_key) +(1|listing), data=monthly)
 summary(model1)
 
-model2.null=lmer(daily_h2o_percapita ~   distance +  water_flow_1 + infrastructure  + day + asset_quintile
+model2.null=lmer(daily_h2o_percapita ~   h2o_distance1 +  checkwater + h2o_collect1  + day + asset_quintile
                 + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 anova(model2,model2.null)
 
-coef(lmer(daily_h2o_percapita ~ season2*water_flow_1  +  distance + infrastructure + day + asset_quintile
+coef(lmer(daily_h2o_percapita ~ season2*checkwater  +  h2o_distance1 + h2o_collect1 + day + asset_quintile
           + ppl + (1|HH_key) +(1|listing), data=monthly))
 
 #handwashing over the seasons
 
-modelhand=lmer( handwash_per_capita ~ season*water_flow_1 +   distance + infrastructure + asset_quintile
+modelhand=lmer( handwash_per_capita ~ season + checkwater +   h2o_distance1 + h2o_collect1 + asset_quintile
             + ppl + (1|HH_key) +(1|listing), data=monthly)
 summary(modelhand)
 
-modelhand.null=lmer(handwash_per_capita ~  distance +  water_flow_1 + infrastructure  + asset_quintile
+modelhand.null=lmer(handwash_per_capita ~  h2o_distance1 +  checkwater + h2o_collect1  + asset_quintile
                 + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 summary(modelhand)
 
 anova(modelhand,modelhand.null)
 
-coef(lmer(handwash_per_capita ~ season + checkwater  +    distance + infrastructure + asset_quintile
+coef(lmer(handwash_per_capita ~ season + checkwater  +    h2o_distance1 + h2o_collect1 + asset_quintile
           + ppl + (1|HH_key) +(1|listing), data=monthly))
 
 modelhand2<-lmer(handwash_per_capita ~ season + daily_h2o_percapita + (1|HH_key) +(1|listing), data=monthly)
@@ -239,21 +239,21 @@ anova(modelhand2, modelhand2null) # p<.001
 summary(modelhand2)
 
 ###
-clothesmodel<-lmer(clothes_pc~season + checkwater + distance + infrastructure + asset_quintile
+clothesmodel<-lmer(clothes_pc~season + checkwater + h2o_distance1 + h2o_collect1 + asset_quintile
                    + ppl + (1|HH_key) +(1|listing), data=monthly)
 summary(clothesmodel)
-clothesmodelnull<-lmer(clothes_pc~checkwater + distance + infrastructure + asset_quintile
+clothesmodelnull<-lmer(clothes_pc~checkwater + h2o_distance1 + h2o_collect1 + asset_quintile
                        + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 anova(clothesmodelnull,clothesmodel)
 
 ##
-dishmodel<-lmer(dishes~season*checkwater + distance + infrastructure + asset_quintile
+dishmodel<-lmer(dishes~season*checkwater + h2o_distance1 + h2o_collect1 + asset_quintile
                 + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 summary(dishmodel)
 
-dishmodelnull<-lmer(dishes~checkwater + distance + infrastructure + asset_quintile
+dishmodelnull<-lmer(dishes~checkwater + h2o_distance1 + h2o_collect1 + asset_quintile
                        + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 anova(dishmodel,dishmodelnull)
@@ -276,6 +276,18 @@ coef(dishmodel)
 #ppl
 
 
+
+
+# Sensitivity analysis ----------------------------------------------------
+
+monthly$daily_volume_se<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
+                        (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
+                      +(cont6.cont6_size*cont6.cont6_times)+(cont7.cont7_size*cont7.cont7_times)+(cont8.cont8_size*cont8.cont8_times)
+                      +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
+                      +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times))
+                      
+
+monthly$daily_h2o_percapita_se<-with(m4, daily_volume_se/ppl)
 
 
 
