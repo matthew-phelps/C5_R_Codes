@@ -70,16 +70,6 @@ m4$other_water_out.adult_bathe_out[is.na(m4$other_water_out.adult_bathe_out)]<-0
 m4$other_water_out.child_bathe_out[is.na(m4$other_water_out.child_bathe_out)]<-0
 m4$other_water_in.child_bathe_in[is.na(m4$other_water_in.child_bathe_in)]<-0
 
-m4$Listing.number.x
-Qual$Listing.number.x<-Qual$Listing.ID
-merged<-merge(Qual,m4,by="Listing.number.x") # either HHID 013 or 241 needs to be deleted after Rebeca writes back
-merged<-merged[!duplicated(merged$uniqueID),]
-merged$water_use_pc<-merged$total_water_use/merged$ppl.x
-merged$adults_baths<-merged$water_quant_per_adult_bath
-merged$water_quant_per_adult_bath<-merged$water_quant_per_adult_bath/merged$ppl.x
-merged[merged$q14_recoded==1,c("water_quant_per_adult_bath")]
-merged[merged$q14_recoded==2,c("water_quant_per_adult_bath")]
-merged<-merged[unique(merged$uniqueID),]
 
 m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
                              (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
@@ -232,109 +222,149 @@ m4[which(m4$other_water_in.child_bathe_in==6&m4$uniqueID=="269_2015-02-17"),"oth
 #View(m4[m4$water_point1.wa_pt1==777&m4$water_point1.wa_pt1_usebefore==2,c("water_point1.wa_pt1","water_point1.wa_source1","water_point1.wa_source1_other","water_point1.wa_tank1")])
 
 m4$h2o_collect1<-with(m4, ifelse(water_point1.wa_pt1==1|water_point1.wa_pt1==2,1, #tap/pipe
-                                           ifelse(water_point1.wa_pt1==3|water_point1.wa_pt1==4,2, #handpump
-                                                  ifelse(water_point1.wa_pt1==5|water_point1.wa_pt1==777,3,4)))) #well, all 777 were checked, and reported bucket in tank category 
+                                 ifelse(water_point1.wa_pt1==3|water_point1.wa_pt1==4,2, #handpump
+                                        ifelse(water_point1.wa_pt1==5|water_point1.wa_pt1==777,3,4)))) #well, all 777 were checked, and reported bucket in tank category 
 m4$h2o_collect1[is.na(m4$h2o_collect1)]<-0 #set NAs to 0 for the loop
 
+m4$h2o_collect2<-with(m4, ifelse(water_point2.wa_pt2==1|water_point2.wa_pt2==2,1, #tap/pipe
+                                 ifelse(water_point2.wa_pt2==3|water_point2.wa_pt2==4,2, #handpump
+                                        ifelse(water_point2.wa_pt2==5|water_point2.wa_pt2==777,3,4)))) #well, all 777 were checked, and reported bucket in tank category 
+m4$h2o_collect2[is.na(m4$h2o_collect2)]<-0 #set NAs to 0 for the loop
+
 m4$h2o_source1<-with(m4, ifelse(water_point1.wa_source1==1|water_point1.wa_source1==999,1, #WASA, only 999 was a handpump
-                                          ifelse(water_point1.wa_source1==2|water_point1.wa_source1==3|water_point1.wa_source1==6,2, #Deep tube well
-                                                 ifelse(water_point1.wa_source1==4|water_point1.wa_source1==5,3,0))))
+                                ifelse(water_point1.wa_source1==2|water_point1.wa_source1==3|water_point1.wa_source1==6,2, #Deep tube well
+                                       ifelse(water_point1.wa_source1==4|water_point1.wa_source1==5,3,0))))
 m4$h2o_source1[is.na(m4$h2o_source1)]<-0 #set NAs to 0 for the loop
+
+m4$h2o_source2<-with(m4, ifelse(water_point2.wa_source2==1|water_point2.wa_source2==999,1, #WASA, only 999 was a handpump
+                                ifelse(water_point2.wa_source2==2|water_point2.wa_source2==3|water_point2.wa_source2==6,2, #Deep tube well
+                                       ifelse(water_point2.wa_source2==4|water_point2.wa_source2==5,3,0))))
+m4$h2o_source2[is.na(m4$h2o_source2)]<-0 #set NAs to 0 for the loop
 
 m4$h2o_tank1<-ifelse(m4$water_point1.wa_tank1>0,1,2)
 m4$h2o_tank1[is.na(m4$h2o_tank1)]<-0 #set NAs to 0 for the loop
+m4$q15_recoded<-ifelse(m4$q15_recoded>0,1,2)
+
+m4$h2o_tank2<-ifelse(m4$water_point2.wa_tank2>0,1,2)
+m4$h2o_tank2[is.na(m4$h2o_tank2)]<-0 #set NAs to 0 for the loop
 
 m4$water_point1.wa_pt1_usebefore<-ifelse(m4$first_visit==1,3,m4$water_point1.wa_pt1_usebefore)
-
-
 
 m4$base_source_change <- ifelse(m4$first_visit==1 & m4$q14_recoded==m4$h2o_collect1 &
                                        m4$q14a_recoded == m4$h2o_source1 & m4$q15_recoded==m4$h2o_tank1, "No", ifelse(m4$first_visit!=1, NA, "Yes"))
 
+m4$h2o_distance1<-m4$distance_to_source1
 m4<-m4[which(!(is.na(m4$FRA))),] #get rid of all x-2 entries that don't have corresponding monthly visit
 
 
 m4_subset<-data.frame()
 
+#make it so that the first entry for each uniqueID starts with 3 (for loop to follow)
+clean_first_entry <- function(x) {
+  
+  x[1, c("water_point1.wa_pt1_usebefore_new")] <- ifelse (x[1, c("water_point1.wa_pt1_usebefore")]!='3','3', x[1, c("water_point1.wa_pt1_usebefore")])
+  x[1, c("h2o_source1")] <- ifelse(x[1,c("h2o_source1")]==0,x[1,c("q14a_recoded")],x[1,c("h2o_source1")])
+  x[1, c("h2o_tank1")] <- ifelse(x[1,c("h2o_tank1")]==0,x[1,c("q15_recoded")],x[1,c("h2o_tank1")])
+  x[1, c("h2o_distance1")] <- ifelse(x[1,c("h2o_collect1")]!=x[1,c("q14_recoded")],x[1,c("distance_to_source2")],x[1,c("distance_to_source1")])
+  x[2:nrow(x), "water_point1.wa_pt1_usebefore_new"] <- ifelse(x[2:nrow(x), "water_point1.wa_pt1_usebefore"]==3,1,x[2:nrow(x), c("water_point1.wa_pt1_usebefore")])
+  return(x)
+}
 
-# Fill in values for water source that does not change  -------------------
+
+# Fill in values for water source and tank for each visit  -------------------
 # in routine/monthly visits, water source that does not change does not have info filled out
 
-# ------------------------- FUNCTION 1 for entries that have no changes over time
-clean <- function(x) {
+
+clean_all <- function(x) {
   
   for (j in 1:(nrow(x)-1)) {
-    x[j+1, "h2o_collect1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
-                                     x[j, "h2o_collect1"],
-                                     x[j+1, "h2o_collect1"])
-    x[j+1, "h2o_source1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
-                                    x[j, "h2o_source1"],
-                                    x[j+1, "h2o_source1"])  
-    x[j+1, "h2o_tank1"] <- ifelse(x[j+1, "water_point1.wa_pt1_usebefore"]==1,
-                                  x[j, "h2o_tank1"],
-                                  x[j+1, "h2o_tank1"]) 
+    x[j+1, c("h2o_source1")] <- ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                         x[j+1, c("h2o_collect1")]==x[1, c("h2o_collect1")],
+                                       x[1, c("h2o_source1")],
+                                       
+                                       ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                                x[j+1, c("h2o_collect1")]==x[1, c("h2o_collect2")],
+                                              x[1, c("h2o_source2")],
+                                       
+                                       ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                                x[j+1, c("h2o_collect1")]==x[1, c("q14_recoded")],
+                                              x[1, c("q14a_recoded")],
+                                              
+                                              ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                                       x[j+1, c("h2o_collect1")]==x[1, c("q14_recoded2")],
+                                                     x[1, c("q14a_recoded2")],x[j+1, c("h2o_source1")]))))
+    x[j+1, c("h2o_tank1")] <- ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                       x[j+1, c("h2o_collect1")]==x[1, c("h2o_collect1")],
+                                     x[1, c("h2o_tank1")],
+                                     
+                                     ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                              x[j+1, c("h2o_collect1")]==x[1, c("h2o_collect2")],
+                                            x[1, c("h2o_tank2")],
+                                     
+                                     ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                              x[j+1, c("h2o_collect1")]==x[1, c("q14_recoded")],
+                                            x[1, c("q15_recoded")],
+                                            
+                                            ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                                     x[j+1, c("h2o_collect1")]==x[1, c("q14_recoded2")],
+                                                   x[1, c("q15_recoded2")],x[j+1, c("h2o_tank1")]))))
+    
+    x[j+1, c("h2o_distance1")] <- ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                       x[j+1, c("h2o_collect1")]==x[1, c("h2o_collect1")],
+                                     x[1, c("h2o_distance1")],
+                                     
+                                     ifelse(x[j+1, c("water_point1.wa_pt1_usebefore_new")]==1&
+                                              x[j+1, c("h2o_collect1")]!=x[1, c("h2o_collect1")],
+                                            x[1, c("distance_to_source2")],x[1, c("distance_to_source1")]))
+    
   }
   
   return (as.data.frame(x))
 }
-
-
-# ------------------------- FUNCTION 2 for entries that have changes over time
-
-clean_alt <- function(x) {
   
-  for (j in 1:(nrow(x)-1)) {
-    
-    if((x[j+1, "water_point1.wa_pt1_usebefore"]==1) &
-       (x[j+1, "h2o_collect1"] == x[which(m4_subset$water_point1.wa_pt1_usebefore==3), "h2o_collect1"]))
-      
-    {
-      x[j+1, "h2o_collect1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==3), "h2o_collect1"]     
-      x[j+1, "h2o_source1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==3), "h2o_source1"]
-      x[j+1, "h2o_tank1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==3), "h2o_tank1"]
-    }
-    
-    else { if ((x[j+1, "water_point1.wa_pt1_usebefore"]==1) &
-               (x[j+1, "h2o_collect1"] == x[which(m4_subset$water_point1.wa_pt1_usebefore==2), "h2o_collect1"])) 
-      
-    {
-      x[j+1, "h2o_collect1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==2), "h2o_collect1"]     
-      x[j+1, "h2o_source1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==2), "h2o_source1"]
-      x[j+1, "h2o_tank1"] <- x[which(m4_subset$water_point1.wa_pt1_usebefore==2), "h2o_tank1"]
-    }  
-      
-    }
-  }
-  
-  return (as.data.frame(x))
-}
-
 
 
 # ------------------------- 
+#m4[m4$uniqueID=="002_2014-06-11",c("uniqueID", "water_point1.wa_pt1_usebefore","water_point1.wa_pt1_usebefore_new", "h2o_collect1", "h2o_collect2", "h2o_source1", "h2o_tank1")]
 
-
+m4_subset_final<-data.frame()
+i<-NULL
+#m4_subset_final[1:100,c("uniqueID", "water_point1.wa_pt1_usebefore_new", "h2o_collect1", "h2o_collect2", "h2o_source1", "h2o_tank1")]
 # loop to fill in values for primary water source info in subsequent visits 
+
 for (i in 1:length(unique(m4$uniqueID))) {
   
   m4_subset <- m4[which(m4$uniqueID==unique(m4$uniqueID)[i]),]
   m4_subset <- m4_subset[order((m4_subset$date_visit)),]
+  m4_subset <- clean_first_entry(m4_subset)  
   
-  # condition 1: 3 & 1s (first visit with no following changes) or 3 & 2 (first visit followed by change)
+  if (unique(m4_subset$water_point1.wa_pt1_usebefore_new)[1]==3) {
+    
+    m4_subset <- clean_all(m4_subset)
+    
+  }
   
-  if  ((length(unique(m4_subset$water_point1.wa_pt1_usebefore))==2) &
-       (unique((m4_subset$water_point1.wa_pt1_usebefore))[1]==3) &
-       (unique((m4_subset$water_point1.wa_pt1_usebefore))[2]==1 | unique((m4_subset$water_point1.wa_pt1_usebefore))[2]==2))      
-  {m4_subset <- clean(m4_subset)}
+  m4_subset_final <- rbind(m4_subset_final, m4_subset)
   
-  else if ((length(unique(m4_subset$water_point1.wa_pt1_usebefore))==3)&
-          (unique((m4_subset$water_point1.wa_pt1_usebefore))[1]==3))
-        
-        {m4_subset <- clean_alt(m4_subset)}
-        
 }
 
-View(m4[,c("uniqueID", "water_point1.wa_pt1_usebefore", "h2o_collect1", "h2o_source1", "h2o_tank1")])
+m4<-m4_subset_final[!(is.na(m4_subset_final$uniqueID)),]
+
+#View(m4[,c("uniqueID", "water_point1.wa_pt1_usebefore_new", "h2o_collect1", "h2o_source1", "h2o_tank1","h2o_distance1")])
+
+#check NAs
+#m4[is.na(m4$h2o_distance1)&!(is.na(m4$h2o_source1)),c("uniqueID","h2o_source1","distance_to_source1")]
+
+#correct NA values for distance when only 1 source reported
+m4[m4$uniqueID=="008_2014-12-09",c("h2o_distance1")]<-10.50
+m4[m4$uniqueID=="074_2014-09-05",c("h2o_distance1")]<-1.20
+m4[m4$uniqueID=="103_2014-06-09",c("h2o_distance1")]<-8.40
+m4[m4$uniqueID=="161_2014-11-13",c("h2o_distance1")]<-6.30
+m4[m4$uniqueID=="175_2014-08-22",c("h2o_distance1")]<-4.30
+m4[m4$uniqueID=="247_2014-08-22",c("h2o_distance1")]<-14.30
+m4[m4$uniqueID=="325_2014-08-14",c("h2o_distance1")]<-2.10
+
+
 # Clean hours per day that water is flowing from source -------------------
 
 m4$water_flow1_end1<- times(m4$water_point1.wa_flow1.wa_time1.aE)
@@ -417,6 +447,27 @@ m4$checkwater<-m4$water_flow_1+m4$water_flow_2+m4$water_flow_3
 #                                                                                       "water_point1.wa_flow1.wa_time1.aS","water_point1.wa_flow1.wa_time1.aE","water_flow_1",
 #                                                                                       "water_point1.wa_flow1.wa_time1.bS","water_point1.wa_flow1.wa_time1.bE","water_flow_2",
 #                                                                                       "water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3","checkwater")], file="water flow recheck.csv")
+
+
+# Calculate quantities based on Rebeca's data -----------------------------
+m4$distance_to_source1
+m4[m4$Listing.number.x==968,c("checkwater")]
+Qual$Listing.number.x<-Qual$Listing.ID
+merged<-merge(Qual,m4,by="Listing.number.x") # one overlapping listing number, rebeca confirmed that hhid 241 was included, not 013 
+merged<-merged[!(merged$HHID==013),]
+merged<-merged[!duplicated(merged$uniqueID),]
+
+merged$water_use_pc<-merged$total_water_use/merged$ppl.x
+merged$adults_baths<-merged$water_quant_per_adult_bath
+merged$water_quant_per_adult_bath<-merged$water_quant_per_adult_bath/merged$ppl.x
+
+merged[merged$q14_recoded==1,c("water_quant_per_adult_bath","distance_to_source1")]
+merged[merged$q14_recoded==2,c("water_quant_per_adult_bath")]
+
+
+merged[,c("uniqueID","distance_to_source1","Listing.number.x","q14_recoded","q15_recoded","h2o_collect1","checkwater")]
+#group 1 less than 24 hours tap
+#group 2 <24 hour service with handpump
 
 #after cleaning water use info, recaculate daily volume and per capita use
 
