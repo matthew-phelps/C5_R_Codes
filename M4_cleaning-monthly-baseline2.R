@@ -81,7 +81,9 @@ m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size
 
 
 m4$dishes<-m4$other_water_in.wash_plate_in+m4$other_water_out.wash_plate_out
+m4[is.na(m4$dishes),c("dishes")]<-0
 m4$clothes<-m4$other_water_in.wash_clothes_in+m4$other_water_out.wash_clothes_out
+m4[is.na(m4$clothes),c("clothes")]<-0
 #average water consumption per activity in liters: adult bath= 37, child bath = 14, wash dishes = 25, wash clothes =43
 
 #create month variable
@@ -464,8 +466,9 @@ merged$water_quant_per_adult_bath<-merged$water_quant_per_adult_bath/merged$ppl.
 merged[merged$q14_recoded==1,c("water_quant_per_adult_bath","distance_to_source1")]
 merged[merged$q14_recoded==2,c("water_quant_per_adult_bath")]
 
-
 merged[,c("uniqueID","distance_to_source1","Listing.number.x","q14_recoded","q15_recoded","h2o_collect1","checkwater")]
+
+
 #group 1 less than 24 hours tap
 #group 2 <24 hour service with handpump
 
@@ -492,19 +495,6 @@ m4[m4$HHID==301&m4$date_visit==as.Date("2015-01-03"),c("other_water_in.adult_bat
 m4[m4$uniqueID=="338_2014-07-11",c("h2o_tank1")]<-0
 m4[m4$uniqueID=="384_2014-07-12",c("h2o_distance1")]<-14.5
 
-#after cleaning water use info, recaculate daily volume and per capita use
-
-m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
-                        (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
-                      +(cont6.cont6_size*cont6.cont6_times)+(cont7.cont7_size*cont7.cont7_times)+(cont8.cont8_size*cont8.cont8_times)
-                      +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
-                      +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times)
-                      +((other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)*37)  #will probably change once more detailed information is received from Rebeca
-                      +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*14))
-
-m4$daily_h2o_percapita<-with(m4, daily_volume/ppl)
-
-
 # fix data on  hours that water is available based on Bimal's changes to "water flow recheck" on 20-10-15
 m4[m4$uniqueID=="020_2014-10-17"&m4$date_visit=="2015-02-20",c("checkwater")]<-6.5
 m4[m4$uniqueID=="041_2015-05-20"&m4$date_visit=="2015-07-10",c("checkwater")]<-9
@@ -520,11 +510,12 @@ m4[m4$uniqueID=="362_2014-07-14"&m4$date_visit=="2015-03-11",c("checkwater")]<-6
 # from too many hours of water sheet
 m4[m4$uniqueID=="026_2014-06-12"&m4$date_visit=="2015-03-06",c("checkwater")]<-24
 m4[m4$uniqueID=="124_2014-12-15"&m4$date_visit=="2015-02-15",c("checkwater")]<-24
-m4[m4$uniqueID=="074_2014-09-05"&m4$date_visit=="2014-10-28",c("checkwater")]<-NA
-m4[m4$uniqueID=="187_2014-10-28"&m4$date_visit=="2015-08-27",c("checkwater")]<-NA
-m4[m4$uniqueID=="200_2014-08-18"&m4$date_visit=="2014-11-09",c("checkwater")]<-NA
-m4[m4$uniqueID=="263_2014-08-04"&m4$date_visit=="2014-10-23",c("checkwater")]<-NA
-m4[m4$uniqueID=="391_2014-11-14"&m4$date_visit=="2015-07-09",c("checkwater")]<-NA
+#delete entries that Bimal does not have on record and there are queries
+m4<-m4[!(m4$uniqueID=="074_2014-09-05"&m4$date_visit=="2014-10-28"),]
+m4<-m4[!(m4$uniqueID=="187_2014-10-28"&m4$date_visit=="2015-08-27"),]
+m4<-m4[!(m4$uniqueID=="200_2014-08-18"&m4$date_visit=="2014-11-09"),]
+m4<-m4[!(m4$uniqueID=="263_2014-08-04"&m4$date_visit=="2014-10-23"),]
+m4<-m4[!(m4$uniqueID=="391_2014-11-14"&m4$date_visit=="2015-07-09"),]
 
 ###data up until this point is cleaned on routine visits through 2015-10-01 #####
 
@@ -540,7 +531,32 @@ m4[m4$water_point1.wa_flow1.wa_time1.aS=="18:00:00"&m4$water_point1.wa_flow1.wa_
 #                                         "water_point1.wa_flow1.wa_time1.cS","water_point1.wa_flow1.wa_time1.cE","water_flow_3",
 #                                         "q15_recoded","checkwater")])
 
+#insert values from rebeca's study here after checkwater water flow calculations
+m4$clothes_water_per_wash <- ifelse(m4$checkwater>23,12.3,7)
+m4$adult_bath_water_per_wash <- ifelse(m4$checkwater>23,34,39)
+m4$child_bath_water_per_wash <- ifelse(m4$checkwater>23,16,9)
+m4$dish_water_per_person <- ifelse(m4$checkwater>23,9,5)
 
+
+#check for missing values
+m4[is.na(m4$checkwater),c("uniqueID")]
+m4[m4$uniqueID=="263_2014-08-04",c("checkwater")]
+
+#after cleaning water use info, recaculate daily volume and per capita use
+
+
+m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
+                        (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
+                      +(cont6.cont6_size*cont6.cont6_times)+(cont7.cont7_size*cont7.cont7_times)+(cont8.cont8_size*cont8.cont8_times)
+                      +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
+                      +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times)
+                      +((other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)*adult_bath_water_per_wash)  
+                      +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*child_bath_water_per_wash)
+                      +(dishes*dish_water_per_person)+(clothes*clothes_water_per_wash))
+
+m4$daily_h2o_percapita<-with(m4, daily_volume/ppl)
+
+mean(m4$daily_h2o_percapita)
 
 #check entries with strange FRA IDs    
 # table(m4$FRA)
