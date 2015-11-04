@@ -229,16 +229,14 @@ names(source2)[8]<-paste("q17_2.2")
 names(source3)[8]<-paste("q17_2.3")
 names(source2)[9]<-paste("q17_3.2")
 names(source3)[9]<-paste("q17_3.3")
-#need same number of rows to cbind
-source2[321:518,]<-0
-source3[149:518,]<-0
 
-watersources<-cbind(source1,source2,source3,by="slno", incomparables=NA)
+watersources<-merge(source1,source2,by="slno", all=T)
+watersources<-merge(watersources,source3, by="slno",all=T)
 
 #check for same slnos in all
 watersources$slno[!(watersources$slno %in% baselineAll$slno)]
 
-baselineAll <- cbind(baselineAll, watersources, by="slno") 
+baselineAll <- merge(baselineAll, watersources, by="slno") 
 
 #####Distance to primary water source#######
 distance47$slno<-as.numeric(paste(distance47$hhid,".",47, sep=""))
@@ -258,10 +256,10 @@ distance<-merge(distance_to_source1,distance_to_source2,by="slno",all=T)
 colnames(distance)[2]<-"distance_to_source1"
 colnames(distance)[3]<-"distance_to_source2"
 
-
-baselineAll<-cbind(baselineAll,distance[,c("distance_to_source1","distance_to_source2")])
-
-
+baselineAll<-merge(baselineAll,distance, by.x="slno",by.y="slno")
+baselineAll$distance_to_source1.y<-NULL
+baselineAll$distance_to_source2.y<-NULL
+baselineAll[baselineAll$listing==1089,c("uniqueID", "q14_recoded","q15_recoded","distance_to_source1")]
 # Move Unique ID to front column -------------------------
 y <- match(c('uniqueID', 'hhid'), names(baselineAll))
 x <- 1:ncol(baselineAll)
