@@ -469,6 +469,29 @@ merged[,c("uniqueID","distance_to_source1","Listing.number.x","q14_recoded","q15
 #group 1 less than 24 hours tap
 #group 2 <24 hour service with handpump
 
+#Cleaning from Bimal's correction on households with no recorded water use
+m4[m4$HHID==018&m4$date_visit==as.Date("2015-05-29"),c("cont1.cont1_size")]<-118.5 #actually sum of containers but too tedious to input all
+m4[m4$HHID==018&m4$date_visit==as.Date("2015-05-29"),c("cont1.cont1_times")]<-1
+m4[m4$HHID==018&m4$date_visit==as.Date("2015-05-29"),c("other_water_in.wash_clothes_in")]<-3
+m4[m4$HHID==018&m4$date_visit==as.Date("2015-05-29"),c("other_water_in.wash_plate_in")]<-1
+
+m4[m4$HHID==055&m4$date_visit==as.Date("2014-12-17"),c("cont1.cont1_size")]<-154
+m4[m4$HHID==055&m4$date_visit==as.Date("2014-12-17"),c("cont1.cont1_times")]<-1
+m4[m4$HHID==055&m4$date_visit==as.Date("2014-12-17"),c("other_water_in.wash_clothes_in")]<-3
+m4[m4$HHID==055&m4$date_visit==as.Date("2014-12-17"),c("other_water_in.wash_plate_in")]<-2
+m4[m4$HHID==055&m4$date_visit==as.Date("2014-12-17"),c("other_water_in.adult_bathe_in")]<-2
+m4[m4$HHID==055&m4$date_visit==as.Date("2014-12-17"),c("other_water_in.child_bathe_in")]<-1
+
+m4[m4$HHID==301&m4$date_visit==as.Date("2015-01-03"),c("cont1.cont1_size")]<-38
+m4[m4$HHID==301&m4$date_visit==as.Date("2015-01-03"),c("cont1.cont1_times")]<-1
+m4[m4$HHID==301&m4$date_visit==as.Date("2015-01-03"),c("other_water_in.wash_clothes_in")]<-2
+m4[m4$HHID==301&m4$date_visit==as.Date("2015-01-03"),c("other_water_in.wash_plate_in")]<-2
+m4[m4$HHID==301&m4$date_visit==as.Date("2015-01-03"),c("other_water_in.adult_bathe_in")]<-2
+
+#from Rebeca's clarifications
+m4[m4$uniqueID=="338_2014-07-11",c("h2o_tank1")]<-0
+m4[m4$uniqueID=="384_2014-07-12",c("h2o_distance1")]<-14.5
+
 #after cleaning water use info, recaculate daily volume and per capita use
 
 m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
