@@ -6,7 +6,7 @@
 rm(list = ls())
 graphics.off()
 ifelse(grepl("zrc340", getwd()), 
-       water.usage.path<- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline.Rdata",
+       water.usage.path<- "C:\\Users\\zrc340\\Desktop\\C5 for Git\\C5_R_Codes\\Rdata\\clean-monthly-baseline_join.Rdata",
        water.usage.path<- "C:\\Users\\wrz741\\Dropbox\\C5_R_Codes\\Rdata\\monthly-water.Rdata")
 
 library(ggplot2)
@@ -17,17 +17,20 @@ load(water.usage.path)
 
 
 
+# Variables needed --------------------------------------------------------
+
+monthly$h2o_tank1
 
 # PLOTS -----------------------------------------------------------------
 
 boxplot(daily_h2o_percapita~month, data=monthly)
 
-boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 1, ])
-boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 2, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$base_tank1 == 1, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$base_tank1 == 0, ])
 boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 3, ])
 boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 5, ])
 
-
+mean(monthly$daily_h2o_percapita)
 
 # Plot a subset of unique ids
 
