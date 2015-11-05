@@ -452,21 +452,48 @@ m4$checkwater<-m4$water_flow_1+m4$water_flow_2+m4$water_flow_3
 
 
 # Calculate quantities based on Rebeca's data -----------------------------
-m4$distance_to_source1
-m4[m4$Listing.number.x==968,c("checkwater")]
+#m4$distance_to_source1
+#m4[m4$Listing.number.x==968,c("checkwater")]
 Qual$Listing.number.x<-Qual$Listing.ID
 merged<-merge(Qual,m4,by="Listing.number.x") # one overlapping listing number, rebeca confirmed that hhid 241 was included, not 013 
 merged<-merged[!(merged$HHID==013),]
 merged<-merged[!duplicated(merged$uniqueID),]
 
+merged[is.na(merged$number_of_child_bath),c("number_of_child_bath")]<-0
+merged$number_adults <- merged$ppl.x-merged$number_of_child_bath
+merged[merged$Listing.number.x==1190,c("number_adults")]<-2
+
 merged$water_use_pc<-merged$total_water_use/merged$ppl.x
 merged$adults_baths<-merged$water_quant_per_adult_bath
-merged$water_quant_per_adult_bath<-merged$water_quant_per_adult_bath/merged$ppl.x
+merged$water_quant_per_adult_bath<-merged$adults_baths/merged$number_adults
 
-merged[merged$q14_recoded==1,c("water_quant_per_adult_bath","distance_to_source1")]
-merged[merged$q14_recoded==2,c("water_quant_per_adult_bath")]
+merged$access_groups<- with(merged,ifelse(Listing.number.x==1089|Listing.number.x==1190|Listing.number.x==958,"a",
+                                           ifelse(Listing.number.x==1422|Listing.number.x==947|Listing.number.x==155|Listing.number.x==403,"b",
+                                                  ifelse(Listing.number.x==1027|Listing.number.x==975,"c","d"))))
 
-merged[,c("uniqueID","distance_to_source1","Listing.number.x","q14_recoded","q15_recoded","h2o_collect1","checkwater")]
+merged$all_day_water<- with(merged,ifelse(access_groups=="a"|access_groups=="b","no","yes"))
+
+test<-aov(water_use_pc~access_groups, data=merged)
+summary(test) # p=0.68, no sig difference
+test2<-aov(water_use_pc~all_day_water, data=merged)
+summary(test2) # p=0.26, no sig difference
+
+#calculate water used for only rinsing
+merged$clothes_wash_soap_times <- merged$number_of_times_clotheswash-merged$number_adults
+merged$clothes_rinse_times <- merged$number_of_times_clotheswash-merged$clothes_wash_soap_times
+merged$clothes_water_per_wash_sub <- merged$water_quant_daily_clothes_wash/merged$number_of_times_clotheswash
+
+merged$only_rinses<- ifelse(merged$clothes_wash_soap_times<=0,"rinse_only","rinse_and_wash")
+sub<-subset(merged[merged$clothes_wash_soap_times<=0,]) 
+sub2<-subset(merged[merged$clothes_wash_soap_times>0,]) 
+merged[,c("access_groups","only_rinses","clothes_water_per_wash_sub")]
+mean(sub$clothes_water_per_wash_sub)
+mean(sub2$clothes_water_per_wash_sub)
+
+
+# merged[merged$q14_recoded==1,c("water_quant_per_adult_bath","distance_to_source1")]
+# 
+# merged[,c("uniqueID","distance_to_source1","Listing.number.x","q14_recoded","q15_recoded","h2o_collect1","checkwater")]
 
 
 #group 1 less than 24 hours tap
@@ -511,7 +538,7 @@ m4[m4$uniqueID=="362_2014-07-14"&m4$date_visit=="2015-03-11",c("checkwater")]<-6
 m4[m4$uniqueID=="026_2014-06-12"&m4$date_visit=="2015-03-06",c("checkwater")]<-24
 m4[m4$uniqueID=="124_2014-12-15"&m4$date_visit=="2015-02-15",c("checkwater")]<-24
 #delete entries that Bimal does not have on record and there are queries
-m4<-m4[!(m4$uniqueID=="074_2014-09-05"&m4$date_visit=="2014-10-28"),]
+m4<-m4[!(m4$uniqueID=="074_2014-09-05"&m4$date_visit=="2014-10-28"),] 
 m4<-m4[!(m4$uniqueID=="187_2014-10-28"&m4$date_visit=="2015-08-27"),]
 m4<-m4[!(m4$uniqueID=="200_2014-08-18"&m4$date_visit=="2014-11-09"),]
 m4<-m4[!(m4$uniqueID=="263_2014-08-04"&m4$date_visit=="2014-10-23"),]
@@ -552,7 +579,7 @@ m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size
                       +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times)
                       +((other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)*adult_bath_water_per_wash)  
                       +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*child_bath_water_per_wash)
-                      +(dishes*dish_water_per_person)+(clothes*clothes_water_per_wash))
+                      +(ppl*dish_water_per_person)+(clothes*clothes_water_per_wash))
 
 m4$daily_h2o_percapita<-with(m4, daily_volume/ppl)
 
