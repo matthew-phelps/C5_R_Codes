@@ -163,7 +163,7 @@ monthly$handwash_per_capita<-(monthly$other_water_in.wash_hands_in+monthly$other
 
 #clothes per capita variable
 monthly$clothes_pc<-monthly$clothes/monthly$ppl
-names(monthly)
+
 monthly$infrastructure_routine<-with(monthly,ifelse(water_point1.wa_pt1==1|water_point1.wa_pt1==2,"tap",
                                                     ifelse(water_point1.wa_pt1==3|water_point1.wa_pt1==4,"handpump",
                                                            ifelse(water_point1.wa_pt1==5|water_point1.wa_pt1==777,"well",water_point1.wa_pt1))))
