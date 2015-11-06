@@ -19,16 +19,39 @@ load(water.usage.path)
 
 # Variables needed --------------------------------------------------------
 
-monthly$h2o_tank1
+monthly<-m4
+
+monthly$water_access_group <- ifelse(monthly$h2o_distance1>=10&monthly$h2o_collect1>1&monthly$checkwater<24,1,
+                                     ifelse(monthly$h2o_distance1>=10&monthly$h2o_collect1==1&monthly$checkwater<24,2,
+                                            ifelse(monthly$h2o_distance1>=10&monthly$h2o_collect1>1&monthly$checkwater==24,3,
+                                                   ifelse(monthly$h2o_distance1>=10&monthly$h2o_collect1==1&monthly$checkwater==24,4,
+                                                   ifelse(monthly$h2o_distance1<10&monthly$h2o_collect1>1&monthly$checkwater<24,5,
+                                                   ifelse(monthly$h2o_distance1<10&monthly$h2o_collect1==1&monthly$checkwater<24,6,
+                                                          ifelse(monthly$h2o_distance1<10&monthly$h2o_collect1>1&monthly$checkwater==24,7,
+                                                                 ifelse(monthly$h2o_distance1<10&monthly$h2o_collect1==1&monthly$checkwater==24,8,9
+                                                                 ))))))))
+length(which(monthly$water_access_group==1))
+length(which(monthly$water_access_group==2))
+length(which(monthly$water_access_group==3))
+length(which(monthly$water_access_group==4))
+length(which(monthly$water_access_group==5))
+length(which(monthly$water_access_group==6))
+length(which(monthly$water_access_group==7))
+length(which(monthly$water_access_group==8))
+
 
 # PLOTS -----------------------------------------------------------------
 
 boxplot(daily_h2o_percapita~month, data=monthly)
 
-boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$base_tank1 == 1, ])
-boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$base_tank1 == 0, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 1, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 2, ])
 boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 3, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 4, ])
 boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 5, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 6, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 7, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 8, ])
 
 mean(monthly$daily_h2o_percapita)
 
