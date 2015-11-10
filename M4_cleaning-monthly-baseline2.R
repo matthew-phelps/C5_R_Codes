@@ -560,7 +560,7 @@ m4[m4$water_point1.wa_flow1.wa_time1.aS=="18:00:00"&m4$water_point1.wa_flow1.wa_
 
 #insert values from rebeca's study here after checkwater water flow calculations
 m4$clothes_water_per_wash <- ifelse(m4$checkwater>23,12.3,7)
-m4$adult_bath_water_per_wash <- ifelse(m4$checkwater>23,34,39)
+m4$adult_bath_water_per_wash <- ifelse(m4$checkwater>23,35,38)
 m4$child_bath_water_per_wash <- ifelse(m4$checkwater>23,16,9)
 m4$dish_water_per_person <- ifelse(m4$checkwater>23,9,5)
 
@@ -578,12 +578,64 @@ m4$daily_volume<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size
                       +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
                       +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times)
                       +((other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)*adult_bath_water_per_wash)  
-                      +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*child_bath_water_per_wash)
+                      +((other_water_out.child_bathe_out+other_water_in.child_bathe_in)*10)
                       +(ppl*dish_water_per_person)+(clothes*clothes_water_per_wash))
 
 m4$daily_h2o_percapita<-with(m4, daily_volume/ppl)
 
 mean(m4$daily_h2o_percapita)
+
+#for senstivity analysis
+m4$daily_volume_se<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
+                                (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
+                              +(cont6.cont6_size*cont6.cont6_times)+(cont7.cont7_size*cont7.cont7_times)+(cont8.cont8_size*cont8.cont8_times)
+                              +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
+                              +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times))
+
+
+m4$daily_h2o_percapita_se<-with(m4, daily_volume_se/ppl)
+
+
+
+m4$number_adult_baths<- with(m4, other_water_in.adult_bathe_in+other_water_out.adult_bathe_out)
+
+#look at water use in cold months (nov-feb) for households that reported baths and those that didn't
+# mean(m4[m4$number_adult_baths==0&(m4$month=="01"|m4$month=="02"|m4$month=="11"|m4$month=="12") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths>0&(m4$month=="01"|m4$month=="02"|m4$month=="11"|m4$month=="12") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths==0&(m4$month=="01"|m4$month=="02"|m4$month=="11"|m4$month=="12") , "daily_h2o_percapita_se"])
+# mean(m4[m4$number_adult_baths>0&(m4$month=="01"|m4$month=="02"|m4$month=="11"|m4$month=="12") , "daily_h2o_percapita_se"])
+# 
+# #look at water use in extra cold months (Dec-Jan) for households that reported baths and those that didn't
+# mean(m4[m4$number_adult_baths==0&(m4$month=="01"|m4$month=="12") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths>0&(m4$month=="01"|m4$month=="12") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths==0&(m4$month=="01"|m4$month=="12") , "daily_h2o_percapita_se"])
+# mean(m4[m4$number_adult_baths>0&(m4$month=="01"|m4$month=="12") , "daily_h2o_percapita_se"])
+# 
+# #look at water use in hot months (mar-oct) for households that reported baths and those that didn't
+# mean(m4[m4$number_adult_baths==0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
+#       m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths>0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
+#       m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths==0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
+#       m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09") , "daily_h2o_percapita_se"])
+# mean(m4[m4$number_adult_baths>0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
+#       m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09") , "daily_h2o_percapita_se"])
+# 
+# #look at water use in cold months (nov-feb) for households that reported baths and those that didn't
+# mean(m4[m4$number_adult_baths==0&m4$clothes==0&(m4$month=="01"|m4$month=="02"|m4$month=="11"|m4$month=="12") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths>0&m4$clothes>0&(m4$month=="01"|m4$month=="02"|m4$month=="11"|m4$month=="12") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths==0&m4$clothes==0&(m4$month=="01"|m4$month=="02"|m4$month=="11"|m4$month=="12") , "daily_h2o_percapita_se"])
+# mean(m4[m4$number_adult_baths>0&m4$clothes>0&(m4$month=="01"|m4$month=="02"|m4$month=="11"|m4$month=="12") , "daily_h2o_percapita_se"])
+# 
+# #look at water use in cold months (nov-feb) for households that reported baths and those that didn't
+# mean(m4[m4$number_adult_baths==0&m4$clothes==0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
+#                                                   m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths>0&m4$clothes>0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
+#                                                 m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09") , "daily_h2o_percapita"])
+# mean(m4[m4$number_adult_baths==0&m4$clothes==0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
+#                                                   m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09") , "daily_h2o_percapita_se"])
+# mean(m4[m4$number_adult_baths>0&m4$clothes>0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
+#                                                 m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09") , "daily_h2o_percapita_se"])
 
 #check entries with strange FRA IDs    
 # table(m4$FRA)
@@ -591,6 +643,7 @@ mean(m4$daily_h2o_percapita)
 # View(m4[m4$uniqueID=="157_2014-07-13",]) #### All are OK
 
 # RE-CHECK CLEAN DATA -----------------------------------------------------
+
 
 
 
