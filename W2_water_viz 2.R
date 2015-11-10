@@ -26,10 +26,12 @@ monthly$water_access_group <- ifelse(monthly$h2o_distance1>=10&monthly$h2o_colle
                                             ifelse(monthly$h2o_distance1>=10&monthly$h2o_collect1>1&monthly$checkwater==24,3,
                                                    ifelse(monthly$h2o_distance1>=10&monthly$h2o_collect1==1&monthly$checkwater==24,4,
                                                    ifelse(monthly$h2o_distance1<10&monthly$h2o_collect1>1&monthly$checkwater<24,5,
-                                                   ifelse(monthly$h2o_distance1<10&monthly$h2o_collect1==1&monthly$checkwater<24,6,
+                                                   ifelse(monthly$h2o_distance1<10&monthly$h2o_distance1>0&monthly$h2o_collect1==1&monthly$checkwater<24,6,
                                                           ifelse(monthly$h2o_distance1<10&monthly$h2o_collect1>1&monthly$checkwater==24,7,
-                                                                 ifelse(monthly$h2o_distance1<10&monthly$h2o_collect1==1&monthly$checkwater==24,8,9
-                                                                 ))))))))
+                                                                 ifelse(monthly$h2o_distance1>0&monthly$h2o_distance1<10&monthly$h2o_collect1==1&monthly$checkwater==24,8,
+                                                                        ifelse(monthly$h2o_distance1==0&monthly$h2o_collect1==1&monthly$checkwater==24,9,
+                                                                               ifelse(monthly$h2o_distance1==0&monthly$h2o_collect1==1&monthly$checkwater<24,10,11
+                                                                               ))))))))))
 length(which(monthly$water_access_group==1))
 length(which(monthly$water_access_group==2))
 length(which(monthly$water_access_group==3))
@@ -38,7 +40,11 @@ length(which(monthly$water_access_group==5))
 length(which(monthly$water_access_group==6))
 length(which(monthly$water_access_group==7))
 length(which(monthly$water_access_group==8))
+length(which(monthly$water_access_group==9))
+length(which(monthly$water_access_group==10))
 
+
+monthly[monthly$distance_to_source1==0,"h2o_collect1"]
 
 # PLOTS -----------------------------------------------------------------
 
@@ -52,6 +58,8 @@ boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group =
 boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 6, ])
 boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 7, ])
 boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 8, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 9, ])
+boxplot(daily_h2o_percapita ~ month, data = monthly[monthly$water_access_group == 10, ])
 
 mean(monthly$daily_h2o_percapita)
 
