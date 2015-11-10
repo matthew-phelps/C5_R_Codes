@@ -31,7 +31,10 @@ monthly<-monthly[monthly$date_visit<as.Date("2015-10-01"),]
 
 # Variables needed --------------------------------------------------------
 
-
+#change h2o_collect to character for model
+monthly$h2o_collect1<-with(monthly, ifelse(h2o_collect1==1,"tap", 
+                                 ifelse(h2o_collect1==2,"handpump", "well")))
+                                        
 # Asset calculation 
 #shared facilities (water q17, kitchen q31, latrines q35) 0=all shared, 1=2of3 shared, 2= 1of3 shared
 monthly$shared_facilities<- with(monthly, ifelse(q17==1& q31 >=1 & q35==1, 0, 
@@ -182,26 +185,25 @@ monthly$infrastructure_routine<-with(monthly,ifelse(water_point1.wa_pt1==1|water
 
 
 ## check if tank is interdependent with season
-modela<-lmer(daily_h2o_percapita ~ season*h2o_tank1 + checkwater +  h2o_distance1 +  h2o_collect1 + day + asset_quintile
-             + ppl + (1|HH_key) +(1|listing), data=monthly)
-modelb<-lmer(daily_h2o_percapita ~ season + h2o_tank1 + checkwater +  h2o_distance1 +  h2o_collect1 + asset_quintile + day 
-             + ppl + (1|HH_key) +(1|listing), data=monthly)
-anova(modela,modelb) #p=0.5, independent
+# modela<-lmer(daily_h2o_percapita ~ season*h2o_tank1 + checkwater +  h2o_distance1 +  h2o_collect1 + day + asset_quintile
+#              + ppl + (1|HH_key) +(1|listing), data=monthly)
+# modelb<-lmer(daily_h2o_percapita ~ season + h2o_tank1 + checkwater +  h2o_distance1 +  h2o_collect1 + asset_quintile + day 
+#              + ppl + (1|HH_key) +(1|listing), data=monthly)
+# anova(modela,modelb) #p=0.5, independent
   
 ##  model 1 daily h2o consumption over seasons Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec
-model1=lmer(daily_h2o_percapita ~ season + checkwater  +  in_home_water   + h2o_collect1 + day + asset_quintile
+model1=lmer(daily_h2o_percapita ~ season + checkwater  +  h2o_distance1   + h2o_collect1 + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 summary(model1)
 
 
-model.null=lmer(daily_h2o_percapita ~ checkwater + in_home_water + h2o_collect1  + day + asset_quintile
+model.null=lmer(daily_h2o_percapita ~ checkwater + h2o_distance1 + h2o_collect1  + day + asset_quintile
                 + ppl + (1|HH_key) +(1|Listing.number.x), data=monthly)
 summary(model.null)
 
 anova(model1,model.null)
 
-coef(lmer(daily_h2o_percapita ~ season + checkwater  +  h2o_distance1 +   + h2o_collect1 + day + asset_quintile
-          + ppl + (1|HH_key) +(1|listing), data=monthly))
+mean(monthly$daily_h2o_percapita)
 
 ### model 2 daily consumption with different seasons
 model2=lmer(daily_h2o_percapita ~ season2 + checkwater  +  h2o_distance1   + h2o_collect1 + day + asset_quintile
@@ -280,14 +282,31 @@ coef(dishmodel)
 
 # Sensitivity analysis ----------------------------------------------------
 
-monthly$daily_volume_se<-with(m4, (cont1.cont1_size*cont1.cont1_times)+(cont2.cont2_size*cont2.cont2_times)+
-                        (cont3.cont3_size*cont3.cont3_times)+(cont4.cont4_size*cont4.cont4_times)+(cont5.cont5_size*cont5.cont5_times)
-                      +(cont6.cont6_size*cont6.cont6_times)+(cont7.cont7_size*cont7.cont7_times)+(cont8.cont8_size*cont8.cont8_times)
-                      +(cont9.cont9_size*cont9.cont9_times)+(cont10.cont10_size*cont10.cont10_times)+(cont11.cont11_size*cont11.cont11_times)
-                      +(cont12.cont12_size*cont12.cont12_times)+(cont13.cont13_size*cont13.cont13_times)+(cont14.cont14_size*cont14.cont14_times))
-                      
+models1=lmer(daily_h2o_percapita_se ~ season + checkwater  +  h2o_distance1   + h2o_collect1 + day + asset_quintile
+            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
+summary(models1)
 
-monthly$daily_h2o_percapita_se<-with(m4, daily_volume_se/ppl)
+
+models.null=lmer(daily_h2o_percapita_se ~ checkwater + h2o_distance1 + h2o_collect1  + day + asset_quintile
+                + ppl + (1|HH_key) +(1|Listing.number.x), data=monthly)
+
+
+anova(models1,models.null) # p = 0.05
+
+mean(monthly$daily_h2o_percapita_se)
+
+#look at subsets based on whether baths were taken or not
+sub1<-monthly[monthly$number_adult_baths==0,]
+#sub2<-monthly[monthly$number_adult_baths==0&monthly$clothes==0,] # analysis showed this doesn't vary from adult bath ==0 alone
+
+models2=lmer(daily_h2o_percapita_se ~ season + checkwater  +  h2o_distance1   + h2o_collect1 + day + asset_quintile
+             + ppl + (1|HH_key)+(1|Listing.number.x), data=sub1)
+summary(models2)
+
+
+#models3=lmer(daily_h2o_percapita_se ~ season + checkwater + h2o_distance1 + h2o_collect1  + day + asset_quintile
+                 + ppl + (1|HH_key) +(1|Listing.number.x), data=sub2)
+#summary(models3)
 
 
 
