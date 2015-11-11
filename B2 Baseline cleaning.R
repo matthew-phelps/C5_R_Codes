@@ -334,7 +334,7 @@ x1$HH_key <- paste(x1$phone.dist.original.nice, x1$HHID_character, sep="_")
 base_merge <- merge(x1, baselineAll, by.x = "uniqueID", by.y = "uniqueID",
                     all = F)
 base_merge$base_date.x == base_merge$base_date.y
-dropvars <- c("hhid", "slno", "hhid.1", "base_date.y")
+dropvars <- c("hhid", "hhid.1", "base_date.y")
 base_merge <- base_merge[, !names(base_merge) %in% dropvars]
 
 
