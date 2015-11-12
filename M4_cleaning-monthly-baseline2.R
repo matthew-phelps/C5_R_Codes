@@ -88,6 +88,7 @@ m4[is.na(m4$clothes),c("clothes")]<-0
 
 #create month variable
 #month variable
+m4<-m4[!(is.na(m4$date_visit)),]
 m4$date_visit_character<-as.character(m4$date_visit)
 temp<-strsplit(m4$date_visit_character, "-")
 mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
@@ -650,4 +651,5 @@ m4$number_adult_baths<- with(m4, other_water_in.adult_bathe_in+other_water_out.a
 # SAVE --------------------------------------------------------------------
 
 save(m4, file = data.output.path)
+
 
