@@ -34,25 +34,24 @@ Q11sub<- ddply(Q11subset, .(slno),
                   literacy = sum(q11_7),
                   slno= unique(slno))
 
-monthly$slno<-monthly$slno.1
+
 monthly<-merge(monthly, Q11sub, by="slno", all.x = T, all.y = F )
 
-             
 #create month variable
-monthly$date_visit_character<-as.character(monthly$date_visit)
-temp<-strsplit(monthly$date_visit_character, "-")
-mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
-df <- as.data.frame(mat)
-colnames(df) <- c("year", "month", "day")
-monthly<- cbind(monthly,df)
-monthly$month1<-formatC(monthly$month,width=2,format='d', flag = 0)
-
-monthly$year.month<-as.numeric(with(monthly, ifelse(month1=="09"|month1=="10"|month1=="11"|
-                                                      month1=="12",paste("14.",month,sep=""),paste("15.",month1,sep=""))))
-
-monthly$season<-with(monthly, ifelse(month1=="01"|month1=="02"|month1=="03",1,
-                                     ifelse(month1=="04"|month1=="05"|month1=="06",2,
-                                            ifelse(month1=="07"|month1=="08"|month1=="09",3,4))))
+# monthly$date_visit_character<-as.character(monthly$date_visit)
+# temp<-strsplit(monthly$date_visit_character, "-")
+# mat  <- matrix(unlist(temp), ncol=3, byrow=TRUE)
+# df <- as.data.frame(mat)
+# colnames(df) <- c("year", "month", "day")
+# monthly<- cbind(monthly,df)
+# monthly$month1<-formatC(monthly$month,width=2,format='d', flag = 0)
+# 
+# monthly$year.month<-as.numeric(with(monthly, ifelse(month1=="09"|month1=="10"|month1=="11"|
+#                                                       month1=="12",paste("14.",month,sep=""),paste("15.",month1,sep=""))))
+# 
+# monthly$season<-with(monthly, ifelse(month1=="01"|month1=="02"|month1=="03",1,
+#                                      ifelse(month1=="04"|month1=="05"|month1=="06",2,
+#                                             ifelse(month1=="07"|month1=="08"|month1=="09",3,4))))
 
 
 monthly$ppl[is.na(monthly$ppl)]<-0
@@ -64,45 +63,45 @@ monthly$daily_h2o_percapita<-with(monthly, daily_volume/ppl)
 # Household size at baseline----------------------------------------------------------
 
 monthly$children<-monthly$children_U5+monthly$children_5_17
-monthly$total_hh_members<- monthly$children + monthly$adult
-uniqueid<-unique(monthly$uniqueID)
+monthly$total_hh_members<- monthly$children + monthly$adults
+unique_key<-monthly[!duplicated(monthly$HH_key),]
 
 
-range(mothly$total_HH_members)
-mean(mothly$total_HH_members)
-range(mothly$adults)
-mean(mothly$adults)
-range(mothly$children_5_17)
-mean(mothly$children_5_17)
-range(mothly$children_U5)
-mean(mothly$children_U5)
+range(unique_key$total_HH_members)
+mean(unique_key$total_HH_members)
+range(unique_key$adults)
+mean(unique_key$adults)
+range(unique_key$children_5_17)
+mean(unique_key$children_5_17)
+range(unique_key$children_U5)
+mean(unique_key$children_U5)
 
 
 # Household structure -----------------------------------------------------
 
 #q10 nuclear =1, multiple families =2, unrelated persons = 3, nuclear family with 1+ unrelated = 4, other=777
 #table(monthly$q10oth)
-monthly[monthly$q10oth=="SINGLE","q10"]<-3 #single is mess hall, same as unrelated people
-monthly[monthly$q10oth=="SINGLE.","q10"]<-3 #single is mess hall, same as unrelated people
-monthly[monthly$q10oth=="SINGLE (MESS)","q10"]<-3 #single is mess hall, same as unrelated people
-monthly[monthly$q10oth=="SINGLE PERSON","q10"]<-3 #single is mess hall, same as unrelated people
-monthly[grep("^SINGLE MEMBER,", monthly$q10oth),"q10"]<-4 #this is one single person living with nuclear family
-monthly[grep("^ONE", monthly$q10oth),"q10"]<-4 #this is one single person living with nuclear family
-monthly[grep("^ONLY", monthly$q10oth),"q10"]<-1 #two sisters living together
+unique_key[unique_key$q10oth=="SINGLE","q10"]<-3 #single is mess hall, same as unrelated people
+unique_key[unique_key$q10oth=="SINGLE.","q10"]<-3 #single is mess hall, same as unrelated people
+unique_key[unique_key$q10oth=="SINGLE (MESS)","q10"]<-3 #single is mess hall, same as unrelated people
+unique_key[unique_key$q10oth=="SINGLE PERSON","q10"]<-3 #single is mess hall, same as unrelated people
+unique_key[grep("^SINGLE MEMBER,", unique_key$q10oth),"q10"]<-4 #this is one single person living with nuclear family
+unique_key[grep("^ONE", unique_key$q10oth),"q10"]<-4 #this is one single person living with nuclear family
+monthly[grep("^ONLY", unique_key$q10oth),"q10"]<-1 #two sisters living together
 #monthly$q10oth[monthly$q10==777]
 
-monthly$nuclear_family<- with(monthly, ifelse(q10==1|q10==2|q10==4,1,0)) #is it one or more nuclear families (1) or primarily unrelated people (0)?
+unique_key$nuclear_family<- with(unique_key, ifelse(q10==1|q10==2|q10==4,1,0)) #is it one or more nuclear families (1) or primarily unrelated people (0)?
 
-monthlysub<-monthly[!duplicated(monthly$uniqueID),]
-table(monthlysub$nuclear_family)
+
+table(unique_key$nuclear_family)
 
 
 # literacy ----------------------------------------------------------------
 monthly$literacy_coded <- ifelse(monthly$adults==monthly$literacy,3,
                                  ifelse(monthly$literacy==0,1,2))
 
-monthlysub<-monthly[!duplicated(monthly$uniqueID),]
-table(monthlysub$literacy_coded)
+unique_key<-monthly[!duplicated(monthly$HH_key),]
+table(unique_key$literacy_coded)
 
 # Household monthly income ------------------------------------------------
 #monthly income = average monthly household income + monthly remittances received - monthly remittances sent + annual remittances received/12 - annual remittances sent/12 - monthly loan payment
@@ -119,12 +118,10 @@ monthly$Monthly_income<- monthly$q12 + monthly$q12a2 - monthly$q12a1 +
 
 monthly$monthly_income_percapita<-monthly$Monthly_income/(monthly$ppl)
 
-monthlysub<-monthly[!duplicated(monthly$uniqueID),]
+
 
 #View(monthly[monthly$monthly_income_percapita>20000,c("monthly_income_percapita","ppl",
                                                             "asset_score","shared_facilities")])
-
-
 
 
 # View(monthly$monthly_income_percapita)
@@ -134,9 +131,10 @@ ApplyQuintiles <- function(x) {
   cut(x, breaks=c(quantile(monthly$monthly_income_percapita, probs = seq(0, 1, by = 0.20))), 
       include.lowest=TRUE)
 }
-mothly$income_Quintile <- sapply(mothly$monthly_income_percapita, ApplyQuintiles)
+monthly$income_Quintile <- sapply(monthly$monthly_income_percapita, ApplyQuintiles)
 
-table(mothly$income_Quintile)
+unique_key<-monthly[!duplicated(monthly$HH_key),]
+table(unique_key$income_Quintile)
 
 # Asset calculation -------------------------------------------------------
 #shared facilities (water q17, kitchen q31, latrines q35) 0=all shared, 1=2of3 shared, 2= 1of3 shared
@@ -222,15 +220,14 @@ monthly$asset_score<- (monthly$q9_other_sum +
 #create column with asset quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
 monthly$asset_score[is.na(monthly$asset_score)]<-0
 
-monthlysub<-monthly[!duplicated(monthly$uniqueID),]
-
 ApplyQuintiles2 <- function(x) {
   cut(x, breaks=c(quantile(monthly$asset_score, probs = seq(0, 1, by = 0.20))), 
       include.lowest=TRUE)
 }
-mothly$asset_Quintile <- sapply(mothly$asset_score, ApplyQuintiles2)
+monthly$asset_Quintile <- sapply(monthly$asset_score, ApplyQuintiles2)
 
-table(mothly$asset_Quintile)
+unique_key<-monthly[!duplicated(monthly$HH_key),]
+table(unique_key$asset_Quintile)
 
 # Occupation --------------------------------------------------------------
 ###q11_6 employment: unemployed/student/retired=6, Un-skilled labor = 1, skilled labor = 2, Garments =3, salaried job = 4, spiritual healer=5, other = 777
@@ -257,16 +254,16 @@ Q11_sub<-q11_sub[(q11_sub$slno==uniqueslno),]
 # Primary water source info -------------------------------------------------------
 
 #is there a tank
-table(monthly$q15_recoded) # tank 1= yes, 0= no
+table(monthly$h2o_tank1) # tank 1= yes, 0= no
 #what is the infrastructure at point of collection
-table(monthly$q14_recoded) # 1= tap 2= handpump 3= well with bucket
+table(monthly$h2o_collect1) # 1= tap 2= handpump 3= well with bucket
 #what is the water source
-table(monthly$q14a_recoded) # 1= WASA 2= deep tubewell 3= groundwater
+table(monthly$h2o_source1) # 1= WASA 2= deep tubewell 3= groundwater
 
 #how far away is the collection point from the front door
-monthly$distance<-with(monthly, ifelse(distance_to_source1==0,1,
-                                       ifelse(distance_to_source1>0&distance_to_source1<=10,2,
-                                              ifelse(distance_to_source1>10&distance_to_source1<=20,3,4))))
+# monthly$distance<-with(monthly, ifelse(distance_to_source1==0,1,
+#                                        ifelse(distance_to_source1>0&distance_to_source1<=10,2,
+#                                               ifelse(distance_to_source1>10&distance_to_source1<=20,3,4))))
 table(monthly$distance)
 
 #how many water sources are used
@@ -283,3 +280,12 @@ monthly$water_flow_range<-with(monthly, ifelse(checkwater<6,1,
                                                ifelse(checkwater>=6&checkwater<15,2,
                                                       ifelse(checkwater>15&checkwater<24,3,4))))
 table(monthly$water_flow_range)
+
+# total water use
+
+mean(monthly$daily_h2o_percapita)
+range(monthly$daily_h2o_percapita)
+median(monthly$daily_h2o_percapita)
+mean(monthly$daily_h2o_percapita_se)
+range(monthly$daily_h2o_percapita_se)
+median(monthly$daily_h2o_percapita_se)
