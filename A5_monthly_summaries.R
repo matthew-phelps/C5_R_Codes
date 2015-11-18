@@ -9,9 +9,11 @@
 
 
 # Intro -------------------------------------------------------------------
+library(reshape)
 library(ggplot2)
 library(dplyr)
 library(lubridate)
+library(grid)
 
 #detach("package:plyr", unload=TRUE) # disrupts the dplyr package
 
@@ -177,7 +179,7 @@ sum(dropout$dropout_HH[1:(nrow(dropout) - 1)])
 
 
 month_visit_ls <- split(m5, f = m5$HH_key)
-t.temp <- t[[2]]
+
 activePeople <- function(t.temp) {
   
   # Create time interval b/w visits
@@ -198,7 +200,7 @@ activePeople <- function(t.temp) {
   }
   # associate each interval with the number of active ppl during that interval
   x <- as.data.frame(x)
-  x <- rename(x, interval = x)
+  x <- dplyr::rename(x, interval = x)
   t.temp <- cbind(t.temp, x)
   rm(x)
   
@@ -221,7 +223,7 @@ vf <- lapply(month_visit_ls, activePeople)
 cv <- do.call(rbind.data.frame, vf)
 month.temp <- colSums(cv)
 monthly_summary <- cbind(monthly_summary, month.temp)
-monthly_summary <- rename(monthly_summary, active_ppl = month.temp)
+monthly_summary <- dplyr::rename(monthly_summary, active_ppl = month.temp)
 rm(vf, cv, month.temp)
 
 
@@ -230,7 +232,7 @@ rm(vf, cv, month.temp)
 x <- as.data.frame(table(m5$date_visit_month))
 x$Var1 <- as.Date(x$Var1)
 monthly_summary <- left_join(monthly_summary, x, by = "Var1")
-monthly_summary <- rename(monthly_summary, number_visits = Freq, date = Var1)
+monthly_summary <- dplyr::rename(monthly_summary, number_visits = Freq, date = Var1)
 
 
 
@@ -269,6 +271,116 @@ plot5 <- ggplot(data = monthly_summary, aes( x= date, y = dropout_HH/active_hh))
   ggtitle ("Household dropouts as % of active households") +
   theme(plot.title = element_text(size = 20, face = "bold"))
 plot5
+
+
+
+
+
+# MULTIPLOT  for LEELA---------------------------------------------------------------
+
+# Re-order data frame for better plotting ---------------------------------
+# This helps the bars come out in the right order
+y <- match(c('date', 'new_phones', 'number_visits'), names(monthly_summary))
+x <- 1:ncol(monthly_summary)
+x <- x[-c(y)]
+monthly_summary <- monthly_summary[, c(y, x)]
+rm(x, y)
+
+
+end_date <- as.Date("2014-12-31")
+monthly_summary_melt <- melt(monthly_summary, id.vars = 'date')
+monthly_summary_melt <- monthly_summary_melt[monthly_summary_melt$date < end_date, ]
+monthly_summary_melt[is.na(monthly_summary_melt$value), 'value'] <- 0
+
+
+monthly_bar_data <- monthly_summary_melt[monthly_summary_melt$variable == 'new_phones' |
+                                           monthly_summary_melt$variable == "number_visits"|
+                                           monthly_summary_melt$variable == 'dropout_HH', ]
+monthly_line_data <- monthly_summary_melt[monthly_summary_melt$variable == "active_hh",  ]
+
+# Plot
+multiplot_1 <- ggplot() +
+  geom_bar(data = monthly_bar_data,
+           aes(x = date, y = value, fill = variable),
+           stat = "identity",
+           position = position_dodge()) +
+  geom_line(data = monthly_line_data,
+            aes(x = date, y = value, color = variable),
+            size = 1.3, 
+            alpha = 0.6) +
+  
+  scale_color_manual(values = c('active_hh' = 'green4'),
+                     labels = c("Active Households")) +
+  scale_fill_manual(values = c("new_phones" = "red2",
+                               "number_visits" = "blue4",
+                               "dropout_HH" = "orange3"),
+                    labels = c("Phones Distributed",
+                               "In-home visits",
+                               'Dropout Households')) +
+  ylab("Number") +
+  xlab("Month (2014)") +
+  ggtitle("Monthly progression of\n diarrhea surveillance")+
+  theme_minimal() +
+  theme(plot.title = element_text(size = 20, face="bold"),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 15),
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 18, face = "bold", vjust = -0.2),
+        axis.title.y = element_text(size = 18, face = "bold", vjust = 1.4),
+        plot.title = element_text(size = 23, face="bold"),
+        legend.key = element_rect(size = 2, colour = 'white'),
+        legend.key.size = unit(1.3, 'lines'))
+multiplot_1
+
+
+ggsave(filename = multiplot_1.path,
+       plot = multiplot_1,
+       width = 30,
+       height = 20,
+       units = 'cm')
+
+# MULTIPLOT 2 -------------------------------------------------------------
+# Uses a line graph for "in home visits
+
+monthly_bar_data <- monthly_summary_melt[monthly_summary_melt$variable == 'new_phones' |
+                                           monthly_summary_melt$variable == 'dropout_HH', ]
+monthly_line_data <- monthly_summary_melt[monthly_summary_melt$variable == "active_hh" |
+                                            monthly_summary_melt$variable == "number_visits", ]
+
+multiplot_2 <- ggplot() +
+  geom_bar(data = monthly_bar_data,
+           aes(x = date, y = value, fill = variable),
+           stat = "identity",
+           position = position_dodge()) +
+  geom_line(data = monthly_line_data,
+            aes(x = date, y = value, color = variable),
+            size = 1.2, 
+            alpha = 0.6) +
+  scale_color_manual(values = c('active_hh' = 'green4',
+                                "number_visits" = "orange3"),
+                     labels = c("Active households",
+                                "In-home vists")) +
+  scale_fill_manual(values = c("new_phones" = "red2",
+                               "dropout_HH" = "blue3"),
+                    labels = c("Phones distributed",
+                               'Dropout households')) +
+  ylab("Number") +
+  xlab("Date") +
+  ggtitle("Monthly progression of\n diarrhea surveillance")+
+  theme_minimal() +
+  theme(plot.title = element_text(size = 20, face="bold"),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 16),
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 18, face = "bold"),
+        axis.title.y = element_text(size = 18, face = "bold", vjust = 1.4),
+        plot.title = element_text(size = 24, face="bold"))
+multiplot_2
+
+
+
 # WRITE OUTPUT ------------------------------------------------------------
 monthly_summary$date<- format(monthly_summary$date, format = "%b-%Y")
 write.csv(monthly_summary, file = output.path, row.names = F)
