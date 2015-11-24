@@ -491,6 +491,12 @@ merged[,c("access_groups","only_rinses","clothes_water_per_wash_sub")]
 mean(sub$clothes_water_per_wash_sub)
 mean(sub2$clothes_water_per_wash_sub)
 
+#calculate 95% CI for water used per adult bath
+mean(merged$water_quant_per_adult_bath)
+sd(merged$water_quant_per_adult_bath)
+me<-1.644*(38.5/sqrt(12)) #margin of error
+mean(merged$water_quant_per_adult_bath)-me #lower bound
+mean(merged$water_quant_per_adult_bath)+me #upper bound
 
 # merged[merged$q14_recoded==1,c("water_quant_per_adult_bath","distance_to_source1")]
 # 
