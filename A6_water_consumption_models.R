@@ -128,11 +128,19 @@ monthly$asset_quintile<- as.character(monthly$asset_quintile)
   
 #distance to primary water source
 monthly$distance<-with(monthly, ifelse(h2o_distance1==0,"in_home",
-                                       ifelse(distance_to_source1>0&distance_to_source1<=10,"10&under",
-                                              ifelse(distance_to_source1>10&distance_to_source1<=20,"btw10&20","over20"))))
-monthly$in_home_water<-with(monthly, ifelse(distance_to_source1==0,"in_home","out_of_home"))
+                                       ifelse(h2o_distance1>0&h2o_distance1<=10,"10&under",
+                                              ifelse(h2o_distance1>10&h2o_distance1<=20,"btw10&20","over20"))))
+monthly$in_home_water<-with(monthly, ifelse(h2o_distance1==0,"in_home","out_of_home"))
 #day of the week
 monthly$day<-weekdays(as.Date(monthly$date_visit))
+monthly$day<-as.character(monthly$day)
+monthly$day<-with(monthly, ifelse(day=="mandag","1Monday",
+                                  ifelse(day=="tirsdag","2Tuesday",
+                                         ifelse(day=="onsdag","3Wednesday",
+                                                ifelse(day=="torsdag","4Thursday",
+                                                       ifelse(day=="fredag","5Friday",
+                                                              ifelse(day=="lørdag","6Saturday","7Sunday")))))))
+  
 
 #check day
 #View(monthly[,c("day","date_visit")])
@@ -149,16 +157,23 @@ monthly$year.month<-as.numeric(with(monthly, ifelse(month=="09"|month=="10"|mont
                                                       month=="12",paste("14.",month,sep=""),paste("15.",month,sep=""))))
 
 #season variable
-monthly$season<-with(monthly, ifelse(month=="01"|month=="02"|month=="03","ld",
-                                     ifelse(month=="04"|month=="05"|month=="06","pm",
-                                            ifelse(month=="07"|month=="08"|month=="09","m","ed"))))
+monthly$season<-with(monthly, ifelse(month=="01"|month=="02"|month=="03","1ld",
+                                     ifelse(month=="04"|month=="05"|month=="06","2pm",
+                                            ifelse(month=="07"|month=="08"|month=="09","3m","4ed"))))
 monthly$season2<-with(monthly, ifelse(month=="01"|month=="02"|month=="11"|month=="12","dry_cold",
                                       ifelse(month=="04"|month=="05","spring",
                                              ifelse(month=="07"|month=="08"|month=="09"|month=="06","m","oct"))))
 
-#set categorical variables as characters for models
+#set categorical variables as characters for models and add in numbers to set the desired reference variable
 monthly$asset_quintile<-as.character(monthly$asset_quintile)
+
+
+
 monthly$distance<-as.character(monthly$distance)
+monthly$distance<-with(monthly, ifelse(distance=="in_home","a_in_home",
+                                       ifelse(distance=="10&under", "b_10&under",
+                                              ifelse(distance=="btw10&20", "c_btw10&20", "d_over20"))))
+
 monthly$infrastructure<-ifelse(monthly$q14_recoded==1,"tap",
                                ifelse(monthly$q14_recoded==2,"handpump","bucket"))
 
@@ -171,21 +186,29 @@ monthly$handwash_per_capita<-(monthly$other_water_in.wash_hands_in+monthly$other
 #clothes per capita variable
 monthly$clothes_pc<-monthly$clothes/monthly$ppl
 
-monthly$infrastructure_routine<-with(monthly,ifelse(water_point1.wa_pt1==1|water_point1.wa_pt1==2,"tap",
-                                                    ifelse(water_point1.wa_pt1==3|water_point1.wa_pt1==4,"handpump",
-                                                           ifelse(water_point1.wa_pt1==5|water_point1.wa_pt1==777,"well",water_point1.wa_pt1))))
+monthly$infrastructure_routine<-with(monthly,ifelse(water_point1.wa_pt1==1|water_point1.wa_pt1==2,"1tap",
+                                                    ifelse(water_point1.wa_pt1==3|water_point1.wa_pt1==4,"2handpump",
+                                                           ifelse(water_point1.wa_pt1==5|water_point1.wa_pt1==777,"3well",water_point1.wa_pt1))))
 
 #table(monthly$infrastructure_routine)
 
 #table(monthly$daily_h2o_percapita)
 
-#dropout variable
+
+# number of water sources used in last 24 hours ---------------------------
+
+table(m4$h2o_collect2)
+
+
+# dropout variable --------------------------------------------------------
+
 #import dropout sheet
 
-dropout$dropout<-ifelse(!(is.na(dropout$       )),1,0)
+#dropout$dropout<-ifelse(!(is.na(dropout$       )),1,0)
 #may need to create variable to merge HHID_listing
 
-m4<-merge(m4,dropout, by=)
+#monthly<-merge(monthly,dropout, by=)
+
 
 # Linear mixed models -----------------------------------------------------
 
@@ -205,46 +228,46 @@ m4<-merge(m4,dropout, by=)
 # anova(modela,modelb) #p=0.5, independent
   
 ##  model 1 daily h2o consumption over seasons Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec
-model1=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
+model1=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 summary(model1)
 
 
-model_null=lmer(daily_h2o_percapita ~ checkwater + distance + h2o_collect1  + day + asset_quintile
+model_null=lmer(daily_h2o_percapita ~ checkwater + distance + infrastructure_routine  + day + asset_quintile
                 + ppl + (1|HH_key) +(1|Listing.number.x), data=monthly)
 summary(model_null)
 
-anova(model1,model_null)
+anova(model1,model_null) # p=0.021
 
 mean(monthly$daily_h2o_percapita)
 
 ### model 2 daily consumption with different seasons
-model2=lmer(daily_h2o_percapita ~ season2 + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
+model2=lmer(daily_h2o_percapita ~ season2 + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key) +(1|listing), data=monthly)
 summary(model1)
 
-model2_null=lmer(daily_h2o_percapita ~   distance +  checkwater + h2o_collect1  + day + asset_quintile
+model2_null=lmer(daily_h2o_percapita ~   distance +  checkwater + infrastructure_routine  + day + asset_quintile
                 + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 anova(model2,model2_null)
 
-coef(lmer(daily_h2o_percapita ~ season2*checkwater  +  distance + h2o_collect1 + day + asset_quintile
+coef(lmer(daily_h2o_percapita ~ season2*checkwater  +  distance + infrastructure_routine + day + asset_quintile
           + ppl + (1|HH_key) +(1|listing), data=monthly))
 
 #handwashing over the seasons
 
-modelhand=lmer( handwash_per_capita ~ season + checkwater +   distance + h2o_collect1 + asset_quintile
+modelhand=lmer( handwash_per_capita ~ season + checkwater +   distance + infrastructure_routine + asset_quintile
             + ppl + (1|HH_key) +(1|listing), data=monthly)
 summary(modelhand)
 
-modelhand_null=lmer(handwash_per_capita ~  distance +  checkwater + h2o_collect1  + asset_quintile
+modelhand_null=lmer(handwash_per_capita ~  distance +  checkwater + infrastructure_routine  + asset_quintile
                 + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 summary(modelhand)
 
 anova(modelhand,modelhand_null)
 
-coef(lmer(handwash_per_capita ~ season + checkwater  +    distance + h2o_collect1 + asset_quintile
+coef(lmer(handwash_per_capita ~ season + checkwater  +    distance + infrastructure_routine + asset_quintile
           + ppl + (1|HH_key) +(1|listing), data=monthly))
 
 modelhand2<-lmer(handwash_per_capita ~ season + daily_h2o_percapita + (1|HH_key) +(1|listing), data=monthly)
@@ -254,21 +277,21 @@ anova(modelhand2, modelhand2null) # p<.001
 summary(modelhand2)
 
 ###
-clothesmodel<-lmer(clothes_pc~season + checkwater + distance + h2o_collect1 + asset_quintile
+clothesmodel<-lmer(clothes_pc~season + checkwater + distance + infrastructure_routine + asset_quintile
                    + ppl + (1|HH_key) +(1|listing), data=monthly)
 summary(clothesmodel)
-clothesmodelnull<-lmer(clothes_pc~checkwater + distance + h2o_collect1 + asset_quintile
+clothesmodelnull<-lmer(clothes_pc~checkwater + distance + infrastructure_routine + asset_quintile
                        + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 anova(clothesmodelnull,clothesmodel)
 
 ##
-dishmodel<-lmer(dishes~season*checkwater + distance + h2o_collect1 + asset_quintile
+dishmodel<-lmer(dishes~season*checkwater + distance + infrastructure_routine + asset_quintile
                 + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 summary(dishmodel)
 
-dishmodelnull<-lmer(dishes~checkwater + distance + h2o_collect1 + asset_quintile
+dishmodelnull<-lmer(dishes~checkwater + distance + infrastructure_routine + asset_quintile
                        + ppl + (1|HH_key) +(1|listing), data=monthly)
 
 anova(dishmodel,dishmodelnull)
@@ -279,154 +302,132 @@ coef(dishmodel)
 # statistical significance of variables -----------------------------------
 
 #hours water was running (checkwater)
-model3=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
+
+model3_null=lmer(daily_h2o_percapita ~ season  +  distance + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
-model3_null=lmer(daily_h2o_percapita ~ season  +  distance + h2o_collect1 + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
-
-anova(model3,model3_null) # p= 0.012
+anova(model1,model3_null) # p= 0.021
 
 #distance to source
 sub3<-monthly[!(is.na(monthly$distance)),]
-model4=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
+model4=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=sub3)
 
-model4_null=lmer(daily_h2o_percapita ~ season + checkwater + h2o_collect1 + day + asset_quintile
+model4_null=lmer(daily_h2o_percapita ~ season + checkwater + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=sub3)
 
-anova(model4,model4_null) # p=0.6
+anova(model4,model4_null) # p=0.73
 
 #infrastructure
-
-model5=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
 model5_null=lmer(daily_h2o_percapita ~ season + checkwater  +  distance + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
-anova(model5,model5_null) # p=0.16
+anova(model1,model5_null) # p=0.17
 
 #assets
 sub4<-monthly[!(is.na(monthly$asset_quintile)),]
-model6=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
+model6=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=sub4)
 
-model6_null=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + day
+model6_null=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + day
             + ppl + (1|HH_key)+(1|Listing.number.x), data=sub4)
 
-anova(model6,model6_null) # p = 0.027
+anova(model6,model6_null) # p = 0.025
 
 #day of the week
 
-model7=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
+model7_null=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
-model7_null=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
-
-anova(model7,model7_null) # p=0.05
+anova(model1,model7_null) # p=0.056
 
 #ppl
 
-model8=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
-
-model8_null=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
+model8_null=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
-anova(model8,model8_null) # p= 2.2e-16
+anova(model1,model8_null) # p= 2.2e-16
 
 # Sensitivity analysis ----------------------------------------------------
+sub_se<-monthly[monthly$number_adult_baths==0,]
 
 #Senstivity 1: look at water use in containers only for all variables
 #season
-models1=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
+models1=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
+            + ppl + (1|HH_key)+(1|Listing.number.x), data=sub_se)
 summary(models1)
 
-
-models1_null=lmer(daily_h2o_percapita_se ~ checkwater + distance + h2o_collect1  + day + asset_quintile
-                + ppl + (1|HH_key) +(1|Listing.number.x), data=monthly)
+models1_null=lmer(daily_h2o_percapita_se ~ checkwater + distance + infrastructure_routine  + day + asset_quintile
+                + ppl + (1|HH_key) +(1|Listing.number.x), data=sub_se)
 
 summary(models1)
-anova(models1,models1_null) # p=
+anova(models1,models1_null) # p= 0.025
+
+plot(model1)
 
 #hours water was running (checkwater)
-models3=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
-models3_null=lmer(daily_h2o_percapita_se ~ season  +  distance + h2o_collect1 + day + asset_quintile
-                 + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
+models3_null=lmer(daily_h2o_percapita_se ~ season  +  distance + infrastructure_routine + day + asset_quintile
+                 + ppl + (1|HH_key)+(1|Listing.number.x), data=sub_se)
 
 summary(models3)
-anova(models3,models3_null) # p=
+anova(models1,models3_null) # p= 0.13
 
 #distance to source
-sub3<-monthly[!(is.na(monthly$distance)),]
-models4=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=sub3)
+sub3_se<-sub_se[!(is.na(sub_se$distance)),]
+models4=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
+            + ppl + (1|HH_key)+(1|Listing.number.x), data=sub3_se)
 
-models4_null=lmer(daily_h2o_percapita_se ~ season + checkwater + h2o_collect1 + day + asset_quintile
-                 + ppl + (1|HH_key)+(1|Listing.number.x), data=sub3)
+models4_null=lmer(daily_h2o_percapita_se ~ season + checkwater + infrastructure_routine + day + asset_quintile
+                 + ppl + (1|HH_key)+(1|Listing.number.x), data=sub3_se)
 
 summary(models4)
-anova(models4,models4_null) # p=
+anova(models4,models4_null) # p=0.84
 
 #infrastructure
 
-models5=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
-
 models5_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance + day + asset_quintile
-                 + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
+                 + ppl + (1|HH_key)+(1|Listing.number.x), data=sub_se)
 
 summary(models5)
-anova(models5,models5_null) # p=
+anova(models1,models5_null) # p= 0.24
 
 #assets
-sub4<-monthly[!(is.na(monthly$asset_quintile)),]
-models6=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
+sub4<-sub_se[!(is.na(sub_se$asset_quintile)),]
+models6=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=sub4)
 
-models6_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day
+models6_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day
                  + ppl + (1|HH_key)+(1|Listing.number.x), data=sub4)
 
 summary(models6)
-anova(models6,models6_null) # p = 
+anova(models6,models6_null) # p = 0.0021
 
 #day of the week
 
-models7=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
+models7_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + asset_quintile
+                 + ppl + (1|HH_key)+(1|Listing.number.x), data=sub_se)
 
-models7_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + asset_quintile
-                 + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
-
-summary(models7)
-anova(models7,models7_null) # p=
+anova(models1,models7_null) # p= 0.080
 
 #ppl
 
-models8=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
-summary(models8)
+models8_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
+                 + (1|HH_key)+(1|Listing.number.x), data=sub_se)
 
-models8_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
-                 + (1|HH_key)+(1|Listing.number.x), data=monthly)
-
-anova(models8,models8_null) # p=
+anova(models1,models8_null) # p= < 2.2e-16
 
 #look at subsets based on whether baths were taken or not
 #sub1<-monthly[monthly$number_adult_baths==0,]
 #sub2<-monthly[monthly$number_adult_baths==0&monthly$clothes==0,] # analysis showed this doesn't vary from adult bath ==0 alone
 
-#models2=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + h2o_collect1 + day + asset_quintile
+#models2=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
              + ppl + (1|HH_key)+(1|Listing.number.x), data=sub1)
 #summary(models2)
 
 
-#models3=lmer(daily_h2o_percapita_se ~ season + checkwater + distance + h2o_collect1  + day + asset_quintile
+#models3=lmer(daily_h2o_percapita_se ~ season + checkwater + distance + infrastructure_routine  + day + asset_quintile
 #                 + ppl + (1|HH_key) +(1|Listing.number.x), data=sub2)
 #summary(models3)
 
@@ -438,10 +439,10 @@ length(unique(monthly$uniqueID))
 
 #include dropout as a fixed variable in linear regression
 
-sens<-lm(daily_h2o_percapita~ season + checkwater + distance + h2o_collect1  + day + asset_quintile
+sens<-lm(daily_h2o_percapita~ season + checkwater + distance + infrastructure_routine  + day + asset_quintile
                          + ppl+ dropout)
 
-sens_null<-lm(daily_h2o_percapita~ season + checkwater + distance + h2o_collect1  + day + asset_quintile
+sens_null<-lm(daily_h2o_percapita~ season + checkwater + distance + infrastructure_routine  + day + asset_quintile
          + ppl )
 
 anova(sens,sens_null)
@@ -458,6 +459,21 @@ tmp <- as.data.frame(confint(glht(model1))$confint)
 tmp$Comparison<-rownames(tmp)
 ggplot(tmp, aes(x = Comparison, y = Estimate, ymin = lwr, ymax = upr)) + geom_errorbar() + geom_point()
 
+
+
+# visualizing models ------------------------------------------------------
+plot.m1<-data.frame(model1@frame, fitted.re = fitted(model1))
+head(plot.m1)
+fixed.m1 <- data.frame(fixef(model1))
+
+g1<- ggplot(plot.m1, aes(x=season,y=daily_h2o_percapita)) + geom_point()
+## Face.
+g2 <- g1 + facet_wrap(~ asset_quintile +checkwater + distance + infrastructure_routine + day +ppl, nrow = 2)
+## Individual fitted curve
+g3 <- g2 + geom_line(aes(y = fitted.re, color="tomato") )
+## Group fitted curve
+g4 <- g3 + geom_abline(intercept = fixed.m1[1,1], slope = fixed.m1[2,1]) + theme_bw()
+#print(g4)
 
 # Save data ---------------------------------------------------------------
 
