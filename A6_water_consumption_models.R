@@ -197,8 +197,11 @@ monthly$infrastructure_routine<-with(monthly,ifelse(water_point1.wa_pt1==1|water
 
 # number of water sources used in last 24 hours ---------------------------
 
-table(m4$h2o_collect2)
+#table(m4$h2o_collect2)
 
+# number of households that used less than 50 LCPD ------------------------
+
+sub<-monthly[monthly$daily_h2o_percapita<50,]
 
 # dropout variable --------------------------------------------------------
 
@@ -240,6 +243,11 @@ summary(model_null)
 anova(model1,model_null) # p=0.021
 
 mean(monthly$daily_h2o_percapita)
+sd(monthly$daily_h2o_percapita) # =38.01
+me<-1.644*(38/sqrt(2392)) #margin of error
+mean(monthly$daily_h2o_percapita)-me #lower bound
+mean(monthly$daily_h2o_percapita)+me #upper bound
+t.test(monthly$daily_h2o_percapita)
 
 ### model 2 daily consumption with different seasons
 model2=lmer(daily_h2o_percapita ~ season2 + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
@@ -355,46 +363,44 @@ sub_se<-monthly[monthly$number_adult_baths==0,]
 #Senstivity 1: look at water use in containers only for all variables
 #season
 models1=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
-            + ppl + (1|HH_key)+(1|Listing.number.x), data=sub_se)
+            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 summary(models1)
 
 models1_null=lmer(daily_h2o_percapita_se ~ checkwater + distance + infrastructure_routine  + day + asset_quintile
-                + ppl + (1|HH_key) +(1|Listing.number.x), data=sub_se)
+                + ppl + (1|HH_key) +(1|Listing.number.x), data=monthly)
 
 summary(models1)
-anova(models1,models1_null) # p= 0.025
+anova(models1,models1_null) # p= 0.052
 
 plot(model1)
 
 #hours water was running (checkwater)
 
 models3_null=lmer(daily_h2o_percapita_se ~ season  +  distance + infrastructure_routine + day + asset_quintile
-                 + ppl + (1|HH_key)+(1|Listing.number.x), data=sub_se)
+                 + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
 summary(models3)
 anova(models1,models3_null) # p= 0.13
 
 #distance to source
-sub3_se<-sub_se[!(is.na(sub_se$distance)),]
+sub3_se<-monthly[!(is.na(monthly$distance)),]
 models4=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=sub3_se)
 
 models4_null=lmer(daily_h2o_percapita_se ~ season + checkwater + infrastructure_routine + day + asset_quintile
                  + ppl + (1|HH_key)+(1|Listing.number.x), data=sub3_se)
 
-summary(models4)
-anova(models4,models4_null) # p=0.84
+anova(models4,models4_null) # p=0.82
 
 #infrastructure
 
 models5_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance + day + asset_quintile
-                 + ppl + (1|HH_key)+(1|Listing.number.x), data=sub_se)
+                 + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
-summary(models5)
 anova(models1,models5_null) # p= 0.24
 
 #assets
-sub4<-sub_se[!(is.na(sub_se$asset_quintile)),]
+sub4<-monthly[!(is.na(monthly$asset_quintile)),]
 models6=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=sub4)
 
@@ -407,14 +413,14 @@ anova(models6,models6_null) # p = 0.0021
 #day of the week
 
 models7_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + asset_quintile
-                 + ppl + (1|HH_key)+(1|Listing.number.x), data=sub_se)
+                 + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
 anova(models1,models7_null) # p= 0.080
 
 #ppl
 
 models8_null=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
-                 + (1|HH_key)+(1|Listing.number.x), data=sub_se)
+                 + (1|HH_key)+(1|Listing.number.x), data=monthly)
 
 anova(models1,models8_null) # p= < 2.2e-16
 
