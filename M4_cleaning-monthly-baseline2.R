@@ -619,6 +619,9 @@ m4$number_adult_baths<- with(m4, other_water_in.adult_bathe_in+other_water_out.a
 # mean(m4[m4$number_adult_baths>0&(m4$month=="01"|m4$month=="12") , "daily_h2o_percapita_se"])
 # 
 # #look at water use in hot months (mar-oct) for households that reported baths and those that didn't
+# hot<-m4[m4$month=="03"|m4$month=="04"|m4$month=="05"|m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09",]
+# cold<-m4[!(m4$month=="03"|m4$month=="04"|m4$month=="05"|m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09"),]
+# 
 # mean(m4[m4$number_adult_baths==0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
 #       m4$month=="06"|m4$month=="07"|m4$month=="08"|m4$month=="09") , "daily_h2o_percapita"])
 # mean(m4[m4$number_adult_baths>0&(m4$month=="03"|m4$month=="04"|m4$month=="05"|
