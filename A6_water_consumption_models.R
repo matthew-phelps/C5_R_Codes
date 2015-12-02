@@ -160,9 +160,9 @@ monthly$year.month<-as.numeric(with(monthly, ifelse(month=="09"|month=="10"|mont
 monthly$season<-with(monthly, ifelse(month=="01"|month=="02"|month=="03","1ld",
                                      ifelse(month=="04"|month=="05"|month=="06","2pm",
                                             ifelse(month=="07"|month=="08"|month=="09","3m","4ed"))))
-monthly$season2<-with(monthly, ifelse(month=="01"|month=="02"|month=="11"|month=="12","dry_cold",
-                                      ifelse(month=="04"|month=="05","spring",
-                                             ifelse(month=="07"|month=="08"|month=="09"|month=="06","m","oct"))))
+monthly$season2<-with(monthly, ifelse(month=="01"|month=="02"|month=="12","rota",
+                                      ifelse(month=="04"|month=="05"|month=="03","spring_peak",
+                                             ifelse(month=="07"|month=="08"|month=="06","monsoon","fall_peak"))))
 
 #set categorical variables as characters for models and add in numbers to set the desired reference variable
 monthly$asset_quintile<-as.character(monthly$asset_quintile)
@@ -231,7 +231,8 @@ sub<-monthly[monthly$daily_h2o_percapita<50,]
 # anova(modela,modelb) #p=0.5, independent
   
 ##  model 1 daily h2o consumption over seasons Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec
-model1=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
+
+model1=lmer(daily_h2o_percapita ~ season2 + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 summary(model1)
 
@@ -444,14 +445,20 @@ length(unique(monthly$uniqueID))
 ##Senstivity 2: analysis for households that dropped out or moved out of arichpur
 
 #include dropout as a fixed variable in linear regression
+monthly$dropout<-ifelse(monthly$Move.out.of.Arichpur==1,"yes","no")
+monthly$move_internally<-ifelse(monthly$Move.within.Arichpur==1,"yes","no")
+sens<-lmer(daily_h2o_percapita~ season + checkwater + distance + infrastructure_routine  + day + asset_quintile
+                         + ppl+ dropout +(1|HH_key) +(1|Listing.number.x), data=monthly)
 
-sens<-lm(daily_h2o_percapita~ season + checkwater + distance + infrastructure_routine  + day + asset_quintile
-                         + ppl+ dropout)
 
-sens_null<-lm(daily_h2o_percapita~ season + checkwater + distance + infrastructure_routine  + day + asset_quintile
-         + ppl )
+anova(sens,model1)
+summary(sens)
 
-anova(sens,sens_null)
+# test for differnce in households that moved within arichpur
+sens2<-lmer(daily_h2o_percapita~ season + checkwater + distance + infrastructure_routine  + day + asset_quintile
+                + ppl+ move_internally +(1|HH_key) +(1|Listing.number.x), data=monthly)
+
+anova(sens2,model1)
 
 # Visualizing models ------------------------------------------------------
 
