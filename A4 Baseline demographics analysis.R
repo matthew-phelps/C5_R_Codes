@@ -118,11 +118,16 @@ monthly$Monthly_income<- monthly$q12 + monthly$q12a2 - monthly$q12a1 +
 
 monthly$monthly_income_percapita<-monthly$Monthly_income/(monthly$ppl)
 
-
+range(monthly$monthly_income_percapita)
 
 #View(monthly[monthly$monthly_income_percapita>20000,c("monthly_income_percapita","ppl",
                                                             "asset_score","shared_facilities")])
 
+range(monthly$daily_h2o_percapita)
+
+sub<-monthly[monthly$daily_h2o_percapita>300,]
+sub<-monthly[monthly$ppl>4,]
+table(sub$daily_h2o_percapita)
 
 # View(monthly$monthly_income_percapita)
 #create column with income quintiles, note: probs=0:5/5 is same as c(.2,.4,.6,.8,1)
