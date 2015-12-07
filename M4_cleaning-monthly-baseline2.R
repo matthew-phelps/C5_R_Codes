@@ -525,6 +525,12 @@ m4[m4$HHID==301&m4$date_visit==as.Date("2015-01-03"),c("other_water_in.wash_clot
 m4[m4$HHID==301&m4$date_visit==as.Date("2015-01-03"),c("other_water_in.wash_plate_in")]<-2
 m4[m4$HHID==301&m4$date_visit==as.Date("2015-01-03"),c("other_water_in.adult_bathe_in")]<-2
 
+m4[m4$HHID==057&m4$date_visit==as.Date("2015-03-06"),c("ppl")]<-3
+m4[m4$HHID==057&m4$date_visit==as.Date("2015-04-17"),c("ppl")]<-3
+m4[m4$HHID==271&m4$date_visit==as.Date("2015-04-03"),c("ppl")]<-5
+
+
+
 #from Rebeca's clarifications
 m4[m4$uniqueID=="338_2014-07-11",c("h2o_tank1")]<-0
 m4[m4$uniqueID=="384_2014-07-12",c("h2o_distance1")]<-14.5
