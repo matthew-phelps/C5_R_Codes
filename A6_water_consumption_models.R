@@ -8,6 +8,9 @@ library(chron)
 library(lattice)
 library(ggplot2)
 library(multcomp)
+library(sjPlot)
+library(effects)
+library(arm)
 
 # Load data ---------------------------------------------------------------
 ifelse(grepl("zrc340", getwd()), 
@@ -203,14 +206,6 @@ monthly$infrastructure_routine<-with(monthly,ifelse(water_point1.wa_pt1==1|water
 
 sub<-monthly[monthly$daily_h2o_percapita<50,]
 
-# dropout variable --------------------------------------------------------
-
-#import dropout sheet
-
-#dropout$dropout<-ifelse(!(is.na(dropout$       )),1,0)
-#may need to create variable to merge HHID_listing
-
-#monthly<-merge(monthly,dropout, by=)
 
 
 # Linear mixed models -----------------------------------------------------
@@ -232,7 +227,7 @@ sub<-monthly[monthly$daily_h2o_percapita<50,]
   
 ##  model 1 daily h2o consumption over seasons Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec
 
-model1=lmer(daily_h2o_percapita ~ season2 + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
+model1=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
             + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
 summary(model1)
 
@@ -430,7 +425,7 @@ anova(models1,models8_null) # p= < 2.2e-16
 #sub2<-monthly[monthly$number_adult_baths==0&monthly$clothes==0,] # analysis showed this doesn't vary from adult bath ==0 alone
 
 #models2=lmer(daily_h2o_percapita_se ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
-             + ppl + (1|HH_key)+(1|Listing.number.x), data=sub1)
+             #+ ppl + (1|HH_key)+(1|Listing.number.x), data=sub1)
 #summary(models2)
 
 
@@ -454,7 +449,7 @@ sens<-lmer(daily_h2o_percapita~ season + checkwater + distance + infrastructure_
 anova(sens,model1)
 summary(sens)
 
-# test for differnce in households that moved within arichpur
+# test for differnce in households that moved within Arichpur
 sens2<-lmer(daily_h2o_percapita~ season + checkwater + distance + infrastructure_routine  + day + asset_quintile
                 + ppl+ move_internally +(1|HH_key) +(1|Listing.number.x), data=monthly)
 
@@ -487,6 +482,27 @@ g3 <- g2 + geom_line(aes(y = fitted.re, color="tomato") )
 ## Group fitted curve
 g4 <- g3 + geom_abline(intercept = fixed.m1[1,1], slope = fixed.m1[2,1]) + theme_bw()
 #print(g4)
+
+test=lmer(daily_h2o_percapita ~  checkwater  + asset_quintile + day + infrastructure_routine + distance+
+                  + ppl + (1|season)+(1|HH_key)+(1|Listing.number.x), data=monthly)
+
+sjp.lmer(model1, type="fe") ## most descriptive for this study ####
+
+sjp.lmer(model1s, type="fe")
+
+#sjp.lmer(test, type="fe.pred") #only makes sense for continuous/numeric variables
+
+#sjp.lmer(model1, type="fe.std") 
+
+#sjp.lmer(test, type="eff") # only works for numeric variables
+
+#sjp.lmer(model1, type="fe.resid") # shows residuals, lots of dots and a flat line
+
+#sjp.lmer(model1, type="fe.cor") # confusing. too many dots
+
+#don't run the following, takes way too long
+#sjp.lmer(model1, type="fe.ri") # shows slopes of multinomial variables, which doens't make sense
+
 
 # Save data ---------------------------------------------------------------
 
