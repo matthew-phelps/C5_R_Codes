@@ -455,6 +455,35 @@ sens2<-lmer(daily_h2o_percapita~ season + checkwater + distance + infrastructure
 
 anova(sens2,model1)
 
+###Sensitivity 3 See if outliers are affecting the model
+
+sub<-monthly[monthly$daily_h2o_percapita<300,]
+
+model1s3=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
+                      + ppl + (1|HH_key)+(1|Listing.number.x), data=sub)
+summary(model1s3)
+
+###Sensitivity 4 exclude households that dropped out to see if there was a different relationship with covariates and water use here
+
+sub<-monthly[monthly$dropout=="no",]
+
+model1s4=lmer(daily_h2o_percapita ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
+              + ppl + (1|HH_key)+(1|Listing.number.x), data=sub)
+
+summary(model1s4)
+
+
+###Senstivity 5, look at log of daily h2o use
+monthly$log_water<-log(monthly$daily_h2o_percapita)
+
+model1s5=lmer(log_water ~ season + checkwater  +  distance   + infrastructure_routine + day + asset_quintile
+            + ppl + (1|HH_key)+(1|Listing.number.x), data=monthly)
+
+summary(model1s5)
+
+s5_residuals<-residuals(model1s5)
+hist(s5_residuals)
+
 # Visualizing models ------------------------------------------------------
 
 #Visualize random effects (HH_key and listing number)
@@ -471,16 +500,18 @@ ggplot(tmp, aes(x = Comparison, y = Estimate, ymin = lwr, ymax = upr)) + geom_er
 
 # visualizing models ------------------------------------------------------
 plot.m1<-data.frame(model1@frame, fitted.re = fitted(model1))
-head(plot.m1)
-fixed.m1 <- data.frame(fixef(model1))
 
-g1<- ggplot(plot.m1, aes(x=season,y=daily_h2o_percapita)) + geom_point()
-## Face.
-g2 <- g1 + facet_wrap(~ asset_quintile +checkwater + distance + infrastructure_routine + day +ppl, nrow = 2)
-## Individual fitted curve
-g3 <- g2 + geom_line(aes(y = fitted.re, color="tomato") )
-## Group fitted curve
-g4 <- g3 + geom_abline(intercept = fixed.m1[1,1], slope = fixed.m1[2,1]) + theme_bw()
+plot(model1) # fitted vs. residuals
+# head(plot.m1)
+# fixed.m1 <- data.frame(fixef(model1))
+# 
+# g1<- ggplot(plot.m1, aes(x=season,y=daily_h2o_percapita)) + geom_point()
+# ## Face.
+# g2 <- g1 + facet_wrap(~ asset_quintile +checkwater + distance + infrastructure_routine + day +ppl, nrow = 2)
+# ## Individual fitted curve
+# g3 <- g2 + geom_line(aes(y = fitted.re, color="tomato") )
+# ## Group fitted curve
+# g4 <- g3 + geom_abline(intercept = fixed.m1[1,1], slope = fixed.m1[2,1]) + theme_bw()
 #print(g4)
 
 test=lmer(daily_h2o_percapita ~  checkwater  + asset_quintile + day + infrastructure_routine + distance+
@@ -496,12 +527,19 @@ sjp.lmer(model1s, type="fe")
 
 #sjp.lmer(test, type="eff") # only works for numeric variables
 
-#sjp.lmer(model1, type="fe.resid") # shows residuals, lots of dots and a flat line
+sjp.lmer(model1, type="fe.resid")# shows residuals, only shows data of interest for numeric variables
+sjp.lmer(model1s5, type="fe.resid")
 
 #sjp.lmer(model1, type="fe.cor") # confusing. too many dots
 
 #don't run the following, takes way too long
 #sjp.lmer(model1, type="fe.ri") # shows slopes of multinomial variables, which doens't make sense
+
+final_model_residuals<-residuals(model1)
+hist(final_model_residuals)
+
+
+
 
 
 # Save data ---------------------------------------------------------------
