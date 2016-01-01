@@ -14,6 +14,7 @@ library(ggplot2)
 library(dplyr)
 library(lubridate)
 library(grid)
+library(data.table)
 
 #detach("package:plyr", unload=TRUE) # disrupts the dplyr package
 
@@ -234,6 +235,10 @@ x$Var1 <- as.Date(x$Var1)
 monthly_summary <- left_join(monthly_summary, x, by = "Var1")
 monthly_summary <- dplyr::rename(monthly_summary, number_visits = Freq, date = Var1)
 
+#number of visits per household
+dt=data.table(monthly)
+dt=dt[duplicated(HH_key), cbind(.SD[1], number = .N), by = HH_key]
+range(dt$number) #add 1 to the highest number in range, and equation only calculated duplicates
 
 
 # PLOTS -------------------------------------------------------------------
