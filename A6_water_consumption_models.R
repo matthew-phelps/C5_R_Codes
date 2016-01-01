@@ -245,11 +245,11 @@ plot(model1)
 model1_residuals<-residuals(model1)
 hist(model1_residuals)
 
+#p-value for season covariate
 model_null=lmer(log_water ~ checkwater + distance + infrastructure_routine  + day + asset_quintile
                 + ppl + (1|HH_key) +(1|Listing.number.x), data=monthly)
-summary(model_null)
 
-anova(model1,model_null) # p=0.021
+anova(model1,model_null) # p=0.023
 
 mean(monthly$daily_h2o_percapita)
 sd(monthly$daily_h2o_percapita) # =38.01
