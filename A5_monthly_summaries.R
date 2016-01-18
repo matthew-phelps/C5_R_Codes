@@ -56,6 +56,7 @@ source(functions.path)
 
 
 # DATA PREPERATION -----------------------------------------------------
+end_date <- as.Date('2015-06-01')
 
 # For entries with no monthly visits, make fake visit at date of phone dist.
 internal_fixNA <- function(x){
@@ -292,7 +293,7 @@ monthly_summary <- monthly_summary[, c(y, x)]
 rm(x, y)
 
 
-end_date <- as.Date("2014-12-31")
+
 monthly_summary_melt <- melt(monthly_summary, id.vars = 'date')
 monthly_summary_melt <- monthly_summary_melt[monthly_summary_melt$date < end_date, ]
 monthly_summary_melt[is.na(monthly_summary_melt$value), 'value'] <- 0

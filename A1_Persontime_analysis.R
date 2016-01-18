@@ -26,7 +26,7 @@ ifelse(grepl("zrc340", getwd()),
 source(functions.path)
 
 # GLOBAL VARIABLES  & FUNCTIONS--------------------------------------------------------
-endDate <- as.Date('31-12-14', "%d-%m-%y")
+endDate <- as.Date('01-06-15', "%d-%m-%y")
 #endDate <- Sys.Date()
 
 
@@ -57,3 +57,4 @@ pt.years <- pt.days/365
 
 pt48.days <- sum(pt48.df$pt48hr)
 pt48.years <- pt48.days/365
+☺

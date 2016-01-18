@@ -104,8 +104,13 @@ ptPerHHID <- function(x, end.date) {
   # If the first record is NA, but there are subsequent monthly visits:
   # (this occurs when HH gets phone, but moves locations before having monthly visit)
   else if (nrow(x) != 1 && is.na(x$date_visit[1])){
+    # Remove visit dates occuring after end.date
+    x1 <- x[1, ]
+    x_remaining <- x[2:nrow(x), ]
+    x_remaining <- x_remaining[x_remaining$date_visit <= end.date, ]
+    x <- rbind(x1, x_remaining)
+    rm(x1, x_remaining)
     for (i in 1:nrow(x)){
-      
       if (i == 1){ # 1st record - make fake 'date_visit" equal to date of phone dist
         x$date_visit[i] <- x$phone.dist[i]
         x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - x$phone.dist[i])
@@ -130,11 +135,14 @@ ptPerHHID <- function(x, end.date) {
   # on which was most recent.
   else {
     # If phone was distributed before end.date, 
-    # but the 1st monthly-visit occurs after end.date
+    # but the 1st monthly-visit occurs after end.date then only use first row
+    # of data and calculate pt between dist and withdraw
     if (x$phone.dist[1] <=end.date && x$date_visit[1] > end.date) {
       x <- x[1,]
       x$pt[1] <- x$ppl_all[1] * as.numeric(end.date - x$phone.dist[1])
-    } else {
+    } 
+    # subset to include only visits occuring before end.date
+    else { 
       x <- x[x$date_visit <= end.date, ]
     }
     
@@ -145,7 +153,13 @@ ptPerHHID <- function(x, end.date) {
         x$pt[i] <- 0
       } else if (nrow(x) == 1) {
         x$pt[i] <- x$ppl_all[i] * (x$with_date[i] - x$phone.dist[i])
-      } else if (i > 1 && i < nrow(x)) {
+      } else if (is.na(x$date_visit[i])){
+        x <- x[-i, ]
+        warning("date_visit field is NA - probably problem with odk join")
+      }
+    }
+    for (i in 1:nrow(x)){
+      if (i > 1 && i < nrow(x)) {
         x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i] - (max(c(x$date_visit[i-1], x$phone.dist[i]))))
       } else if (i > 1 && i == nrow(x)) {
         x$pt[i] <- x$ppl_all[i] *  as.numeric(x$date_visit[i] - max(c(x$date_visit[i-1], x$phone.dist[i]))) +
@@ -153,6 +167,12 @@ ptPerHHID <- function(x, end.date) {
       }
     }
   }
+  for (i in 1:nrow(x)){
+    if (is.na(x$uniqueID[i])){
+      browser()
+    }
+  }
+  
   return(x)
 }
 
