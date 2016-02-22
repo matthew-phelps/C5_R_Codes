@@ -7,8 +7,8 @@
 rm(list = ls())
 # PHONE data-------------------------------------------------------------------
 #
-n_phone <- 869.9 # person-time years at risk total in study
-n_cases <- 97
+n_phone <- 845.8 # person-time years at risk total in study
+n_cases <- 95
 lambda_phone <- n_cases/n_phone
 lambda_phone # Point estimate
 

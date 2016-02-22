@@ -27,6 +27,7 @@ source(functions.path)
 
 # GLOBAL VARIABLES  & FUNCTIONS--------------------------------------------------------
 endDate <- as.Date('01-06-15', "%d-%m-%y")
+startDate <- as.Date('2014-08-12')
 #endDate <- Sys.Date()
 
 
@@ -57,4 +58,30 @@ pt.years <- pt.days/365
 
 pt48.days <- sum(pt48.df$pt48hr)
 pt48.years <- pt48.days/365
-☺
+
+
+# CRUDE PT CALCULATION AFTER CHANGE IN DIARRHEA DEFINtion----------------------
+# Instead of calculation PT for each household for each month, calculate it
+# from the beginign of data to to end of data set
+
+# Re-assign start dates of HH that received phone before change in diarrhea
+# definition
+a1_new_start_date <- a1
+
+# Store index of obs that met condition:
+cond1 <- a1_new_start_date$phone.dist < startDate
+
+# For obs that met condition, replace old start date with date definition changed
+a1_new_start_date$phone.dist[cond1] <- startDate
+a1_new_start_date$base_date[cond1] <- startDate
+
+# Calculate new PT
+a2_new_start <- ptCalc(a1_new_start_date, end.date = endDate)
+pt48.df <- pt48hr(a1_new_start_date, end.date = endDate)
+
+pt.days <- sum(a2_new_start$pt)
+pt.years <- pt.days/365
+pt.years
+pt48.days <- sum(pt48.df$pt48hr)
+pt48.years <- pt48.days/365
+pt48.years
