@@ -101,6 +101,41 @@ ptPerHHID <- function(x, start.date, end.date) {
     x$pt[1] <- x$ppl_all[1] * as.numeric(x$with_date[1] - x$phone.dist[1])
   }
   
+  # If there are no monthly visits because all visits occured before start date,
+  # then HH dropped out after start date, but before next monthly visit pt will
+  # be from phone dist. to withdraw
+  else if (x$date_visit[1] < start.date) {
+    for (i in 1:nrow(x)){
+      if (x$date_visit[i] < start.date){
+        x$date_visit[i] <- start.date
+      }
+    }
+    # Keep only 1 of the visits that occured before start date - pt time will be
+    # calculated from this
+    #browser()
+    x <- x[!duplicated(x$date_visit), ]
+    x_rows <- nrow(x)
+    
+    # if the results if only 1 record, pt = time from "visit" until withdraw
+    if (x_rows == 1){
+      x$pt <-  x$ppl_all * as.numeric((x$with_date - x$phone.dist))
+      
+    } else if (x_rows > 2) {
+      # Else if there are more than one row:
+      # Calculate directly the 1st and last row's "pt"
+      x$pt[1] <- x$ppl_all[1] * as.numeric(x$date_visit[2] - x$date_visit[1])
+      x$pt[x_rows] <- x$ppl_all[x_rows] * as.numeric(x$with_date[x_rows] - x$date_visit[x_rows])
+      # For middle rows, loop through and calculate "pt"
+      for (i in 2:(x_rows- 1)){
+        x$pt[i] <- x$ppl_all[i] * as.numeric(x$date_visit[i +1] - x$date_visit[i])
+      }
+      
+    } else if (x_rows == 2) {
+      # Else if there are exactly 2 rows, a slightly differnt logic is required:
+      x$pt[1] <- x$ppl_all[1] * as.numeric(x$date_visit[2] - x$date_visit[1])
+      x$pt[2] <- x$ppl_all[2] * as.numeric(x$with_date[2] - x$date_visit[2])
+    }
+  }
   # If the first record is NA, but there are subsequent monthly visits:
   # (this occurs when HH gets phone, but moves locations before having monthly visit)
   else if (nrow(x) != 1 && is.na(x$date_visit[1])){
@@ -137,14 +172,13 @@ ptPerHHID <- function(x, start.date, end.date) {
     # If phone was distributed before end.date, 
     # but the 1st monthly-visit occurs after end.date then only use first row
     # of data and calculate pt between dist and withdraw
-    if (x$phone.dist[1] <=end.date && x$date_visit[1] > end.date) {
+    if (x$phone.dist[1] <= end.date && x$date_visit[1] > end.date) {
       x <- x[1,]
       x$pt[1] <- x$ppl_all[1] * as.numeric(end.date - x$phone.dist[1])
     } 
     # subset to include only visits occuring before end.date and after start date
     else { 
       x <- x[x$date_visit <= end.date, ]
-      x <- x[x$date_visit >= startDate]
     }
     
     for (i in 1:nrow(x)) {
@@ -180,14 +214,15 @@ ptPerHHID <- function(x, start.date, end.date) {
 
 
 
+
 ptCalc <- function(x, start.date, end.date) {
   # Calculates person time over entire dataset. Uses 'ptPerHHID' function
   x <- x[x$phone.dist <= end.date, ]
   x$with_date[x$with_date > end.date] <- end.date 
   x$pt <- NA
   x1 <- x[complete.cases(x$uniqueID), ]
-  x1 <- split(x1, f = x1$HH_key)
-  z <- lapply(x1, ptPerHHID, end.date = end.date)
+  x1 <- split(x1, f = x1$uniqueID)
+  z <- lapply(x1, ptPerHHID, start.date = start.date, end.date = end.date)
   z <- do.call(rbind.data.frame, z)
   row.names(z) <- NULL
   z
@@ -196,9 +231,11 @@ ptCalc <- function(x, start.date, end.date) {
 
 
 
-pt48hr <- function(x, end.date) {
+pt48hr <- function(x, start.date, end.date) {
   # Calculates person time over entire dataset. Uses 'ptPerHHID' function
+  #browser()
   x <- x[(x$phone.dist <= end.date & x$date_visit <= end.date), ]
+  x <- x[(x$date_visit >= start.date), ]
   x$with_date[x$with_date > end.date] <- end.date 
   x1 <- x[complete.cases(x[, 1:7]), ]
   x1$pt48hr <- 2 * x1$ppl_all

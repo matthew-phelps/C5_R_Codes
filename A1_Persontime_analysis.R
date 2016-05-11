@@ -33,7 +33,7 @@ startDate <- as.Date('2015-06-10')
 
 # LOAD DATA ---------------------------------------------------------------
 # Matthew to remove these two lines after finishes working from his Mac
-source("/Users/Matthew/Dropbox (Personal)/C5_R_Codes/c_5_functions_source_file.R")
+source("/Users/Matthew/GitClones/C5_R_Codes/c_5_functions_source_file.R")
 load("person-time.Rdata")
 
 load(pt) 
@@ -81,15 +81,17 @@ a1_new_start_date$phone.dist[cond1] <- startDate
 a1_new_start_date$base_date[cond1] <- startDate
 
 
-# If withdraw date is before startDate, remove records from analysis:
+# # If withdraw date is before startDate, remove records from analysis:
 cond2 <- a1_new_start_date$with_date >= startDate
 a2_new_start <- a1_new_start_date[cond2, ]
 
 # Calculate new PT
-a2_new_start <- ptCalc(a1_new_start_date,
+a2_new_start <- (ptCalc(a2_new_start,
                        start.date = startDate,
-                       end.date = endDate)
-pt48.df <- pt48hr(a1_new_start_date, end.date = endDate)
+                       end.date = endDate))
+pt48.df <- pt48hr(a1_new_start_date,
+                  start.date = startDate,
+                  end.date = endDate)
 
 
 
@@ -99,3 +101,4 @@ pt.years
 pt48.days <- sum(pt48.df$pt48hr)
 pt48.years <- pt48.days/365
 pt48.years
+
