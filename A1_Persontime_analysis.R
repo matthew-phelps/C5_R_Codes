@@ -20,20 +20,23 @@ ifelse(grepl("zrc340", getwd()),
 
 
 #detach("package:plyr", unload=TRUE) # disrupts the dplyr package
-
+setwd("/Users/Matthew/Dropbox (Personal)/C5_R_Codes/Rdata")
 
 # FUNCTIONS ---------------------------------------------------------------
 source(functions.path)
 
 # GLOBAL VARIABLES  & FUNCTIONS--------------------------------------------------------
-endDate <- as.Date('01-06-15', "%d-%m-%y")
-startDate <- as.Date('2014-08-12')
+endDate <- as.Date('31-12-15', "%d-%m-%y")
+startDate <- as.Date('2015-06-10')
 #endDate <- Sys.Date()
 
 
 # LOAD DATA ---------------------------------------------------------------
+# Matthew to remove these two lines after finishes working from his Mac
+source("/Users/Matthew/Dropbox (Personal)/C5_R_Codes/c_5_functions_source_file.R")
+load("person-time.Rdata")
 
-load(pt)
+load(pt) 
 rm(pt)
 
 
@@ -41,6 +44,8 @@ rm(pt)
 
 # Remove records where phone was distributed after the specified endDate
 a1 <- m5[m5$phone.dist <= endDate, ]
+
+
 
 # Set withdraw date as end date for any records where true withdraw is after end date
 a1$with_date[a1$with_date > endDate] <- endDate
@@ -75,9 +80,18 @@ cond1 <- a1_new_start_date$phone.dist < startDate
 a1_new_start_date$phone.dist[cond1] <- startDate
 a1_new_start_date$base_date[cond1] <- startDate
 
+
+# If withdraw date is before startDate, remove records from analysis:
+cond2 <- a1_new_start_date$with_date >= startDate
+a2_new_start <- a1_new_start_date[cond2, ]
+
 # Calculate new PT
-a2_new_start <- ptCalc(a1_new_start_date, end.date = endDate)
+a2_new_start <- ptCalc(a1_new_start_date,
+                       start.date = startDate,
+                       end.date = endDate)
 pt48.df <- pt48hr(a1_new_start_date, end.date = endDate)
+
+
 
 pt.days <- sum(a2_new_start$pt)
 pt.years <- pt.days/365

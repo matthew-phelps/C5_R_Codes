@@ -90,7 +90,7 @@ hhCleanup <- function(data, dateVisit, baseDate, withdrawDate, phoneDate) {
 
 # A1 Functions -----------------------------------------------------------
 
-ptPerHHID <- function(x, end.date) {
+ptPerHHID <- function(x, start.date, end.date) {
   
   # Set phone dist.date for HH that moved to be the original phone.dist date
   x$phone.dist <- min(x$phone.dist)
@@ -141,9 +141,10 @@ ptPerHHID <- function(x, end.date) {
       x <- x[1,]
       x$pt[1] <- x$ppl_all[1] * as.numeric(end.date - x$phone.dist[1])
     } 
-    # subset to include only visits occuring before end.date
+    # subset to include only visits occuring before end.date and after start date
     else { 
       x <- x[x$date_visit <= end.date, ]
+      x <- x[x$date_visit >= startDate]
     }
     
     for (i in 1:nrow(x)) {
@@ -179,7 +180,7 @@ ptPerHHID <- function(x, end.date) {
 
 
 
-ptCalc <- function(x, end.date) {
+ptCalc <- function(x, start.date, end.date) {
   # Calculates person time over entire dataset. Uses 'ptPerHHID' function
   x <- x[x$phone.dist <= end.date, ]
   x$with_date[x$with_date > end.date] <- end.date 
