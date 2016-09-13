@@ -33,8 +33,10 @@ moveDates <- function (x, factor) {
 
 # M2 Functions ------------------------------------------------------------
 dateReplace <- function (x) {
-  # On each row, test to see if there is a ODK entry, and the entry before or after was only a X2 entry
-  # If row i is odk and row i+1 or i-1 is only x2 - take the date from row i and apply it to row i+1 or i-1
+  # On each row, test to see if there is a ODK entry, and the entry before or
+  # after was only a X2 entry
+  # If row i is odk and row i+1 or i-1 is only x2 - take the date from row i and
+  # assign it to row i+1 or i-1
   for (i in 1:nrow(x)){
     if(i> 1 && i < nrow(x) && is.na(x[i, ]$Listing.number) && (is.na(x[i-1, ]$FRA) | is.na(x[i+1, ]$FRA))){
       if(x[i, ]$date_visit <= (x[i-1, ]$date_visit + 2)) {

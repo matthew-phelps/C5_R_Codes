@@ -156,7 +156,7 @@ row.names(not.in.odk) <- NULL
 
 
 #  CLEAN based on logical assumptions---------------------------------------
-# If dates are off by exactly 1 month, use ODK dates
+# If dates are off by exactly 1 month / 1 year, use ODK dates
 #  If dates are off by a couple of day (+/- 3 days), use ODK dates
 
 # Changes to ODK
